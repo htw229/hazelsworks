@@ -4,5 +4,6 @@ __pycache__
 venv
 db.sqlite
 /static/admin
+/app/migrations
 .DS_Store
 .idea
