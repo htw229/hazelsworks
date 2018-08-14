@@ -1,0 +1,8 @@
+markup
+[number]
+
+ignore caps
+
+check for whole matches first, then matches with 's' apostrophe-s or with 'ed', then as end of word(?)
+
+- duplicates

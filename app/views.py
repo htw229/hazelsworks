@@ -26,7 +26,8 @@ def britpickapp(request):
         if form.is_valid():
             text = form.cleaned_data['text']
             dialect = form.cleaned_data['dialect']
-            britpickedtext = britpick(text, dialect)
+            dialogue = form.cleaned_data['dialogue']
+            britpickedtext = britpick(text, dialect, dialogue)
             form.initial.update({'original_text': text})
 
     responsedata = {

@@ -14,19 +14,21 @@ p {
 
 .replacement {
     background-color: lightyellow;
-}
-
-.directreplacement {
-    color: black;
     font-weight: bold;
 }
 
+.directreplacement {
+    /*color: black;*/
+    /*font-weight: bold;*/
+    background-color: yellow;
+}
+
 .considerreplacement {
-    color: black;
+    /*color: black;*/
 }
 
 .clarifyreplacement {
-    color: black;
+    /*color: black;*/
     font-style: italic;
 }
 
