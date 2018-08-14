@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Britpick - Find Duplicates</title>
+    <link rel="stylesheet" href="../static/britpick.css">
+</head>
+<body>
+{% if findreplaceduplicates %}
+    {% for i in findreplaceduplicates %}
+        <p>
+            <a href="/admin/app/britpickfindreplace/{{ i.findreplace01_index }}/change/">{{ i.findreplace01_string }}</a>
+            <br />
+            <a href="/admin/app/britpickfindreplace/{{ i.findreplace02_index }}/change/">{{ i.findreplace02_string }}</a>
+        </p>
+    {% endfor %}
+{% else %}
+    No duplicates found.
+{%  endif %}
+<hr>
+</body>
+</html>

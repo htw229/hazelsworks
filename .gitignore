@@ -3,6 +3,7 @@
 __pycache__
 venv
 db.sqlite
+db.sqlite3
 /static/admin
 /app/migrations
 .DS_Store

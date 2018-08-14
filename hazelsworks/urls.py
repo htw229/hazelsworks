@@ -21,4 +21,6 @@ from app import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls),
     url(r'^robots.txt', views.robotstxt, name='robots.txt'),
+    url(r'^britpick/findduplicates/', views.britpickfindduplicates, name='britpick_findduplicates.html'),
+    url(r'^britpick/', views.britpickapp, name='britpick.html'),
 ]

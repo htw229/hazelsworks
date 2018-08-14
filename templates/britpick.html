@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Britpick</title>
+    <link rel="stylesheet" href="../static/britpick.css">
+</head>
+<body>
+<form action="/britpick/" method="post">
+    {% csrf_token %}
+    {{ form }}
+    <input type="submit" value="Submit">
+</form>
+{{ britpickedtext|safe }}
+</body>
+</html>
