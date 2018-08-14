@@ -1,4 +1,4 @@
-from .models import BritpickFindReplace
+from .models import BritpickFindReplace, BritpickDialects
 import re
 
 suffixes = [
@@ -10,14 +10,10 @@ suffixes = [
     'ing',
 ]
 
-def britpick(inputtext = 'here is a whale standing next to the blue lamppost'):
-    outputtext = ''
+def britpick(text, dialectname):
+    # dialect = BritpickDialects.objects.get(pk = dialectname)
 
-    # iterate through search terms
-    # when found, replace with {f1}, f1 = item number in searches
-    text = inputtext
-
-    findreplaceobjects = BritpickFindReplace.objects.all()
+    findreplaceobjects = BritpickFindReplace.objects.filter(dialect = dialectname)
     searches = []
     markupdict = {}
 
@@ -26,69 +22,32 @@ def britpick(inputtext = 'here is a whale standing next to the blue lamppost'):
         for s in o.searchwordlist:
             searches.append([s,o])
 
+    # add suffixes to searchwords; do this after all original words added so that they take lower priority
     originalsearches = [s for s in searches]
     for search in originalsearches:
         for suffix in suffixes:
             searches.append([search[0] + suffix, search[1]])
 
-
+    # substitute every instance of 'searchstring' with '{f1}'
+    # create markup dict items so that {'{f1}': 'original word [replacement text]',}
     for i, search in enumerate(searches):
         markup = 'f' + str(i)
-        # text = text.replace(search[0], '{' + markup + '}')
-
         text = re.sub(r'\b' + search[0] + r'\b',  '{' + markup + '}', text)
-
         replacetext = addfoundword(search[0]) + ' ' + createreplacetext(search[1])
 
         markupdict.update({markup: replacetext})
 
+    # replace every instance of {f1} with 'original word [replacement text]'
     outputtext = text.format(**markupdict)
 
-
-
-
-    # findreplacelist = [
-    #     ('whale', 'elephant'),
-    #     ('lamppost', 'sidewalk'),
-    #     ('blue', 'green'),
-    # ]
-    #
-    # placeholderdict = {}
-    #
-    # t = inputtext
-    # placeholdertable = {}
-    # n = 0
-    #
-    # for i, replacement in enumerate(findreplacelist):
-    #     print(i, replacement)
-    #     t = t.replace(replacement[0], '{' + 'r' + str(i) + '}')
-    #     print(t)
-    #     markup = 'r' + str(i)
-    #     placeholderdict.update({markup: addfoundword(replacement[0]) + ' ' + adddirectreplacement(replacement[1])})
-
-    # t = t.format(**placeholderdict)
-
-
-    # s = 'whale'
-    #
-    # t = inputtext.replace(s, '{f13}')
-    #
-    # foundword = addfoundword('whale')
-    # replacement = adddirectreplacement('emergency')
-    # newstring = foundword + ' ' + replacement
-    # markups = { 'f13': newstring}
-    #
-    # outputtext = t.format(**markups)
-
-    # outputtext = inputtext + adddirectreplacement('whale')
-
-    # outputtext = text
+    # create line breaks
+    outputtext = outputtext.replace('\r\n', '<br />')
 
     return outputtext
 
 
 def createreplacetext(obj):
-    s = '['
+    s = ''
     if obj.directreplacement:
         s += addspan(obj.directreplacement, 'directreplacement')
     if obj.considerreplacement:
@@ -99,9 +58,8 @@ def createreplacetext(obj):
         s += addspan(obj.clarifyreplacement, 'clarifyreplacement')
     if obj.americanslang:
         s += addspan('phrase may not be used in britain', 'americanslang')
-    s += ']'
 
-    return s
+    return addspan(s, 'replacement', '[', ']')
 
 def addfoundword(text):
     s = addspan(text, 'foundword')

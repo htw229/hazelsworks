@@ -16,20 +16,29 @@ def robotstxt(request):
 
 
 def britpickapp(request):
+    dialect = ''
+    text = ''
     britpickedtext = ''
+
 
     if request.method == 'POST':
         form = BritpickForm(request.POST)
         if form.is_valid():
-            inputtext = form.cleaned_data['original_text']
-            britpickedtext = britpick(inputtext)
+            text = form.cleaned_data['text']
+            dialect = form.cleaned_data['dialect']
+            britpickedtext = britpick(text, dialect)
+            form.initial.update({'original_text': text})
 
     responsedata = {
         'form': BritpickForm,
+        'text': text,
+        'dialect': dialect,
         'britpickedtext': britpickedtext,
     }
 
     return render(request, 'britpick.html', responsedata)
+
+
 
 def britpickfindduplicates(request):
     objects = BritpickFindReplace.objects.all()

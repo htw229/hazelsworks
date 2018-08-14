@@ -1,5 +1,5 @@
 body {
-    background-color: lightblue;
+    background-color: white;
 }
 
 h1 {
@@ -12,16 +12,22 @@ p {
     font-size: 20px;
 }
 
+.replacement {
+    background-color: lightyellow;
+}
+
 .directreplacement {
-    color: crimson;
+    color: black;
+    font-weight: bold;
 }
 
 .considerreplacement {
-    color: palevioletred;
+    color: black;
 }
 
 .clarifyreplacement {
-    color: darkorange;
+    color: black;
+    font-style: italic;
 }
 
 .americanslang {
@@ -30,5 +36,5 @@ p {
 
 .foundword {
     font-weight: bold;
-    background-color: gray;
+    /*background-color: lightgray;*/
 }
