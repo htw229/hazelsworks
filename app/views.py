@@ -1,7 +1,8 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+import re
 
-from .forms import BritpickForm
+from .forms import BritpickForm, BritpickfindwordForm
 from .britpick import britpick
 from .models import BritpickFindReplace
 
@@ -49,28 +50,16 @@ def britpickfindduplicates(request):
         for c in objects:
             if o.pk == c.pk:
                 continue
+            if o.dialect != c.dialect:
+                continue
 
             duplicatewordlist = [i for i in o.searchwordlist if i in c.searchwordlist]
             if duplicatewordlist:
-                o_string = ' '.join([
-                    str(o.pk),
-                    ': ',
-                    ', '.join(o.searchwordlist),
-                    '(' + o.dialect.name + ')',
-                ])
-
-                c_string = ' '.join([
-                    str(c.pk),
-                    ': ',
-                    ', '.join(c.searchwordlist),
-                    '(' + c.dialect.name + ')',
-                ])
-
                 duplicateobjects.append({
                     'findreplace01_index': o.pk,
-                    'findreplace01_string': o_string,
+                    'findreplace01_string': o.objectstring,
                     'findreplace02_index': c.pk,
-                    'findreplace02_string': c_string,
+                    'findreplace02_string': c.objectstring,
                 })
 
     responsedata = {
@@ -78,3 +67,32 @@ def britpickfindduplicates(request):
     }
 
     return render(request, 'britpick_findduplicates.html', responsedata)
+
+
+def britpickfindword(request):
+    # objects = BritpickFindReplace.objects.all()
+    s = ''
+    searchwords = []
+    replacementwords = []
+
+    if request.method == 'POST':
+        form = BritpickfindwordForm(request.POST)
+        if form.is_valid():
+            s = form.cleaned_data['searchword']
+
+            for o in BritpickFindReplace.objects.all():
+                if s in o.searchwords:
+                    searchwords.append({'pk': o.pk, 'string': o.objectstring})
+                if o.directreplacement and s in o.directreplacement:
+                    replacementwords.append({'pk': o.pk, 'string': o.objectstring})
+                if o.considerreplacement and s in o.considerreplacement:
+                    replacementwords.append({'pk': o.pk, 'string': o.objectstring})
+
+    responsedata = {
+        'form': BritpickfindwordForm,
+        'search': s,
+        'searchwords': searchwords,
+        'replacementwords': replacementwords,
+    }
+
+    return render(request, 'britpick_findword.html', responsedata)

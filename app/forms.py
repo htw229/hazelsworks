@@ -22,3 +22,7 @@ class BritpickForm(forms.Form):
     #     super(MyForm, self).__init__(*args, **kwargs)
     #     # assign a (computed, I assume) default value to the choice field
     #     self.initial['dialogue'] = matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']
+
+
+class BritpickfindwordForm(forms.Form):
+    searchword = forms.CharField(label='Search')
