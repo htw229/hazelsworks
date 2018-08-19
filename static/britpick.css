@@ -8,19 +8,26 @@ h1 {
 }
 
 p {
-    font-family: verdana;
+    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
     font-size: 20px;
 }
 
+.mandatory {
+    background-color: red;
+    color: white;
+    font-weight: bold;
+}
+
 .replacement {
-    background-color: lightyellow;
+    background-color: yellow;
     font-weight: bold;
 }
 
 .directreplacement {
     /*color: black;*/
     /*font-weight: bold;*/
-    background-color: yellow;
+    background-color: orange;
+    /*color: white;*/
 }
 
 .considerreplacement {
@@ -30,10 +37,7 @@ p {
 .clarifyreplacement {
     /*color: black;*/
     font-style: italic;
-}
-
-.americanslang {
-    color: darkviolet;
+    font-size: smaller;
 }
 
 .foundword {

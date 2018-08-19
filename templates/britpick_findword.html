@@ -17,7 +17,7 @@
 {% if searchwords %}
     {% for i in searchwords %}
         <p>
-            <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/">{{ i.string }}</a>
+            <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/" target="_blank">{{ i.string }}</a>
         </p>
     {% endfor %}
 {% else %}
@@ -28,11 +28,15 @@
 {% if replacementwords %}
     {% for i in replacementwords %}
         <p>
-            <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/">{{ i.string }}</a>
+            <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/" target="_blank">{{ i.string }}</a>
         </p>
     {% endfor %}
 {% else %}
     Word not found in directreplacement or considerreplacement
 {%  endif %}
+
+<p>
+    <a href="/admin/app/britpickfindreplace/add/" target="_blank">Add new word</a>
+</p>
 </body>
 </html>

@@ -24,5 +24,11 @@
 <h2>Dialect: {{ dialect }}</h2>
 {{ britpickedtext|safe }}
 
+{% if showdebug %}
+    <h3>Debug:</h3>
+    <p>
+    {{ debug }}
+    </p>
+{% endif %}
 </body>
 </html>

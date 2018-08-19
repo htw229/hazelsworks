@@ -20,7 +20,7 @@ def britpickapp(request):
     dialect = ''
     text = ''
     britpickedtext = ''
-
+    debug = ''
 
     if request.method == 'POST':
         form = BritpickForm(request.POST)
@@ -28,7 +28,7 @@ def britpickapp(request):
             text = form.cleaned_data['text']
             dialect = form.cleaned_data['dialect']
             dialogue = form.cleaned_data['dialogue']
-            britpickedtext = britpick(text, dialect, dialogue)
+            britpickedtext, debug = britpick(text, dialect, dialogue)
             form.initial.update({'original_text': text})
 
     responsedata = {
@@ -36,6 +36,8 @@ def britpickapp(request):
         'text': text,
         'dialect': dialect,
         'britpickedtext': britpickedtext,
+        'showdebug': True,
+        'debug': debug,
     }
 
     return render(request, 'britpick.html', responsedata)
