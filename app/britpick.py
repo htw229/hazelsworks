@@ -42,12 +42,18 @@ markups = [
 suffixes = [
     's',
     'es',
-    "'s",
+    r"\'s",
     'ed',
     'd',
     'ly',
     'ing',
 ]
+
+# suffixes = [
+#     's',
+#     'es',
+#     r"\'s"
+# ]
 
 prepositions = [
     'to',
@@ -84,6 +90,7 @@ def britpick(inputtext, dialectname, matchoption=matchoptions['SEARCH_DIALOGUE_I
 
     searches = createsearches(dialectname)
     debug.add(['number of searches:', len(searches)])
+    debug.add(['searches[25]', searches[25].regexpattern])
 
     # TODO: clean up matchoption
     outputtext = createoutputtext(inputtext, searches, dialectname, matchoption)
@@ -193,8 +200,11 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     #     # debug += 'no preposition: ' + s + '<br>'
 
 
-    wordsuffixpattern = '(' + re.escape(searchword) + suffixpattern + ')'
+    wordsuffixpattern = re.escape(searchword) + suffixpattern
     patternlist = [wordsuffixpattern]
+
+    #DEBUG: get time without suffixes
+    # patternlist = ['(' + re.escape(searchword) + ')']
 
     # add markup
     if not britpickobj.markup:
@@ -213,10 +223,14 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     return patternlist
 
 
-def replacetext(search, inputtext, pattern):
+def replacetext(search, inputtext, templatepattern):
+    global debug
+
+    pattern = templatepattern % search.regexpattern
+    debug.add(['pattern:', pattern], max=10)
 
     # \1 detects entire match (lookahead is not included)
-    text = re.sub(pattern % search.regexpattern, createreplacetext(r'{\1 ', search.britpickobj) + r'}', inputtext, flags=re.IGNORECASE)
+    text = re.sub(pattern, createreplacetext(r'{\1 ', search.britpickobj) + r'}', inputtext, flags=re.IGNORECASE)
 
     return text
 

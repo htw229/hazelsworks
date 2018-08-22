@@ -3,8 +3,13 @@ from timeit import default_timer
 class Debug():
     debugstrings = []
     starttime = ''
+    counter = 0
 
-    def add(self, item):
+    def add(self, item, max = 50):
+        self.counter += 1
+        if self.counter > max:
+            return
+
         if type(item) == list:
             s = ' : '.join([str(s) for s in item])
         else:
@@ -16,6 +21,9 @@ class Debug():
         self.debugstrings.append(
             string + ': ' + str(default_timer() - self.starttime)
         )
+
+    def resetcounter(self):
+        self.counter = 0
 
     def __init__(self):
         self.starttime = default_timer()
