@@ -6,5 +6,6 @@ db.sqlite
 db.sqlite3
 /static/admin
 /app/migrations
+/notes
 .DS_Store
 .idea

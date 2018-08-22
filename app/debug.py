@@ -6,7 +6,7 @@ class Debug():
 
     def add(self, item):
         if type(item) == list:
-            s = ' : '.join(item)
+            s = ' : '.join([str(s) for s in item])
         else:
             s = str(item)
 

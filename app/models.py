@@ -28,6 +28,10 @@ class BritpickFindReplace(models.Model):
         return wordlist
 
     @property
+    def longestsearchwordlength(self) -> int:
+        return len(max(self.searchwordlist, key=lambda l: len(l)))
+
+    @property
     def considerreplacementlist(self) -> list:
         wordlist = [w for w in self.considerreplacement.split('\r\n') if w.strip() != '']
         return wordlist

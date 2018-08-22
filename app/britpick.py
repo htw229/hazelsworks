@@ -58,200 +58,167 @@ prepositions = [
 ]
 
 
+findanywherepattern = r"""\b(%s)\b(?=[^}]*?{)"""
+findinquotespattern = r"""\b(%s)\b(?=[^"”}]*?[^\s\w}]["”])(?=[^}]*?{)"""
+
+
+
+class britpicksearch():
+    regexpattern = ''
+    britpickobj = ''
+
+    def __init__(self, regexpattern, britpickobj):
+        self.regexpattern = regexpattern
+        self.britpickobj = britpickobj
+
+
+
+
 
 def britpick(inputtext, dialectname, matchoption=matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']):
 
     # debug
     global debug
+    debug = ''
     debug = Debug()
 
     searches = createsearches(dialectname)
-
-    debug.timer('searches created')
     debug.add(['number of searches:', len(searches)])
 
-    text = inputtext + '{'
+    # TODO: clean up matchoption
+    outputtext = createoutputtext(inputtext, searches, dialectname, matchoption)
 
-    for i, search in enumerate(searches):
-
-        s = search[0]
-
-        if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
-            # \1 and \3 refer to groups, since we are only substituting group 2 (see patten above), keep groups 1 and 3 the same as in original text
-            text = replaceinquotes(search, s, text)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != "British (Generic)":
-            text = replaceinquotes(search, s, text)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search[1].dialogue == True:
-            text = replaceinquotes(search, s, text)
-        else:
-            # search all text
-            text = replaceanytext(search, s, text)
-
-        # # remove regex from dispalyed searchstring
-        # # can't regenerate original text but can make it more readable
-        # displayedsearchword = search[0].replace('\d+', '[number]').replace(r'\ ', ' ')
-        #
-        # replacetext = addfoundword(displayedsearchword) + ' ' + createreplacetext(search[1])
-        # markupdict.update({markup: replacetext})
-
-    # replace every instance of {f1} with 'original word [replacement text]'
-    # outputtext = text.format(**markupdict)
-
-    outputtext = text
-
-    # create line breaks
-    outputtext = outputtext.replace('\r\n', '<br />')
-    # remove created {}
-    outputtext = outputtext.replace('{', '').replace('}', '')
-
-    debug.timer('finish')
+    debug.timer('britpick() finished')
 
     return outputtext, debug.html
 
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-def createsubstitutedstrings(originalsearchword, obj) -> list:
-    global debug
-    # takes the searchword and its original object and creates a string for that searchword
-    # (in calling function, will later combine strings to create regex | pattern)
-
-    # retain special characters in search (such as ?, which can help limit found words)
-    # requires escaping them for regex
-    # escape prior to substituting (substitutes may contain regex)
-    if obj.regex:
-        # do nothing to it
-        return [originalsearchword]
-
-    # finds either without suffix or with suffix
-    suffixpattern = r'(|' + '|'.join(suffixes) + r')'
-    searchword = originalsearchword
-
-    # stringprepositionlist = searchword.rsplit(None, 1)
-    # if len(stringprepositionlist) > 1 and stringprepositionlist[1] in prepositions:
-    #     searchword = stringprepositionlist[0] + suffixpattern + stringprepositionlist[1]
-    # else:
-
-    # add suffixes to 2nd to last word if ends with preposition
-    # get last word in string
-    stringprepositionlist = searchword.rsplit(None, 1)
-    if len(stringprepositionlist) > 1 and stringprepositionlist[1] in prepositions:
-        s = '(' + re.escape(stringprepositionlist[0]) + suffixpattern + ' ' + re.escape(stringprepositionlist[1]) + ')'
-        # debug += 'preposition: ' + s + '<br>'
-    else:
-        s = '(' + re.escape(searchword) + suffixpattern + ')'
-        # debug += 'no preposition: ' + s + '<br>'
-
-    # s = re.escape(s)
-    # debug += 's: ' + s + '<br><br>'
-    stringslist = [s]
-
-    # add markup
-    if not obj.markup:
-        return stringslist
-
-    for m in markups:
-        # if m['markup'] not in searchword:
-        #     # most won't have markup, so have a quick exit for them
-        #     # note that this prevents markup from containing other markup
-        #     # (if that's needed, could create loop with escape when there's no markup left)
-        #     continue
-
-        # reiterating the generated list allows for more than one markup in a searchword
-        for s in [t for t in stringslist]:
-            # s is the searchword that (potentially) contains markup
-            if m['markup'] in s:
-                # remove the string that has markup still in it
-                stringslist.remove(s)
-                # create a list of strings with words substituted for markup
-                newstrings = [s.replace(m['markup'], w) for w in m['wordlist']]
-                stringslist.extend(newstrings)
-
-    return stringslist
-
-
 def createsearches(dialectname) -> list:
-    # this is fast! total runtime 0.06s
-    findreplaceobjects = BritpickFindReplace.objects.filter(dialect=dialectname).filter(active=True)
+    '''
+
+    :param dialectname: string as pk of dialect object
+    :return: list of britpicksearch objects (1 per britpickfindreplace)
+    '''
+
+    global debug
+
     searches = []
 
-    # create searches such that ['searchstring', BritpickFindReplace obj]
-    for o in findreplaceobjects:
-        stringslist = []
-        for s in o.searchwordlist:
-            stringslist.extend(createsubstitutedstrings(s, o))
-            # searches.extend([[w, o] for w in createsubstitutedstrings(s, o)])
-        searches.append(['|'.join(stringslist), o])
+    britpickobjs = BritpickFindReplace.objects\
+        .filter(dialect=dialectname)\
+        .filter(active=True)
 
-    # sort all but length, descending; so that multiple word searches will be found before single ones
-    # searches.sort(key=lambda search: len(search[0]), reverse=True)
+    for britpickobj in britpickobjs:
+        searchpatternlist = []
+        for s in britpickobj.searchwordlist:
+            searchpatternlist.extend(createsearchwordpatterns(s, britpickobj))
+        regexpattern = '|'.join(searchpatternlist)
+        searches.append(britpicksearch(regexpattern, britpickobj))
 
-    # add suffixes to searchwords; do this after all original words added so that they take lower priority
-    # originalsearches = [s for s in searches]
-    # for search in originalsearches:
-    #     for suffix in suffixes:
-    #         searches.append([search[0] + suffix, search[1]])
+    # sort by longest searchword (a kludgy way of getting compound words to be found before single words)
+    searches.sort(key=lambda search: search.britpickobj.longestsearchwordlength, reverse=True)
 
+    debug.timer('createsearches() finished')
     return searches
 
 
-def replaceanytext(search: list, s: str, text: str) -> str:
+
+def createoutputtext(inputtext, searches, dialectname, matchoption):
+    '''
+
+    :param inputtext:
+    :param searches:
+    :param dialectname:
+    :param matchoption:
+    :return: html formatted output text
+    '''
     global debug
 
-    # can't be inside prior match that's been found
-    # must be before { or # (# marks end of text)
+    text = inputtext + '{'
 
-    # 2 capture groups (word and suffix)
-    textpattern = r"""\b(%s)\b(?=[^}]*?{)"""
-    # textreplacepattern = r'{\1\2 ' + createreplacetext('TEST', search[1]) + r'}'
+    for search in searches:
+        if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
+            text = replacetext(search, text, findinquotespattern)
+        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != "British (Generic)":
+            text = replacetext(search, text, findinquotespattern)
+        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search.britpickobj.dialogue == True:
+            text = replacetext(search, text, findinquotespattern)
+        else:
+            # this is majority of replacements for generic dialect
+            text = replacetext(search, text, findanywherepattern)
 
-    text = re.sub(textpattern % s, createreplacetext(r'{\1 ', search[1]) + r'}', text, flags=re.IGNORECASE)
 
-    # debug += 'textpattern: ' + textpattern % s
-    # debug += '<p>'
+    # create line breaks
+    text = text.replace('\r\n', '<br />')
+    # remove created {}
+    text = text.replace('{', '').replace('}', '')
 
+    debug.timer('createoutputtext() finished')
     return text
 
 
-def replaceinquotes(search: list, s: str, text: str) -> str:
+
+def createsearchwordpatterns(searchword, britpickobj) -> list:
+    '''
+
+    :param searchword: string of single (or compound) word
+    :param britpickobj:
+    :return: list of regex patterns for single searchword with substitutions made and suffixes added
+    '''
+
     global debug
 
-    # group 1 = captured word, group 2 = suffix
-    dialogpattern = r"""\b(%s)\b(?=[^"”}]*?[^\s\w}]["”])(?=[^}]*?{)"""
+    if britpickobj.regex:
+        # do nothing to it
+        return [searchword]
 
-    # dialogreplacepattern = r'\1{\2\3 ' + createreplacetext(search[1]) + r'}\4'
-    text = re.sub(dialogpattern % s, r'{' + createreplacetext(r'\1', search[1]) + r'}', text, flags=re.IGNORECASE)
+    # create generic regex pattern for with/without suffix
+    suffixpattern = r'(|' + '|'.join(suffixes) + r')'
+
+
+    # REGEX ESCAPING: retain special characters in search (such as ?, which can help limit found words); escape prior to substituting markup (substitutes may contain regex)
+
+    # TODO
+    # add suffixes to 2nd to last word if ends with preposition
+    # get last word in string
+    # stringprepositionlist = searchword.rsplit(None, 1)
+    #
+    # if len(stringprepositionlist) > 1 and stringprepositionlist[1] in prepositions:
+    #     s = '(' + re.escape(stringprepositionlist[0]) + suffixpattern + ' ' + re.escape(stringprepositionlist[1]) + ')'
+    #     # debug += 'preposition: ' + s + '<br>'
+    # else:
+    #     s = '(' + re.escape(searchword) + suffixpattern + ')'
+    #     # debug += 'no preposition: ' + s + '<br>'
+
+
+    wordsuffixpattern = '(' + re.escape(searchword) + suffixpattern + ')'
+    patternlist = [wordsuffixpattern]
+
+    # add markup
+    if not britpickobj.markup:
+        return patternlist
+
+    for m in markups:
+        for pattern in [p for p in patternlist]:
+            if m['markup'] in pattern:
+                # remove the string that has markup still in it
+                patternlist.remove(pattern)
+                # create a list of strings with words substituted for markup
+                newpatterns = [pattern.replace(m['markup'], w) for w in m['wordlist']]
+                patternlist.extend(newpatterns)
+
+    # debug.timer('createsearchwordpatterns() finished')
+    return patternlist
+
+
+def replacetext(search, inputtext, pattern):
+
+    # \1 detects entire match (lookahead is not included)
+    text = re.sub(pattern % search.regexpattern, createreplacetext(r'{\1 ', search.britpickobj) + r'}', inputtext, flags=re.IGNORECASE)
+
     return text
-
-
-
 
 
 

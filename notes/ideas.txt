@@ -1,8 +1,13 @@
 markup
 [number]
+[month]
 
-ignore caps
+x ignore caps
 
-check for whole matches first, then matches with 's' apostrophe-s or with 'ed', then as end of word(?)
+x check for whole matches first, then matches with 's' apostrophe-s or with 'ed', then as end of word(?)
 
-- duplicates
+x duplicates
+
+active/inactive
+x dialogue
+sort by length before adding suffixes (so that longer and multiple words found first)
