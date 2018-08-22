@@ -34,6 +34,7 @@ suffixes = [
     'es',
     "'s",
     'ed',
+    'd',
     'ly',
     'ing',
 ]
@@ -71,26 +72,51 @@ def createsubstitutedstrings(originalsearchword, obj) -> list:
 
     return stringslist
 
-def createsearches(dialectname):
+def createsearches(dialectname) -> list:
     # this is fast! total runtime 0.06s
     findreplaceobjects = BritpickFindReplace.objects.filter(dialect=dialectname).filter(active=True)
     searches = []
 
     # create searches such that ['searchstring', BritpickFindReplace obj]
     for o in findreplaceobjects:
+        stringslist = []
         for s in o.searchwordlist:
-            searches.extend([[w, o] for w in createsubstitutedstrings(s, o)])
+            stringslist.extend(createsubstitutedstrings(s, o))
+            # searches.extend([[w, o] for w in createsubstitutedstrings(s, o)])
+        searches.append(['|'.join(stringslist), o])
 
     # sort all but length, descending; so that multiple word searches will be found before single ones
-    searches.sort(key=lambda search: len(search[0]), reverse=True)
+    # searches.sort(key=lambda search: len(search[0]), reverse=True)
 
     # add suffixes to searchwords; do this after all original words added so that they take lower priority
-    originalsearches = [s for s in searches]
-    for search in originalsearches:
-        for suffix in suffixes:
-            searches.append([search[0] + suffix, search[1]])
+    # originalsearches = [s for s in searches]
+    # for search in originalsearches:
+    #     for suffix in suffixes:
+    #         searches.append([search[0] + suffix, search[1]])
+
+
 
     return searches
+
+def replaceanytext(search: list, s: str, text: str) -> str:
+    # can't be inside prior match that's been found
+    # must be before { or # (# marks end of text)
+
+    # 2 capture groups (word and suffix)
+    textpattern = r"""(?<=\b)%s(?=\b[^}]*?{)"""
+    # textreplacepattern = r'{\1\2 ' + createreplacetext('TEST', search[1]) + r'}'
+
+    text = re.sub(textpattern % s, createreplacetext(r'{\1\2 ', search[1]) + r'}', text, flags=re.IGNORECASE)
+
+    return text
+
+def replaceinquotes(search: list, s: str, text: str) -> str:
+    # group 1 = captured word, group 2 = suffix
+    dialogpattern = r"""\b(%s)\b(?=[^"”}]*?[^\s\w}]["”])(?=[^}]*?{)"""
+
+    # dialogreplacepattern = r'\1{\2\3 ' + createreplacetext(search[1]) + r'}\4'
+    text = re.sub(dialogpattern % s, r'{' + createreplacetext(r'\2\3', search[1]) + r'}', text, flags=re.IGNORECASE)
+    return text
 
 
 def britpick(text, dialectname, matchoption = matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']):
@@ -100,41 +126,64 @@ def britpick(text, dialectname, matchoption = matchoptions['SEARCH_DIALOGUE_IF_S
     starttime = default_timer()
     searches = createsearches(dialectname)
     debug += 'createsearches: ' + str(default_timer() - starttime)
+    debug += '   len(searches)=' + str(len(searches)) + ' | '
 
     # substitute every instance of 'searchstring' with '{f1}'
+
     # create markup dict items so that {'{f1}': 'original word [replacement text]',}
     markupdict = {}
+    replacelist = []
+
+
+    combinedsearches = []
+
+    #combined search = ['hello | hi | hello there ']
+
+
+    # for i, search in enumerate (searches):
+    #     markup = 'f' + str(i)
+    #
+    #     # remove regex from dispalyed searchstring
+    #     # can't regenerate original text but can make it more readable
+    #     displayedsearchword = search[0].replace('\d+', '[number]').replace(r'\ ', ' ')
+    #     replacetext = addfoundword(displayedsearchword) + ' ' + createreplacetext(search[1])
+    #     markupdict.update({markup: replacetext})
+        # replacelist.append(replacetext)
+
+    text = text + '{'
+
+    suffixpattern = r'(|' + '|'.join(suffixes) + r')'
 
     for i, search in enumerate(searches):
         # ie {f1}, {f2}
         markup = 'f' + str(i)
 
-        s = search[0]
+        s = '(' + search[0] + ')' + suffixpattern
 
-        # to find in quotes
-        # searching in quotes is slow! (doubles/triples time)
-        pattern = r"""(["][^"]*?\b)(""" + s + r""")(\b[^"]*?[^\s\w]["])"""
+        # replacepattern = "REPLACED"
 
         if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
             # \1 and \3 refer to groups, since we are only substituting group 2 (see patten above), keep groups 1 and 3 the same as in original text
-            text = re.sub(pattern, r'\1 {' + markup + r'} \3', text, flags=re.IGNORECASE)
+            text = replaceinquotes(search, s, text)
         elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != "British (Generic)":
-            text = re.sub(pattern, r'\1 {' + markup + r'} \3', text, flags=re.IGNORECASE)
+            text = replaceinquotes(search, s, text)
         elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search[1].dialogue == True:
-            text = re.sub(pattern, r'\1 {' + markup + r'} \3', text, flags=re.IGNORECASE)
+            text = replaceinquotes(search, s, text)
         else:
             # search all text
-            text = re.sub(r'\b' + s + r'\b',  '{' + markup + '}', text, flags=re.IGNORECASE)
+            text = replaceanytext(search, s, text)
 
-        # remove regex from dispalyed searchstring
-        # can't regenerate original text but can make it more readable
-        displayedsearchword = search[0].replace('\d+', '[number]').replace(r'\ ', ' ')
-
-        replacetext = addfoundword(displayedsearchword) + ' ' + createreplacetext(search[1])
-        markupdict.update({markup: replacetext})
+        # # remove regex from dispalyed searchstring
+        # # can't regenerate original text but can make it more readable
+        # displayedsearchword = search[0].replace('\d+', '[number]').replace(r'\ ', ' ')
+        #
+        # replacetext = addfoundword(displayedsearchword) + ' ' + createreplacetext(search[1])
+        # markupdict.update({markup: replacetext})
 
     # replace every instance of {f1} with 'original word [replacement text]'
-    outputtext = text.format(**markupdict)
+    # outputtext = text.format(**markupdict)
+
+    outputtext = text
 
     # create line breaks
     outputtext = outputtext.replace('\r\n', '<br />')
@@ -144,8 +193,14 @@ def britpick(text, dialectname, matchoption = matchoptions['SEARCH_DIALOGUE_IF_S
     return outputtext, debug
 
 
-def createreplacetext(obj):
+def createreplacetext(originalstring, obj):
+    # format original string
+    originalstring = addspan(originalstring, 'found word')
+
+    # create replacement text that will be in []
     stringlist = []
+
+
 
     if obj.directreplacement:
         if obj.mandatory:
@@ -168,7 +223,10 @@ def createreplacetext(obj):
     s = ' '.join(stringlist)
     s = addspan(s, 'replacement', '[', ']')
 
-    return s
+    # combine
+    text = addspan(originalstring, 'foundword') + ' ' + s
+
+    return text
 
 def addfoundword(text):
     s = addspan(text, 'foundword')
