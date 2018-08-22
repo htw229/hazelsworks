@@ -3,6 +3,8 @@ import re
 import regex
 from timeit import default_timer
 
+debug = ''
+
 # matchoption
 matchoptions = {
     'SEARCH_ALL': '1',
@@ -39,15 +41,42 @@ suffixes = [
     'ing',
 ]
 
+prepositions = [
+    'to',
+    'up',
+    'out',
+    'of',
+    'with',
+]
+
 def createsubstitutedstrings(originalsearchword, obj) -> list:
+    # takes the searchword and its original object and creates a string for that searchword
+    # (in calling function, will later combine strings to create regex | pattern)
+
+
 
 
     # retain special characters in search (such as ?, which can help limit found words)
     # requires escaping them for regex
-    # escape prior to substituting (substitutes may contain regex such as numbers)
-    searchword = re.escape(originalsearchword)
-    stringslist = [searchword]
+    # escape prior to substituting (substitutes may contain regex)
+    if obj.regex:
+        # do nothing to it
+        return [originalsearchword]
 
+    # finds either without suffix or with suffix
+    suffixpattern = r'(|' + '|'.join(suffixes) + r')'
+    searchword = re.escape(originalsearchword)
+
+    # stringprepositionlist = searchword.rsplit(None, 1)
+    # if len(stringprepositionlist) > 1 and stringprepositionlist[1] in prepositions:
+    #     searchword = stringprepositionlist[0] + suffixpattern + stringprepositionlist[1]
+    # else:
+
+    s = '(' + originalsearchword  + suffixpattern + ')'
+    stringslist = [s]
+
+
+    # add markup
     if not obj.markup:
         return stringslist
 
@@ -99,43 +128,52 @@ def createsearches(dialectname) -> list:
     return searches
 
 def replaceanytext(search: list, s: str, text: str) -> str:
+    global debug
+
     # can't be inside prior match that's been found
     # must be before { or # (# marks end of text)
 
     # 2 capture groups (word and suffix)
-    textpattern = r"""(?<=\b)%s(?=\b[^}]*?{)"""
+    textpattern = r"""\b(%s)\b(?=[^}]*?{)"""
     # textreplacepattern = r'{\1\2 ' + createreplacetext('TEST', search[1]) + r'}'
 
     text = re.sub(textpattern % s, createreplacetext(r'{\1\2 ', search[1]) + r'}', text, flags=re.IGNORECASE)
 
+    # debug += 'textpattern: ' + textpattern % s
+    # debug += '\r\n'
+
     return text
 
 def replaceinquotes(search: list, s: str, text: str) -> str:
+    global debug
+
     # group 1 = captured word, group 2 = suffix
     dialogpattern = r"""\b(%s)\b(?=[^"”}]*?[^\s\w}]["”])(?=[^}]*?{)"""
 
     # dialogreplacepattern = r'\1{\2\3 ' + createreplacetext(search[1]) + r'}\4'
-    text = re.sub(dialogpattern % s, r'{' + createreplacetext(r'\2\3', search[1]) + r'}', text, flags=re.IGNORECASE)
+    text = re.sub(dialogpattern % s, r'{' + createreplacetext(r'\1', search[1]) + r'}', text, flags=re.IGNORECASE)
     return text
 
 
 def britpick(text, dialectname, matchoption = matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']):
 
+    global debug
     debug = ''
 
     starttime = default_timer()
     searches = createsearches(dialectname)
-    debug += 'createsearches: ' + str(default_timer() - starttime)
+    # debug += 'searches[25][0]:  ' + searches[25][0]
+    debug += '   createsearches: ' + str(default_timer() - starttime)
     debug += '   len(searches)=' + str(len(searches)) + ' | '
 
     # substitute every instance of 'searchstring' with '{f1}'
 
     # create markup dict items so that {'{f1}': 'original word [replacement text]',}
-    markupdict = {}
-    replacelist = []
-
-
-    combinedsearches = []
+    # markupdict = {}
+    # replacelist = []
+    #
+    #
+    # combinedsearches = []
 
     #combined search = ['hello | hi | hello there ']
 
@@ -152,13 +190,15 @@ def britpick(text, dialectname, matchoption = matchoptions['SEARCH_DIALOGUE_IF_S
 
     text = text + '{'
 
-    suffixpattern = r'(|' + '|'.join(suffixes) + r')'
+
 
     for i, search in enumerate(searches):
         # ie {f1}, {f2}
         markup = 'f' + str(i)
 
-        s = '(' + search[0] + ')' + suffixpattern
+        # if search[0]
+
+        s = search[0]
 
         # replacepattern = "REPLACED"
 
@@ -187,6 +227,8 @@ def britpick(text, dialectname, matchoption = matchoptions['SEARCH_DIALOGUE_IF_S
 
     # create line breaks
     outputtext = outputtext.replace('\r\n', '<br />')
+    # remove created {}
+    outputtext = outputtext.replace('{', '').replace('}', '')
 
     debug += 'total runtime: ' + str(default_timer() - starttime)
 
