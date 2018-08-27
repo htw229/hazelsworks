@@ -47,6 +47,10 @@ suffixes = [
     'd',
     'ly',
     'ing',
+    'ped',
+    'ded',
+    'ping',
+    'ding',
 ]
 
 # suffixes = [
@@ -199,12 +203,26 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     #     s = '(' + re.escape(searchword) + suffixpattern + ')'
     #     # debug += 'no preposition: ' + s + '<br>'
 
+    try:
+        # will fail if rsplit returns only 1 string (ie if single word)
+        word, preposition = searchword.rsplit(None, 1)
+        if preposition in prepositions:
+            debug.add([word, preposition], max=20)
+            wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
+        else:
+            raise ValueError('not a preposition')
+    except ValueError:
+        wordsuffixpattern = re.escape(searchword) + suffixpattern
 
-    wordsuffixpattern = re.escape(searchword) + suffixpattern
+    # searchwordsplit = searchword.rsplit(None, 1)
+    # lastword = searchwordsplit[-1]
+    # if len(searchwordsplit) > 1 and lastword in prepositions:
+    #     debug.add(['preposition', searchword], max=20)
+    #     wordsuffixpattern = re.escape(searchwordsplit) + suffixpattern + lastword)
+    #
+
+    # wordsuffixpattern = re.escape(searchword) + suffixpattern
     patternlist = [wordsuffixpattern]
-
-    #DEBUG: get time without suffixes
-    # patternlist = ['(' + re.escape(searchword) + ')']
 
     # add markup
     if not britpickobj.markup:
@@ -227,7 +245,11 @@ def replacetext(search, inputtext, templatepattern):
     global debug
 
     pattern = templatepattern % search.regexpattern
-    debug.add(['pattern:', pattern], max=10)
+    # debug.add(['pattern:', pattern], max=100)
+
+    # DEBUG SINGLE WORD
+    # if 'reverse' in pattern:
+    #     debug.add(pattern)
 
     # \1 detects entire match (lookahead is not included)
     text = re.sub(pattern, createreplacetext(r'{\1 ', search.britpickobj) + r'}', inputtext, flags=re.IGNORECASE)
