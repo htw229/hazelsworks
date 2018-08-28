@@ -51,7 +51,7 @@ class BritpickFindReplace(models.Model):
         if self.clarifyreplacement:
             s = s + ' / '.join([w for w in self.clarifyreplacement.split('\r\n') if w.strip() != ''])
 
-        if len(self.replacementexplanations.all()) > 0:
+        if self.replacementexplanations:
             # get strings from all objects
             explanationstrings = [o.text for o in self.replacementexplanations.all()]
             s = s + ' / '.join(explanationstrings)

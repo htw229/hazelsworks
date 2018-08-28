@@ -223,15 +223,14 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
 def replacetext(search, inputtext, templatepattern):
     global debug
 
-    pattern = templatepattern % search.regexpattern
-    # debug.add(['pattern:', pattern], max=100)
+    text = inputtext
+    addedtextlength = 0     # increment starting position after every replacement
+    pattern = re.compile(templatepattern % search.regexpattern, re.IGNORECASE)
 
-    # DEBUG SINGLE WORD
-    # if 'reverse' in pattern:
-    #     debug.add(pattern)
-
-    # \1 detects entire match (lookahead is not included)
-    text = re.sub(pattern, createreplacetext(r'{\1 ', search.britpickobj) + r'}', inputtext, flags=re.IGNORECASE)
+    for match in pattern.finditer(inputtext):
+        replacetext = createreplacetext(r'{' + match.group() + ' ', search.britpickobj) + r'}'
+        text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
+        addedtextlength += len(replacetext) - len(match.group())
 
     return text
 
