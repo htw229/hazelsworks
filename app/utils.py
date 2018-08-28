@@ -5,7 +5,8 @@ debug = DebugClass()
 
 def changebritishdialectname():
     for obj in BritpickFindReplace.objects.all():
-        obj.dialect = BritpickDialects.objects.get(name='British')
-        obj.save()
-        debug.add(['obj', obj], max=10)
+        if obj.dialect.name == 'British (Generic)':
+            obj.dialect = BritpickDialects.objects.get(name='British')
+            obj.save()
+            debug.add(['obj', obj], max=10)
     debug.print()
