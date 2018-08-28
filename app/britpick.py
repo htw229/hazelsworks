@@ -1,5 +1,6 @@
-from .models import BritpickFindReplace, BritpickDialects
+from .models import BritpickFindReplace, BritpickDialects, ReplacementExplanation
 from .debug import Debug
+import app.settings as settings
 
 import re
 import regex
@@ -152,7 +153,7 @@ def createoutputtext(inputtext, searches, dialectname, matchoption):
     for search in searches:
         if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
             text = replacetext(search, text, findinquotespattern)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != "British":
+        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != settings.DEFAULT_DIALOG:
             text = replacetext(search, text, findinquotespattern)
         elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search.britpickobj.dialogue == True:
             text = replacetext(search, text, findinquotespattern)
@@ -247,6 +248,9 @@ def createreplacetext(textstring, britpickobj):
     :return: span with css formatting
     '''
 
+    global debug
+    debug.timer('createreplacetext() start')
+
     # format original string
     textstring = addspan(textstring, 'found word')
 
@@ -261,15 +265,20 @@ def createreplacetext(textstring, britpickobj):
     if britpickobj.considerreplacement:
         c = ', '.join(w for w in britpickobj.considerreplacementlist)
         stringlist.append(addspan(c, 'considerreplacement'))
-    if britpickobj.clarifyreplacement:
+
+    explanationtext = ''
+
+    # add explanations
+    if britpickobj.clarifyreplacementstring:
         if len(stringlist) == 0:
             # if no other text, then don't add parenthesis
             stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarifyreplacement'))
         else:
             stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarifyreplacement', '(', ')'))
+
+    # if it's mandatory and there's no replacement/explanation, then add generic explanation
     if britpickobj.mandatory and len(stringlist) == 0:
-        # if it's mandatory and there's no replacement/explanation, then add generic explanation
-        stringlist.append(addspan('may not be used in britain', 'clarifyreplacement'))
+        stringlist.append(addspan(ReplacementExplanation.objects.get(name='not used').text, 'clarifyreplacement'))
 
     s = ' '.join(stringlist)
     s = addspan(s, 'replacement', '[', ']')
@@ -277,6 +286,7 @@ def createreplacetext(textstring, britpickobj):
     # combine texts
     text = addspan(textstring, 'foundword') + ' ' + s
 
+    debug.timer('createreplacetext()')
     return text
 
 

@@ -6,14 +6,20 @@ class BritpickDialects(models.Model):
     def __str__(self):
         return self.name
 
-#
+class ReplacementExplanation(models.Model):
+    name = models.CharField(max_length=100)
+    text = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return self.name
+
 class BritpickFindReplace(models.Model):
     dialect = models.ForeignKey(BritpickDialects, default="British", on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
 
     mandatory = models.BooleanField(default=False)
-    dialogue = models.BooleanField(default=False)
-    slang = models.BooleanField(default=False)
+    dialogue = models.BooleanField(default=False, help_text="limit to character's speech")
+    slang = models.BooleanField(default=False, help_text="similar to dialogue but may be crude or grammatically incorrect")
 
 
     searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines")
@@ -21,10 +27,7 @@ class BritpickFindReplace(models.Model):
     directreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for straightforward required replacements such as apartment -> flat")
     considerreplacement = models.TextField(blank=True, null=True, help_text="for optional replacements such as cool -> brilliant")
     clarifyreplacement = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
-
-
-
-
+    replacementexplanations = models.ManyToManyField(ReplacementExplanation)
 
     @property
     def searchwordlist(self) -> list:
@@ -42,8 +45,17 @@ class BritpickFindReplace(models.Model):
 
     @property
     def clarifyreplacementstring(self) -> str:
-        lines = [w for w in self.clarifyreplacement.split('\r\n') if w.strip() != '']
-        s = ' / '.join(lines)
+        # get strings from clarifyreplacement text box
+        s = ''
+
+        if self.clarifyreplacement:
+            s = s + ' / '.join([w for w in self.clarifyreplacement.split('\r\n') if w.strip() != ''])
+
+        if len(self.replacementexplanations.all()) > 0:
+            # get strings from all objects
+            explanationstrings = [o.text for o in self.replacementexplanations.all()]
+            s = s + ' / '.join(explanationstrings)
+
         return s
 
     @property
@@ -87,7 +99,5 @@ class BritpickFindReplace(models.Model):
 
     def __str__(self):
         return self.objectstring
-
-
 
 
