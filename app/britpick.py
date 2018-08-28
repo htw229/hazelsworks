@@ -93,8 +93,8 @@ def britpick(inputtext, dialectname, matchoption=matchoptions['SEARCH_DIALOGUE_I
     debug = Debug()
 
     searches = createsearches(dialectname)
-    debug.add(['number of searches:', len(searches)])
-    debug.add(['searches[25]', searches[25].regexpattern])
+    # debug.add(['number of searches:', len(searches)])
+    # debug.add(['searches[25]', searches[25].regexpattern])
 
     # TODO: clean up matchoption
     outputtext = createoutputtext(inputtext, searches, dialectname, matchoption)
@@ -152,7 +152,7 @@ def createoutputtext(inputtext, searches, dialectname, matchoption):
     for search in searches:
         if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
             text = replacetext(search, text, findinquotespattern)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != "British (Generic)":
+        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != "British":
             text = replacetext(search, text, findinquotespattern)
         elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search.britpickobj.dialogue == True:
             text = replacetext(search, text, findinquotespattern)
@@ -181,28 +181,14 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
 
     global debug
 
-    if britpickobj.regex:
-        # do nothing to it
-        return [searchword]
+    # REGEX ESCAPING: retain special characters in search
+    # (such as ?, which can help limit found words);
+    # escape prior to substituting markup (substitutes may contain regex)
 
     # create generic regex pattern for with/without suffix
     suffixpattern = r'(|' + '|'.join(suffixes) + r')'
 
-
-    # REGEX ESCAPING: retain special characters in search (such as ?, which can help limit found words); escape prior to substituting markup (substitutes may contain regex)
-
-    # TODO
-    # add suffixes to 2nd to last word if ends with preposition
-    # get last word in string
-    # stringprepositionlist = searchword.rsplit(None, 1)
-    #
-    # if len(stringprepositionlist) > 1 and stringprepositionlist[1] in prepositions:
-    #     s = '(' + re.escape(stringprepositionlist[0]) + suffixpattern + ' ' + re.escape(stringprepositionlist[1]) + ')'
-    #     # debug += 'preposition: ' + s + '<br>'
-    # else:
-    #     s = '(' + re.escape(searchword) + suffixpattern + ')'
-    #     # debug += 'no preposition: ' + s + '<br>'
-
+    # create patternlist with individual searchwords and suffixes
     try:
         # will fail if rsplit returns only 1 string (ie if single word)
         word, preposition = searchword.rsplit(None, 1)
@@ -214,18 +200,10 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     except ValueError:
         wordsuffixpattern = re.escape(searchword) + suffixpattern
 
-    # searchwordsplit = searchword.rsplit(None, 1)
-    # lastword = searchwordsplit[-1]
-    # if len(searchwordsplit) > 1 and lastword in prepositions:
-    #     debug.add(['preposition', searchword], max=20)
-    #     wordsuffixpattern = re.escape(searchwordsplit) + suffixpattern + lastword)
-    #
-
-    # wordsuffixpattern = re.escape(searchword) + suffixpattern
     patternlist = [wordsuffixpattern]
 
-    # add markup
-    if not britpickobj.markup:
+    # markup always has '[', so skip objects that don't have character
+    if '[' not in searchword:
         return patternlist
 
     for m in markups:

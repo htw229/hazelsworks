@@ -5,22 +5,26 @@ class BritpickDialects(models.Model):
 
     def __str__(self):
         return self.name
+
 #
 class BritpickFindReplace(models.Model):
-    dialect = models.ForeignKey(BritpickDialects, default="British (Generic)", on_delete=models.CASCADE)
+    dialect = models.ForeignKey(BritpickDialects, default="British", on_delete=models.CASCADE)
+    active = models.BooleanField(default=True)
+
+    mandatory = models.BooleanField(default=False)
     dialogue = models.BooleanField(default=False)
+    slang = models.BooleanField(default=False)
+
 
     searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines")
-    regex = models.BooleanField(default=False)
-    markup = models.BooleanField(default=False)
 
     directreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for straightforward required replacements such as apartment -> flat")
     considerreplacement = models.TextField(blank=True, null=True, help_text="for optional replacements such as cool -> brilliant")
     clarifyreplacement = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
-    mandatory = models.BooleanField(default=False, help_text="American slang not generally used in Britain")
 
 
-    active = models.BooleanField(default=True)
+
+
 
     @property
     def searchwordlist(self) -> list:

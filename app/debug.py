@@ -26,6 +26,8 @@ class Debug():
         self.counter = 0
 
     def __init__(self):
+        self.debugstrings = []
+        self.counter = 0
         self.starttime = default_timer()
         self.debugstrings.append('debug timer started')
 
@@ -37,3 +39,7 @@ class Debug():
     def html(self) -> str:
         s = '<br />'.join(self.debugstrings)
         return s
+
+    def print(self):
+        s = '\r\n'.join(self.debugstrings)
+        print(s)
