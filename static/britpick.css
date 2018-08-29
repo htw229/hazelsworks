@@ -49,3 +49,15 @@ p {
     font-weight: bold;
     background-color: greenyellow;
 }
+
+.searchword {
+    font-weight: bold;
+}
+
+.foundreplacementwords {
+    background-color: greenyellow;
+}
+
+.foundclarifyreplacement {
+    background-color: orange;
+}

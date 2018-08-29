@@ -84,17 +84,17 @@ def britpickfindword(request):
 
             for o in BritpickFindReplace.objects.all():
                 if s in o.searchwords:
-                    searchwords.append({'pk': o.pk, 'string': o.objectstring})
+                    searchwords.append(o)
                 if o.directreplacement and s in o.directreplacement:
-                    replacementwords.append({'pk': o.pk, 'string': o.objectstring})
+                    replacementwords.append(o)
                 if o.considerreplacement and s in o.considerreplacement:
-                    replacementwords.append({'pk': o.pk, 'string': o.objectstring})
+                    replacementwords.append(o)
 
     responsedata = {
         'form': BritpickfindwordForm,
         'search': s,
-        'searchwords': searchwords,
-        'replacementwords': replacementwords,
+        'searchwordobjects': searchwords,
+        'replacementwordobjects': replacementwords,
     }
 
     return render(request, 'britpick_findword.html', responsedata)

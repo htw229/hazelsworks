@@ -14,23 +14,19 @@
 </form>
 <p><b>{{ search }}</b></p>
 <p>Input:</p>
-{% if searchwords %}
-    {% for i in searchwords %}
-
-
-        <p>
-            <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/" target="_blank">{{ i.string }}</a>
-        </p>
+{% if searchwordobjects %}
+    {% for o in searchwordobjects %}
+        {% include "britpick_wordsnippet.html" %}
     {% endfor %}
 {% else %}
     Word not found in searchwords
 {%  endif %}
 
 <p>Output:</p>
-{% if replacementwords %}
-    {% for i in replacementwords %}
+{% if replacementwordobjects %}
+    {% for o in replacementwordobjects %}
         <p>
-            <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/" target="_blank">{{ i.string }}</a>
+            {% include "britpick_wordsnippet.html" %}
         </p>
     {% endfor %}
 {% else %}
