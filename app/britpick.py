@@ -275,6 +275,12 @@ def createreplacetext(textstring, britpickobj):
         else:
             stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarifyreplacement', '(', ')'))
 
+    # add topic
+    for topic in britpickobj.replacementtopics.all():
+        topiclink = gettopiclink(topic)
+        debug.add(topiclink, max=20)
+        stringlist.append(addspan(topiclink, 'topiclink'))
+
     # if it's mandatory and there's no replacement/explanation, then add generic explanation
     if britpickobj.mandatory and len(stringlist) == 0:
         stringlist.append(addspan(ReplacementExplanation.objects.get(name='not used').text, 'clarifyreplacement'))
@@ -291,7 +297,7 @@ def createreplacetext(textstring, britpickobj):
 
 def addspan(string, cssclass, wrapperstart='', wrapperend=''):
     '''
-    :param string: text to be formatted
+    :param string: plain text or html to be formatted
     :param cssclass: css class to reference in <span>
     :param wrapperstart: optional open/closing marks (such as parentheses)
     :param wrapperend: optional open/closing marks (such as parentheses)
@@ -305,3 +311,7 @@ def addspan(string, cssclass, wrapperstart='', wrapperend=''):
     s += wrapperstart + string + wrapperend
     s += '</span>'
     return s
+
+def gettopiclink(topic):
+    link = r'<a href="">' + topic.name + r'</a>'
+    return link

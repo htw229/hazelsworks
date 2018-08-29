@@ -16,6 +16,8 @@
 <p>Input:</p>
 {% if searchwords %}
     {% for i in searchwords %}
+
+
         <p>
             <a href="/admin/app/britpickfindreplace/{{ i.pk }}/change/" target="_blank">{{ i.string }}</a>
         </p>

@@ -9,3 +9,6 @@ admin.site.register(ReplacementExplanation)
 
 from .models import BritpickFindReplace
 admin.site.register(BritpickFindReplace)
+
+from .models import ReplacementTopic
+admin.site.register(ReplacementTopic)

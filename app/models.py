@@ -10,6 +10,15 @@ class ReplacementExplanation(models.Model):
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True, null=True)
 
+
+    def __str__(self):
+        return self.name
+
+class ReplacementTopic(models.Model):
+    name = models.CharField(max_length=100)
+    text = models.TextField(blank=True, null=True)
+    # TODO: add links to outside resources as new field (so can automatically generate html rather than hand-coding it), make html page, url and view; inside text field can have citation markup to create direct link for attributing; maybe if link already used in outputtext to only have it once?
+
     def __str__(self):
         return self.name
 
@@ -21,13 +30,13 @@ class BritpickFindReplace(models.Model):
     dialogue = models.BooleanField(default=False, help_text="limit to character's speech")
     slang = models.BooleanField(default=False, help_text="similar to dialogue but may be crude or grammatically incorrect")
 
-
     searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines")
 
     directreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for straightforward required replacements such as apartment -> flat")
     considerreplacement = models.TextField(blank=True, null=True, help_text="for optional replacements such as cool -> brilliant")
     clarifyreplacement = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
-    replacementexplanations = models.ManyToManyField(ReplacementExplanation)
+    replacementexplanations = models.ManyToManyField(ReplacementExplanation, blank=True)
+    replacementtopics = models.ManyToManyField(ReplacementTopic, blank=True)
 
     @property
     def searchwordlist(self) -> list:
@@ -99,5 +108,6 @@ class BritpickFindReplace(models.Model):
 
     def __str__(self):
         return self.objectstring
+
 
 
