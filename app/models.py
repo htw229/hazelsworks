@@ -17,7 +17,7 @@ class ReplacementExplanation(models.Model):
 
 class Citation(models.Model):
     name = models.CharField(max_length=300)
-    displayname = models.CharField(max_length=100, blank=True, null=True)
+    adminname = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
 
     @property
@@ -28,8 +28,8 @@ class Citation(models.Model):
         return s
 
     def __str__(self):
-        if self.displayname:
-            s = self.displayname
+        if self.adminname:
+            s = self.adminname
         else:
             s = self.name
         s += ' [' + str(self.pk) + ']'
@@ -38,7 +38,7 @@ class Citation(models.Model):
 
 class ReplacementTopic(models.Model):
     name = models.CharField(max_length=100)
-    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link')
+    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only')
     citations = models.ManyToManyField(Citation, blank=True)
 
     # TODO: inside text field can have citation markup to create direct link for attributing; maybe if link already used in outputtext to only have it once?

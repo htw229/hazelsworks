@@ -4,7 +4,7 @@ import re
 
 from .models import BritpickFindReplace, ReplacementTopic, Citation
 from .debug import Debug
-from .htmlutils import addspan, linebreakstoparagraphs
+from .htmlutils import addspan, linebreakstoparagraphs, getlinkhtml
 
 debug = None
 
@@ -29,7 +29,7 @@ def britpicktopic(topicname):
     # text = topic.text
     text = linebreakstoparagraphs(topic.text)
 
-    citationpattern = r"\[(?P<pk>\d+)\]"
+    citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
     text = replacecitations(text, citationpattern)
 
     text = addspan(text, 'topictext', tagname='div')
@@ -63,11 +63,18 @@ def replacecitations(inputtext, templatepattern):
 
         try:
             citation = Citation.objects.get(pk=citationpk)
-            citationlink = citation.link
-        except ObjectDoesNotExist:
-            citationlink = 'citation missing'
 
-        replacetext = addspan(citationlink, 'citation-inline', '[', ']')
+            # citationlink = citation.link
+            if '[' in match.group():
+                citationlink = getlinkhtml(citation.url, '[x]', citation.name)
+            elif '{' in match.group():
+                citationlink = getlinkhtml(citation.url, citation.name)
+            else:
+                citationlink = '[incorrect markup]'
+        except ObjectDoesNotExist:
+            citationlink = '[citation missing]'
+
+        replacetext = addspan(citationlink, 'citation-inline')
         text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
         addedtextlength += len(replacetext) - len(match.group())
 

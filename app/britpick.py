@@ -1,6 +1,6 @@
 from .models import BritpickFindReplace, BritpickDialects, ReplacementExplanation
 from .debug import Debug
-from .htmlutils import addspan
+from .htmlutils import addspan, getlinkhtml
 
 import app.settings as settings
 
@@ -300,5 +300,6 @@ def createreplacetext(textstring, britpickobj):
 
 
 def gettopiclink(topic):
-    link = r'<a href="topic/%s/">%s</a>' % (topic.name, topic.name)
+    # link = r'<a href="topic/%s/">%s</a>' % (topic.name, topic.name)
+    link = getlinkhtml('topic/' + topic.name + '/', topic.name)
     return link

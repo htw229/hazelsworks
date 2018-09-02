@@ -23,3 +23,16 @@ def linebreakstoparagraphs(inputtext):
     paragraphs = [w for w in inputtext.split('\r\n') if w.strip() != '']
     text = r'<p>' + r'</p><p>'.join(paragraphs)
     return text
+
+def getlinkhtml(link, text, mouseovertext = '', newtab = True):
+    s = r'<a href="' + link + r'"'
+    s += r' title="' + str(mouseovertext) + '"'
+
+    if newtab:
+        s += r' target="_blank"'
+
+    s += r'>'
+    s += str(text)
+    s += r'</a>'
+
+    return s
