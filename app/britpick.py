@@ -1,5 +1,7 @@
 from .models import BritpickFindReplace, BritpickDialects, ReplacementExplanation
 from .debug import Debug
+from .htmlutils import addspan, getlinkhtml
+
 import app.settings as settings
 
 import re
@@ -194,7 +196,7 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
         # will fail if rsplit returns only 1 string (ie if single word)
         word, preposition = searchword.rsplit(None, 1)
         if preposition in prepositions:
-            debug.add([word, preposition], max=20)
+            # debug.add([word, preposition], max=20)
             wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
         else:
             raise ValueError('not a preposition')
@@ -275,6 +277,12 @@ def createreplacetext(textstring, britpickobj):
         else:
             stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarifyreplacement', '(', ')'))
 
+    # add topic
+    for topic in britpickobj.replacementtopics.all():
+        topiclink = gettopiclink(topic)
+        # debug.add(topiclink, max=20)
+        stringlist.append(addspan(topiclink, 'topiclink'))
+
     # if it's mandatory and there's no replacement/explanation, then add generic explanation
     if britpickobj.mandatory and len(stringlist) == 0:
         stringlist.append(addspan(ReplacementExplanation.objects.get(name='not used').text, 'clarifyreplacement'))
@@ -289,19 +297,9 @@ def createreplacetext(textstring, britpickobj):
     return text
 
 
-def addspan(string, cssclass, wrapperstart='', wrapperend=''):
-    '''
-    :param string: text to be formatted
-    :param cssclass: css class to reference in <span>
-    :param wrapperstart: optional open/closing marks (such as parentheses)
-    :param wrapperend: optional open/closing marks (such as parentheses)
-    :return: <span> with css
-    '''
-    if not string:
-        return ''
-    s = "<span class='"
-    s += cssclass
-    s += "'>"
-    s += wrapperstart + string + wrapperend
-    s += '</span>'
-    return s
+
+
+def gettopiclink(topic):
+    # link = r'<a href="topic/%s/">%s</a>' % (topic.name, topic.name)
+    link = getlinkhtml('topic/' + topic.name + '/', topic.name)
+    return link

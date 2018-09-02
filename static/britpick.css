@@ -9,7 +9,7 @@ h1 {
 
 p {
     font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
-    font-size: 20px;
+    font-size: 14px;
 }
 
 .mandatory {
@@ -43,4 +43,33 @@ p {
 .foundword {
     font-weight: bold;
     /*background-color: lightgray;*/
+}
+
+.topiclink {
+    font-weight: bold;
+    background-color: greenyellow;
+}
+
+.searchword {
+    font-weight: bold;
+}
+
+.foundreplacementwords {
+    background-color: greenyellow;
+}
+
+.foundclarifyreplacement {
+    background-color: orange;
+}
+
+.topictext {
+    /*background-color: greenyellow;*/
+}
+
+.topictext p {
+    color: darkviolet;
+}
+
+.citation-inline {
+    background-color: yellow;
 }

@@ -4,7 +4,10 @@ import re
 
 from .forms import BritpickForm, BritpickfindwordForm
 from .britpick import britpick
-from .models import BritpickFindReplace
+from .britpicktopic import britpicktopic
+from .models import BritpickFindReplace, ReplacementTopic
+from .debug import Debug
+
 
 def robotstxt(request):
     """
@@ -84,17 +87,26 @@ def britpickfindword(request):
 
             for o in BritpickFindReplace.objects.all():
                 if s in o.searchwords:
-                    searchwords.append({'pk': o.pk, 'string': o.objectstring})
+                    searchwords.append(o)
                 if o.directreplacement and s in o.directreplacement:
-                    replacementwords.append({'pk': o.pk, 'string': o.objectstring})
+                    replacementwords.append(o)
                 if o.considerreplacement and s in o.considerreplacement:
-                    replacementwords.append({'pk': o.pk, 'string': o.objectstring})
+                    replacementwords.append(o)
 
     responsedata = {
         'form': BritpickfindwordForm,
         'search': s,
-        'searchwords': searchwords,
-        'replacementwords': replacementwords,
+        'searchwordobjects': searchwords,
+        'replacementwordobjects': replacementwords,
     }
 
     return render(request, 'britpick_findword.html', responsedata)
+
+
+def britpicktopicapp(request, topicname):
+
+    # responsedata is dict that contains topic (obj), topichtml (html), searchwords (object list), debug (as html)
+    responsedata = britpicktopic(topicname)
+
+
+    return render(request, 'britpick_topic.html', responsedata)

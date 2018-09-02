@@ -15,6 +15,7 @@ Including another URLconf
 """
 
 from django.conf.urls import include, url
+from django.urls import path
 from django.contrib import admin
 from app import views
 
@@ -23,5 +24,6 @@ urlpatterns = [
     url(r'^robots.txt', views.robotstxt, name='robots.txt'),
     url(r'^britpick/search/', views.britpickfindword, name='britpick_findword.html'),
     url(r'^britpick/findduplicates/', views.britpickfindduplicates, name='britpick_findduplicates.html'),
+    path(r'britpick/topic/<str:topicname>/', views.britpicktopicapp, name='britpick_topic.html'),
     url(r'^britpick/', views.britpickapp, name='britpick.html'),
 ]
