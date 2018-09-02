@@ -2,27 +2,30 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Britpick</title>
-    <link rel="stylesheet" href="../static/britpick.css">
+    <title>Britpick Topics</title>
+    <link rel="stylesheet" href="/static/britpick.css">
 </head>
 <body>
 
-<h2>Input</h2>
-<form action="/britpick/" method="post">
-    {% csrf_token %}
+<h2>{{ topic.name }}</h2>
 
-{#    <input type="text" id="id_text" name="text" value="{{ text }}">#}
-    <textarea id="id_text" name="text" rows="10" cols="30">{{ text }}</textarea>
-    <br />
-{#    {{ form.text }}#}
-    {{ form.dialect }}
-    {{ form.dialogue }}
+<div class="topictext">
+    {{ topichtml|safe }}
+</div>
 
-    <input type="submit" value="Submit">
-</form>
+{% if searchwordobjects %}
+    <h3>Related Words</h3>
+    {% for o in searchwordobjects %}
+        {% include "britpick_wordsnippet.html" %}
+    {% endfor %}
+{%  endif %}
 
-<h2>Dialect: {{ dialect }}</h2>
-{{ britpickedtext|safe }}
+{% if citations %}
+    <h3>References</h3>
+    {% for o in citations %}
+        <p>{{ o.link|safe }}</p>
+    {% endfor %}
+{%  endif %}
 
 {% if showdebug %}
     <h3>Debug:</h3>

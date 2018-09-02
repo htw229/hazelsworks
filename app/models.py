@@ -14,10 +14,34 @@ class ReplacementExplanation(models.Model):
     def __str__(self):
         return self.name
 
+
+class Citation(models.Model):
+    name = models.CharField(max_length=300)
+    displayname = models.CharField(max_length=100, blank=True, null=True)
+    url = models.URLField(blank=True, null=True)
+
+    @property
+    def link(self) -> str:
+        s = '<a href="' + self.url + '">'
+        s += self.name
+        s += '</a>'
+        return s
+
+    def __str__(self):
+        if self.displayname:
+            s = self.displayname
+        else:
+            s = self.name
+        s += ' [' + str(self.pk) + ']'
+        return s
+
+
 class ReplacementTopic(models.Model):
     name = models.CharField(max_length=100)
-    text = models.TextField(blank=True, null=True)
-    # TODO: add links to outside resources as new field (so can automatically generate html rather than hand-coding it), make html page, url and view; inside text field can have citation markup to create direct link for attributing; maybe if link already used in outputtext to only have it once?
+    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link')
+    citations = models.ManyToManyField(Citation, blank=True)
+
+    # TODO: inside text field can have citation markup to create direct link for attributing; maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
         return self.name

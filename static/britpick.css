@@ -9,7 +9,7 @@ h1 {
 
 p {
     font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
-    font-size: 20px;
+    font-size: 14px;
 }
 
 .mandatory {
@@ -60,4 +60,16 @@ p {
 
 .foundclarifyreplacement {
     background-color: orange;
+}
+
+.topictext {
+    /*background-color: greenyellow;*/
+}
+
+.topictext p {
+    color: darkviolet;
+}
+
+.citation-inline {
+    background-color: yellow;
 }
