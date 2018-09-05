@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Britpick Topics</title>
+    <link rel="stylesheet" href="/static/britpick.css">
+</head>
+<body>
+
+<h2>Britpick Topics</h2>
+
+
+{% if topics %}
+    {% for topic in topics %}
+        <p>
+{#            <a href="{% url 'topic' topicslug=topic.slug %}">{{ topic.name }}</a>#}
+            {{ topic.linkhtml|safe }}
+        </p>
+    {% endfor %}
+{% else %}
+    <p>No topics found.</p>
+{%  endif %}
+
+
+{% if showdebug %}
+    <h3>Debug:</h3>
+    <p>
+    {{ debug|safe }}
+    </p>
+{% endif %}
+</body>
+</html>

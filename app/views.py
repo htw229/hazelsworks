@@ -103,10 +103,32 @@ def britpickfindword(request):
     return render(request, 'britpick_findword.html', responsedata)
 
 
-def britpicktopicapp(request, topicname):
+def topicview(request, topicslug):
 
     # responsedata is dict that contains topic (obj), topichtml (html), searchwords (object list), debug (as html)
-    responsedata = britpicktopic(topicname)
+    responsedata = {
+        'topic': None,
+        'topichtml': 'Topic not found',
+        'searchwords': None,
+        'debug': '',
+        'showdebug': True,
+    }
 
+    for topic in ReplacementTopic.objects.all():
+        if topicslug == topic.slug:
+            responsedata = britpicktopic(topic)
+            break
 
     return render(request, 'britpick_topic.html', responsedata)
+
+def topicslist(request):
+
+    topics = ReplacementTopic.objects.order_by('name')
+
+    responsedata = {
+        'topics': topics,
+        'debug': '',
+        'showdebug': True,
+    }
+
+    return render(request, 'topicslist.html', responsedata)

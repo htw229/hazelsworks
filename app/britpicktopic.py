@@ -8,21 +8,9 @@ from .htmlutils import addspan, linebreakstoparagraphs, getlinkhtml
 
 debug = None
 
-def britpicktopic(topicname):
+def britpicktopic(topic):
     global debug
     debug = Debug()
-
-    try:
-        topic = ReplacementTopic.objects.get(name__iexact=topicname)
-    except ObjectDoesNotExist:
-        responsedata = {
-            'topic': None,
-            'topichtml': 'Topic not found',
-            'searchwords': None,
-            'debug': debug.html,
-        }
-
-        return responsedata
 
     debug.add(['topic found: ', topic])
 
@@ -31,19 +19,13 @@ def britpicktopic(topicname):
 
     citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
     text = replacecitations(text, citationpattern)
-
     text = addspan(text, 'topictext', tagname='div')
-
-    # text = re.sub(citationpattern, Citation.objects.get(pk=int(r'\1')), text)
-
-    searchwords = BritpickFindReplace.objects.filter(replacementtopics__pk=topic.pk)
-    citations = topic.citations.all()
 
     responsedata = {
         'topic': topic,
         'topichtml': text,
-        'citations': citations,
-        'searchwordobjects': searchwords,
+        'citations': topic.citations.all(),
+        'searchwordobjects': BritpickFindReplace.objects.filter(replacementtopics__pk=topic.pk),
         'debug': debug.html,
         'showdebug': True,
     }

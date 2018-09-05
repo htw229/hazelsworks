@@ -1,4 +1,7 @@
 from django.db import models
+from django.template.defaultfilters import slugify
+
+from .htmlutils import getlinkhtml
 
 class BritpickDialects(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -40,8 +43,19 @@ class ReplacementTopic(models.Model):
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only')
     citations = models.ManyToManyField(Citation, blank=True)
+    relatedtopics = models.ManyToManyField("self", blank=True)
 
-    # TODO: inside text field can have citation markup to create direct link for attributing; maybe if link already used in outputtext to only have it once?
+    @property
+    def slug(self) -> str:
+        s = slugify(self.name)
+        return s
+
+    @property
+    def linkhtml(self) -> str:
+        s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
+        return s
+
+    # TODO: maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
         return self.name

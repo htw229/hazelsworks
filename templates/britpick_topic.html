@@ -13,15 +13,6 @@
     {{ topichtml|safe }}
 </div>
 
-{% if citations %}
-    <h3>References</h3>
-    {% for citation in citations %}
-        <p>
-            <a href="{{ citation.url }}" target="_blank">{{ citation.name }}</a>
-        </p>
-    {% endfor %}
-{%  endif %}
-
 {% if searchwordobjects %}
     <h3>Related Words</h3>
     {% for o in searchwordobjects %}
@@ -30,11 +21,28 @@
         {% elif o.clarifyreplacementstring %}
             {% include "britpick_wordsnippet.html" %}
         {% endif %}
-        
-
     {% endfor %}
 {%  endif %}
 
+
+{% if topic.relatedtopics %}
+    <h3>Related Topics</h3>
+    {% for relatedtopic in topic.relatedtopics.all %}
+        <p>
+            {{ relatedtopic.linkhtml|safe }}
+        </p>
+    {% endfor %}
+{%  endif %}
+
+
+{% if citations %}
+    <h3>References</h3>
+    {% for citation in citations %}
+        <p>
+            <a href="{{ citation.url }}" target="_blank">{{ citation.name }}</a>
+        </p>
+    {% endfor %}
+{%  endif %}
 
 
 {% if showdebug %}

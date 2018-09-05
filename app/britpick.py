@@ -295,9 +295,7 @@ def createreplacetext(textstring, britpickobj):
 
     # add topic
     for topic in britpickobj.replacementtopics.all():
-        topiclink = gettopiclink(topic)
-        # debug.add(topiclink, max=20)
-        stringlist.append(addspan(topiclink, 'topiclink'))
+        stringlist.append(addspan(topic.linkhtml, 'topiclink'))
 
     # if it's mandatory and there's no replacement/explanation, then add generic explanation
     if britpickobj.mandatory and len(stringlist) == 0:
@@ -311,11 +309,3 @@ def createreplacetext(textstring, britpickobj):
 
     debug.timer('createreplacetext()')
     return text
-
-
-
-
-def gettopiclink(topic):
-    # link = r'<a href="topic/%s/">%s</a>' % (topic.name, topic.name)
-    link = getlinkhtml('topic/' + topic.name + '/', topic.name)
-    return link
