@@ -54,7 +54,7 @@ class BritpickFindReplace(models.Model):
     dialogue = models.BooleanField(default=False, help_text="limit to character's speech")
     slang = models.BooleanField(default=False, help_text="similar to dialogue but may be crude or grammatically incorrect")
 
-    searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines")
+    searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
 
     directreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for straightforward required replacements such as apartment -> flat")
     considerreplacement = models.TextField(blank=True, null=True, help_text="for optional replacements such as cool -> brilliant")

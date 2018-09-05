@@ -68,6 +68,9 @@ prepositions = [
     'out',
     'of',
     'with',
+    'over',
+    'it',
+    'that',
 ]
 
 
@@ -184,9 +187,12 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
 
     global debug
 
+
+
     # REGEX ESCAPING: retain special characters in search
     # (such as ?, which can help limit found words);
     # escape prior to substituting markup (substitutes may contain regex)
+    # (errors occur if done earlier than try/except below)
 
     # create generic regex pattern for with/without suffix
     suffixpattern = r'(|' + '|'.join(suffixes) + r')'
@@ -198,10 +204,14 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
         if preposition in prepositions:
             # debug.add([word, preposition], max=20)
             wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
+            debug.add(searchword)
         else:
             raise ValueError('not a preposition')
     except ValueError:
         wordsuffixpattern = re.escape(searchword) + suffixpattern
+
+    # dash in word can be dash, space or no space (ie ice-cream matches ice cream, icecream and ice-cream)
+    wordsuffixpattern = wordsuffixpattern.replace(r'\-', r"[-\s]*")
 
     patternlist = [wordsuffixpattern]
 
@@ -229,7 +239,13 @@ def replacetext(search, inputtext, templatepattern):
     addedtextlength = 0     # increment starting position after every replacement
     pattern = re.compile(templatepattern % search.regexpattern, re.IGNORECASE)
 
+    if 'hospital' in search.regexpattern:
+        debug.add(templatepattern % search.regexpattern)
+
     for match in pattern.finditer(inputtext):
+        if 'hospital' in search.regexpattern:
+            debug.add('found hospital')
+
         replacetext = createreplacetext(r'{' + match.group() + ' ', search.britpickobj) + r'}'
         text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
         addedtextlength += len(replacetext) - len(match.group())
