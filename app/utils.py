@@ -10,4 +10,3 @@ def changebritishdialectname():
             obj.save()
             debug.add(['obj', obj], max=10)
     debug.print()
-

@@ -25,9 +25,9 @@
 {%  endif %}
 
 
-{% if topic.relatedtopics %}
+{% if topic.allrelatedtopics %}
     <h3>Related Topics</h3>
-    {% for relatedtopic in topic.relatedtopics.all %}
+    {% for relatedtopic in topic.allrelatedtopics %}
         <p>
             {{ relatedtopic.linkhtml|safe }}
         </p>

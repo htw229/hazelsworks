@@ -14,12 +14,15 @@ def britpicktopic(topic):
 
     debug.add(['topic found: ', topic])
 
-    # text = topic.text
-    text = linebreakstoparagraphs(topic.text)
+    text = topic.text
+
 
     citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
     text = replacecitations(text, citationpattern)
-    text = addspan(text, 'topictext', tagname='div')
+    text = replacecitationswithquotes(text)
+    # text = addspan(text, 'topictext', tagname='div')
+    # debug.add(text)
+    text = linebreakstoparagraphs(text)
 
     responsedata = {
         'topic': topic,
@@ -32,6 +35,7 @@ def britpicktopic(topic):
 
 
     return responsedata
+
 
 def replacecitations(inputtext, templatepattern):
     global debug
@@ -62,3 +66,33 @@ def replacecitations(inputtext, templatepattern):
 
     return text
 
+
+def replacecitationswithquotes(inputtext):
+    global debug
+
+    text = inputtext
+    addedtextlength = 0
+    pattern = re.compile(r"<(?P<pk>\d+):(?P<text>(.|\n)*?)>")
+
+    for match in pattern.finditer(inputtext):
+        citationpk = int(match.group('pk'))
+        citationhtml = "From %s:\r\n" % getcitationlinkhtml(citationpk)
+
+        quotedtext = addspan('\r\n' + match.group('text'), cssclass='quoted', tagname='div')
+
+        replacetext = citationhtml + quotedtext
+        text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
+        addedtextlength += len(replacetext) - len(match.group())
+
+    return text
+
+
+def getcitationlinkhtml(citationpk, citationtemplate = '%s'):
+    try:
+        citation = Citation.objects.get(pk=citationpk)
+        citationlink = getlinkhtml(citation.url, citationtemplate % citation.name)
+
+    except ObjectDoesNotExist:
+        citationlink = '[citation missing]'
+
+    return citationlink

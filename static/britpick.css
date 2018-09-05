@@ -70,6 +70,10 @@ p {
     color: darkviolet;
 }
 
+.quoted {
+    margin-left: 5%;
+}
+
 .citation-inline {
     background-color: yellow;
 }

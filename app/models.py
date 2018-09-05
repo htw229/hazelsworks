@@ -38,12 +38,15 @@ class Citation(models.Model):
         s += ' [' + str(self.pk) + ']'
         return s
 
+    class Meta:
+        ordering = ['adminname']
+
 
 class ReplacementTopic(models.Model):
     name = models.CharField(max_length=100)
-    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only')
+    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
     citations = models.ManyToManyField(Citation, blank=True)
-    relatedtopics = models.ManyToManyField("self", blank=True)
+    relatedtopics = models.ManyToManyField("self", blank=True, help_text='back references are included when this is displayed in html')
 
     @property
     def slug(self) -> str:
@@ -55,10 +58,23 @@ class ReplacementTopic(models.Model):
         s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
+    @property
+    def allrelatedtopics(self) -> list:
+        # returns all forward and back-referenced relatedtopics
+        topics = list(self.relatedtopics.all())
+        for t in ReplacementTopic.objects.all():
+            if t not in topics:
+                if self in t.relatedtopics.all():
+                    topics.append(t)
+        return topics
+
     # TODO: maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        ordering = ['name']
 
 class BritpickFindReplace(models.Model):
     dialect = models.ForeignKey(BritpickDialects, default="British", on_delete=models.CASCADE)
