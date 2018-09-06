@@ -1,32 +1,135 @@
+:root {
+    --red: #950d19;
+    --darkred: #7b0b15;
+    --yellow: #eed82d;
+    --darkyellow: #c4b125;
+    --blue: #21569c;
+    --darkblue: #1a4277;
+    --lightgray:#e6e6e6;
+    --darkgray: #1f1d1e;
+}
+
+
 body {
-    background-color: white;
-    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
+    font-family: 'Open Sans', sans-serif;
+
+}
+
+.content {
+    margin: 0 3% 0 3%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+        font-family: 'Vollkorn', serif;
 }
 
 h1 {
-    color: white;
-    text-align: center;
+    font-size: x-large;
+}
+
+h2 {
+    font-size: large;
 }
 
 p {
-    font-size: 14px;
+    /*font-size: 14px;*/
 }
 
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+a:link {
+    color: var(--blue);
+    text-decoration: none;
+}
+
+a:visited {
+    color: var(--darkblue);
+    text-decoration: none;
+}
+
+a:hover {
+    color: var(--red);
+    text-decoration: underline;
+}
+
+a:active {
+    color: var(--darkred);
+    text-decoration: underline;
+}
+
+
+.navbar {
+    font-family: 'Vollkorn', serif;
+    color: white;
+    font-weight: bold;
+    font-size: large;
+    /*background-color: var(--blue);*/
+    padding: 10px;
+    margin: 0;
+}
+
+.navbar.header {
+    background-color: var(--red);
+}
+
+.navbar.footer {
+    background-color: var(--blue);
+}
+
+.sitename {
+    font-family: 'Vollkorn', serif;
+    font-weight: bolder;
+    /*font-size: x-large;*/
+    margin-right: 2%;
+}
+
+.navbaritem {
+    margin-left: 2%;
+    margin-right: 2%;
+}
+
+.navbar a:link {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:visited {
+    color: white;
+    text-decoration: none;
+}
+
+.navbar a:hover {
+    color: var(--lightgray);
+    text-decoration: none;
+}
+
+.navbar a:active {
+    color: var(--darkgray);
+    text-decoration: none;
+}
+
+
+
+
 .mandatory {
-    background-color: red;
+    background-color: var(--yellow);
     color: white;
     font-weight: bold;
 }
 
 .replacement {
-    background-color: yellow;
+    background-color: var(--lightgray);
     font-weight: bold;
 }
 
 .directreplacement {
     /*color: black;*/
     /*font-weight: bold;*/
-    background-color: orange;
+    /*background-color: orange;*/
     /*color: white;*/
 }
 
@@ -47,7 +150,7 @@ p {
 
 .topiclink {
     font-weight: bold;
-    background-color: greenyellow;
+    /*background-color: greenyellow;*/
 }
 
 .searchword {
@@ -55,11 +158,11 @@ p {
 }
 
 .foundreplacementwords {
-    background-color: greenyellow;
+    /*background-color: greenyellow;*/
 }
 
 .foundclarifyreplacement {
-    background-color: orange;
+    /*background-color: orange;*/
 }
 
 .topictext {
@@ -67,7 +170,7 @@ p {
 }
 
 .topictext p {
-    color: darkviolet;
+    /*color: darkviolet;*/
 }
 
 .quoted {
@@ -75,7 +178,7 @@ p {
 }
 
 .citation-inline {
-    background-color: yellow;
+    /*background-color: yellow;*/
 }
 
 .topiclist {

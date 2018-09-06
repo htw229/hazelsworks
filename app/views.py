@@ -126,9 +126,11 @@ def topicslist(request):
     topics = ReplacementTopic.objects.order_by('name')
 
     responsedata = {
+        'pagetitle': 'Topics',
+        'template': 'topicslist.html',
         'topics': topics,
         'debug': '',
         'showdebug': True,
     }
 
-    return render(request, 'topicslist.html', responsedata)
+    return render(request, 'britpicktemplate.html', responsedata)
