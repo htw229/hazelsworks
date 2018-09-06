@@ -11,12 +11,13 @@
 
 
 {% if topics %}
+    <ul class="topiclist">
     {% for topic in topics %}
-        <p>
-{#            <a href="{% url 'topic' topicslug=topic.slug %}">{{ topic.name }}</a>#}
+        <li class="topiclistitem {% if topic.maintopic %}main{% endif %}">
             {{ topic.linkhtml|safe }}
-        </p>
+        </li>
     {% endfor %}
+    </ul>
 {% else %}
     <p>No topics found.</p>
 {%  endif %}

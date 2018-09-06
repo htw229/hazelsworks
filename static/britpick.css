@@ -1,5 +1,6 @@
 body {
     background-color: white;
+    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
 }
 
 h1 {
@@ -8,7 +9,6 @@ h1 {
 }
 
 p {
-    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
     font-size: 14px;
 }
 
@@ -76,4 +76,16 @@ p {
 
 .citation-inline {
     background-color: yellow;
+}
+
+.topiclist {
+
+}
+
+.topiclistitem {
+
+}
+
+.topiclistitem.main {
+    font-weight: bold;
 }

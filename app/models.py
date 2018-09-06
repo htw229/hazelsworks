@@ -43,10 +43,14 @@ class Citation(models.Model):
 
 
 class ReplacementTopic(models.Model):
+    active = models.BooleanField(default=True)
+    maintopic = models.BooleanField(default=True)
+
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
     citations = models.ManyToManyField(Citation, blank=True)
     relatedtopics = models.ManyToManyField("self", blank=True, help_text='back references are included when this is displayed in html')
+
 
     @property
     def slug(self) -> str:
@@ -68,10 +72,25 @@ class ReplacementTopic(models.Model):
                     topics.append(t)
         return topics
 
+    @property
+    def hascontent(self) -> bool:
+        if len(self.text) > 0:
+            return True
+        if self.citations.count() > 0:
+            return True
+        return False
+
     # TODO: maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
-        return self.name
+        s = self.name
+        if self.maintopic:
+            s = '*' + s
+        if not self.hascontent:
+            s += ' (EMPTY)'
+        if not self.active:
+            s += ' (INACTIVE)'
+        return s
 
     class Meta:
         ordering = ['name']
