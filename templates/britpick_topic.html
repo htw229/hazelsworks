@@ -1,14 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Britpick Topics</title>
-    <link rel="stylesheet" href="/static/britpick.css">
-</head>
-<body>
-
-<h2>{{ topic.name }}</h2>
-
 <div class="topictext">
     {{ topichtml|safe }}
 </div>
@@ -43,13 +32,3 @@
         </p>
     {% endfor %}
 {%  endif %}
-
-
-{% if showdebug %}
-    <h3>Debug:</h3>
-    <p>
-    {{ debug|safe }}
-    </p>
-{% endif %}
-</body>
-</html>

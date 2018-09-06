@@ -33,6 +33,7 @@ h2 {
 
 p {
     /*font-size: 14px;*/
+    font-size: small;
 }
 
 ul {
@@ -44,6 +45,7 @@ ul {
 a:link {
     color: var(--blue);
     text-decoration: none;
+    font-weight: bold;
 }
 
 a:visited {
@@ -52,12 +54,12 @@ a:visited {
 }
 
 a:hover {
-    color: var(--red);
+    /*color: var(--red);*/
     text-decoration: underline;
 }
 
 a:active {
-    color: var(--darkred);
+    /*color: var(--darkred);*/
     text-decoration: underline;
 }
 
@@ -94,22 +96,20 @@ a:active {
 
 .navbar a:link {
     color: white;
-    text-decoration: none;
 }
 
 .navbar a:visited {
     color: white;
-    text-decoration: none;
 }
 
 .navbar a:hover {
-    color: var(--lightgray);
-    text-decoration: none;
+    /*color: var(--lightgray);*/
+    text-decoration: underline;
 }
 
 .navbar a:active {
-    color: var(--darkgray);
-    text-decoration: none;
+    /*color: var(--darkgray);*/
+    text-decoration: underline;
 }
 
 

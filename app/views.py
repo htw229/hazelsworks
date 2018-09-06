@@ -35,6 +35,8 @@ def britpickapp(request):
             form.initial.update({'original_text': text})
 
     responsedata = {
+        'pagetitle': 'Britpick',
+        'template': 'britpick.html',
         'form': BritpickForm,
         'text': text,
         'dialect': dialect,
@@ -43,7 +45,7 @@ def britpickapp(request):
         'debug': debug,
     }
 
-    return render(request, 'britpick.html', responsedata)
+    return render(request, 'britpicktemplate.html', responsedata)
 
 
 
@@ -107,6 +109,7 @@ def topicview(request, topicslug):
 
     # responsedata is dict that contains topic (obj), topichtml (html), searchwords (object list), debug (as html)
     responsedata = {
+        'pagetitle': 'Topic not found',
         'topic': None,
         'topichtml': 'Topic not found',
         'searchwords': None,
@@ -117,9 +120,14 @@ def topicview(request, topicslug):
     for topic in ReplacementTopic.objects.all():
         if topicslug == topic.slug:
             responsedata = britpicktopic(topic)
+            responsedata['pagetitle'] = topic.name
+            responsedata['template'] = 'britpick_topic.html'
+
             break
 
-    return render(request, 'britpick_topic.html', responsedata)
+
+
+    return render(request, 'britpicktemplate.html', responsedata)
 
 def topicslist(request):
 
