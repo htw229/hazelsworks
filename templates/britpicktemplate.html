@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name=viewport content="width=device-width, initial-scale=1">
     <title>{{ pagetitle }}</title>
     <link rel="stylesheet" href="/static/britpick.css">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
@@ -29,22 +30,35 @@
 </head>
 <body>
 
-<div class="navbar header"><img src="/static/crown-32.png"> <span class="sitename"><a href="{% url 'britpick' %}">Britpick</a></span> · <span class="navbaritem"><a href="{% url 'topicslist' %}">Topics</a></span> · <span class="navbaritem">References</span> · <span class="navbaritem">About</span></div>
 
-<div class="content">
-<h1>{{ pagetitle }}</h1>
-
-{% include template %}
+<div class="navbar header">
+    <a href="{% url 'britpick' %}"><img class="navbar image" src="/static/crown-32.png"></a>
+    <span class="navbar item"><a href="{% url 'britpick' %}">Britpick</a></span>
+    ·
+    <span class="navbar item"><a href="{% url 'topicslist' %}">Topics</a></span>
+    ·
+    <span class="navbar item">Search</span>
+    ·
+    <span class="navbar item">References</span>
+    ·
+    <span class="navbar item">About</span>
 </div>
 
-<div class="navbar footer"><a href="{% url 'britpick' %}">britpick</a> | <a href="{% url 'topicslist' %}">topics</a> | references</div>
+
+<div class="content">
+    <h1>{{ pagetitle }}</h1>
+    {% include template %}
+</div>
+
+<div class="navbar footer"></div>
 
 {% if showdebug %}
-    <hr>
+<div class="content">
     <h3>Debug:</h3>
     <p>
     {{ debug|safe }}
     </p>
+</div>
 {% endif %}
 
 </body>
