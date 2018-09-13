@@ -1,6 +1,6 @@
-markup
-[number]
-[month]
+x markup
+x [number]
+x [month]
 
 x ignore caps
 
@@ -8,6 +8,24 @@ x check for whole matches first, then matches with 's' apostrophe-s or with 'ed'
 
 x duplicates
 
-active/inactive
+x active/inactive
 x dialogue
-sort by length before adding suffixes (so that longer and multiple words found first)
+x sort by length before adding suffixes (so that longer and multiple words found first)
+
+
+y -> -ies
+-d (not ed)
+-y
+
+add to instructions that the following trigger a links to topic pages:
+insult
+exclamation
+(cannot use symbols to trigger these as only looking at word characters in text)
+
+x add 'see also' to link topics to each other
+
+make topic page not found to go to topic list (make into single view, and single html?) -> or just generic 404 page
+
+x make URLs reverse : https://stackoverflow.com/questions/11241668/what-is-reverse-in-django
+x make admin boxes larger: https://stackoverflow.com/questions/910169/resize-fields-in-django-admin
+

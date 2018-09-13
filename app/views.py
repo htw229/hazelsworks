@@ -5,7 +5,7 @@ import re
 from .forms import BritpickForm, BritpickfindwordForm
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import BritpickFindReplace, ReplacementTopic
+from .models import BritpickFindReplace, ReplacementTopic, Citation
 from .debug import Debug
 
 
@@ -35,6 +35,8 @@ def britpickapp(request):
             form.initial.update({'original_text': text})
 
     responsedata = {
+        'pagetitle': 'Britpick',
+        'template': 'britpick.html',
         'form': BritpickForm,
         'text': text,
         'dialect': dialect,
@@ -43,7 +45,7 @@ def britpickapp(request):
         'debug': debug,
     }
 
-    return render(request, 'britpick.html', responsedata)
+    return render(request, 'britpicktemplate.html', responsedata)
 
 
 
@@ -103,10 +105,55 @@ def britpickfindword(request):
     return render(request, 'britpick_findword.html', responsedata)
 
 
-def britpicktopicapp(request, topicname):
+def topicview(request, topicslug):
 
     # responsedata is dict that contains topic (obj), topichtml (html), searchwords (object list), debug (as html)
-    responsedata = britpicktopic(topicname)
+    responsedata = {
+        'pagetitle': 'Topic not found',
+        'topic': None,
+        'topichtml': 'Topic not found',
+        'searchwords': None,
+        'debug': '',
+        'showdebug': True,
+    }
+
+    for topic in ReplacementTopic.objects.all():
+        if topicslug == topic.slug:
+            responsedata = britpicktopic(topic)
+            responsedata['pagetitle'] = topic.name
+            responsedata['template'] = 'britpick_topic.html'
+
+            break
 
 
-    return render(request, 'britpick_topic.html', responsedata)
+
+    return render(request, 'britpicktemplate.html', responsedata)
+
+def topicslist(request):
+
+    topics = ReplacementTopic.objects.filter(maintopic=True).order_by('name')
+
+    responsedata = {
+        'pagetitle': 'Topics',
+        'template': 'topicslist.html',
+        'topics': topics,
+        'debug': '',
+        'showdebug': True,
+    }
+
+    return render(request, 'britpicktemplate.html', responsedata)
+
+
+def referenceslist(request):
+
+    references = Citation.objects.filter(mainreference=True).order_by('name')
+
+    responsedata = {
+        'pagetitle': 'References',
+        'template': 'britpick_references.html',
+        'references': references,
+        'debug': '',
+        'showdebug': True,
+    }
+
+    return render(request, 'britpicktemplate.html', responsedata)

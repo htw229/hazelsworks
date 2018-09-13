@@ -1,32 +1,189 @@
+:root {
+    --red: #950d19;
+    --darkred: #7b0b15;
+    --yellow: #eed82d;
+    --darkyellow: #c4b125;
+    --blue: #21569c;
+    --darkblue: #1a4277;
+    --lightgray:#e6e6e6;
+    --darkgray: #1f1d1e;
+}
+
+
 body {
-    background-color: white;
+    font-family: 'Open Sans', sans-serif;
+    font-size: 16px;
+    margin: 0;
+    padding: 0;
+    /*line-height: 1.2;*/
+}
+
+html {
+    font-size: 100%;
+}
+
+@media(min-width: 60em) {
+    html {
+        font-size: 100%;
+    }
+}
+
+.content {
+    margin: 0 10% 0 5%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+        font-family: 'Vollkorn', serif;
 }
 
 h1 {
-    color: white;
-    text-align: center;
+    font-size: 135%;
+}
+
+h2 {
+    font-size: 115%;
+}
+
+h3 {
+    font-size: 1.1em;
+    -webkit-margin-before: 2em;
+    -webkit-margin-after: 0.5em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
 }
 
 p {
-    font-family: "Roboto", "Lucida Grande", Verdana, Arial, sans-serif ;
-    font-size: 14px;
+    /*font-size: 14px;*/
+    font-size: 80%;
 }
 
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    line-height: 110%;
+}
+
+li {
+    font-size: 90%;
+    margin-bottom: 1em;
+}
+
+a:link {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: bold;
+}
+
+a:visited {
+    color: var(--darkblue);
+    text-decoration: none;
+}
+
+a:hover {
+    /*color: var(--red);*/
+    text-decoration: underline;
+}
+
+a:active {
+    /*color: var(--darkred);*/
+    text-decoration: underline;
+}
+
+.external-link {
+    margin-right: 5px;
+    padding-bottom: 5px;
+    vertical-align: middle;
+}
+
+/*--------------------------------------------*/
+/*  NAVBAR  */
+/*--------------------------------------------*/
+
+.navbar {
+    font-family: 'Vollkorn', serif;
+    color: white;
+    font-weight: bold;
+    font-size: 100%;
+    /*height: 32px;*/
+    /*background-color: var(--blue);*/
+    padding: 1%;
+    margin: 0;
+}
+
+.navbar.header {
+    background-color: var(--red);
+}
+
+.navbar.image {
+    vertical-align: middle;
+    padding: 0 0 11px 0;
+    margin: 0 0 0 2%;
+
+    /*margin: 0;*/
+}
+
+.navbar.item {
+    /*margin-left: 2%;*/
+    /*margin-right: 2%;*/
+    margin: 2%;
+    padding: 5% 0 0 0;
+    /*padding-top: 5%;*/
+}
+
+.navbar a {
+    color: white;
+}
+
+.navbar a:hover, .navbar a:active {
+    text-decoration: underline;
+}
+
+
+
+.navbar.footer {
+    background-color: var(--blue);
+    margin-top: 20px;
+    padding-top: 40px;
+}
+
+
+/*--------------------------------------------*/
+/*  LISTS  */
+/*--------------------------------------------*/
+
+
+
+.main-list {
+    font-size: 100%;
+}
+
+.level-two {
+    font-size: 80%;
+    margin-left: 2em;
+}
+
+
+
+
+
+
 .mandatory {
-    background-color: red;
+    background-color: var(--yellow);
     color: white;
     font-weight: bold;
 }
 
 .replacement {
-    background-color: yellow;
+    background-color: var(--lightgray);
     font-weight: bold;
 }
 
 .directreplacement {
     /*color: black;*/
     /*font-weight: bold;*/
-    background-color: orange;
+    /*background-color: orange;*/
     /*color: white;*/
 }
 
@@ -47,7 +204,7 @@ p {
 
 .topiclink {
     font-weight: bold;
-    background-color: greenyellow;
+    /*background-color: greenyellow;*/
 }
 
 .searchword {
@@ -55,11 +212,11 @@ p {
 }
 
 .foundreplacementwords {
-    background-color: greenyellow;
+    /*background-color: greenyellow;*/
 }
 
 .foundclarifyreplacement {
-    background-color: orange;
+    /*background-color: orange;*/
 }
 
 .topictext {
@@ -67,9 +224,25 @@ p {
 }
 
 .topictext p {
-    color: darkviolet;
+    /*color: darkviolet;*/
+}
+
+.quoted {
+    margin-left: 5%;
 }
 
 .citation-inline {
-    background-color: yellow;
+    /*background-color: yellow;*/
+}
+
+.topiclist {
+
+}
+
+.topiclistitem {
+
+}
+
+.topiclistitem.main {
+    font-weight: bold;
 }

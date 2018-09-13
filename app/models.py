@@ -1,4 +1,7 @@
 from django.db import models
+from django.template.defaultfilters import slugify
+
+from .htmlutils import getlinkhtml
 
 class BritpickDialects(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -19,10 +22,11 @@ class Citation(models.Model):
     name = models.CharField(max_length=300)
     adminname = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
+    mainreference = models.BooleanField(default=False)
 
     @property
     def link(self) -> str:
-        s = '<a href="' + self.url + '">'
+        s = '<a href="' + self.url + '"><img class="external-link" src="/static/flag.png">'
         s += self.name
         s += '</a>'
         return s
@@ -35,16 +39,74 @@ class Citation(models.Model):
         s += ' [' + str(self.pk) + ']'
         return s
 
+    class Meta:
+        ordering = ['adminname']
+
 
 class ReplacementTopic(models.Model):
-    name = models.CharField(max_length=100)
-    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only')
-    citations = models.ManyToManyField(Citation, blank=True)
+    active = models.BooleanField(default=True)
+    maintopic = models.BooleanField(default=True)
 
-    # TODO: inside text field can have citation markup to create direct link for attributing; maybe if link already used in outputtext to only have it once?
+    name = models.CharField(max_length=100)
+    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
+    citations = models.ManyToManyField(Citation, blank=True)
+    relatedtopics = models.ManyToManyField("self", symmetrical=True, blank=True, help_text='back references are automatically created')
+
+
+    @property
+    def slug(self) -> str:
+        s = slugify(self.name)
+        return s
+
+    @property
+    def linkhtml(self) -> str:
+        s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
+        return s
+
+    # @property
+    # def allrelatedtopics(self) -> list:
+    #     # returns all forward and back-referenced relatedtopics
+    #     topics = list(self.relatedtopics.all())
+    #     # topics = self.referenced_by_topics.all()
+    #     # topics = []
+    #     # topics = list(ReplacementTopic.objects.all())
+    #     # for t in ReplacementTopic.objects.all():
+    #     #     if t not in topics:
+    #     #         if self in t.relatedtopics.all():
+    #     #             topics.append(t)
+
+
+
+        # return topics
+
+    # @property
+    # def minorrelatedtopics(self) -> list:
+    #     topics = self.allrelatedtopics
+    #     minortopics = [t for t in topics if t.maintopic == False]
+    #     return minortopics
+
+    @property
+    def hascontent(self) -> bool:
+        if len(self.text) > 0:
+            return True
+        if self.citations.count() > 0:
+            return True
+        return False
+
+    # TODO: maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
-        return self.name
+        s = self.name
+        if self.maintopic:
+            s = '*' + s
+        if not self.hascontent:
+            s += ' (EMPTY)'
+        if not self.active:
+            s += ' (INACTIVE)'
+        return s
+
+    class Meta:
+        ordering = ['name']
 
 class BritpickFindReplace(models.Model):
     dialect = models.ForeignKey(BritpickDialects, default="British", on_delete=models.CASCADE)
@@ -54,7 +116,7 @@ class BritpickFindReplace(models.Model):
     dialogue = models.BooleanField(default=False, help_text="limit to character's speech")
     slang = models.BooleanField(default=False, help_text="similar to dialogue but may be crude or grammatically incorrect")
 
-    searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines")
+    searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
 
     directreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for straightforward required replacements such as apartment -> flat")
     considerreplacement = models.TextField(blank=True, null=True, help_text="for optional replacements such as cool -> brilliant")

@@ -20,10 +20,12 @@ from django.contrib import admin
 from app import views
 
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^admin/', admin.site.urls, name='admin'),
     url(r'^robots.txt', views.robotstxt, name='robots.txt'),
     url(r'^britpick/search/', views.britpickfindword, name='britpick_findword.html'),
     url(r'^britpick/findduplicates/', views.britpickfindduplicates, name='britpick_findduplicates.html'),
-    path(r'britpick/topic/<str:topicname>/', views.britpicktopicapp, name='britpick_topic.html'),
-    url(r'^britpick/', views.britpickapp, name='britpick.html'),
+    path(r'britpick/topics/<slug:topicslug>', views.topicview, name='topic'),
+    url(r'^britpick/topics', views.topicslist, name='topicslist'),
+    url(r'^britpick/references', views.referenceslist, name='references'),
+    url(r'^britpick/', views.britpickapp, name='britpick'),
 ]

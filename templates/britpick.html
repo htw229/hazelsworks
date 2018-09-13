@@ -1,11 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Britpick</title>
-    <link rel="stylesheet" href="../static/britpick.css">
-</head>
-<body>
 
 <h2>Input</h2>
 <form action="/britpick/" method="post">
@@ -23,12 +15,3 @@
 
 <h2>Dialect: {{ dialect }}</h2>
 {{ britpickedtext|safe }}
-
-{% if showdebug %}
-    <h3>Debug:</h3>
-    <p>
-    {{ debug|safe }}
-    </p>
-{% endif %}
-</body>
-</html>

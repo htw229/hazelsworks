@@ -1,3 +1,5 @@
+from django.urls import reverse
+
 def addspan(string, cssclass, wrapperstart='', wrapperend='', tagname='span'):
     '''
     :param string: plain text or html to be formatted
@@ -24,11 +26,25 @@ def linebreakstoparagraphs(inputtext):
     text = r'<p>' + r'</p><p>'.join(paragraphs)
     return text
 
-def getlinkhtml(link, text, mouseovertext = '', newtab = True):
-    s = r'<a href="' + link + r'"'
+def getlinkhtml(url = '', text = 'link', mouseovertext ='', newbrowsertab = False, urlname = None, urlkwargs = None):
+    """
+
+    :param urldata: string of address verbatim
+    :param text:
+    :param mouseovertext:
+    :param newbrowsertab: open in new browser tab (target='_blank')
+    :return:
+    """
+
+    # if urlname is provided, use reverse lookup to get the url
+    if urlname:
+        url = reverse(urlname, kwargs=urlkwargs)
+
+
+    s = r'<a href="' + url + r'"'
     s += r' title="' + str(mouseovertext) + '"'
 
-    if newtab:
+    if newbrowsertab:
         s += r' target="_blank"'
 
     s += r'>'
@@ -36,3 +52,4 @@ def getlinkhtml(link, text, mouseovertext = '', newtab = True):
     s += r'</a>'
 
     return s
+

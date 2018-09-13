@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name=viewport content="width=device-width, initial-scale=1">
+    <title>{{ pagetitle }}</title>
+    <link rel="stylesheet" href="/static/britpick.css">
+    <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Vollkorn:700" rel="stylesheet">
+    <link rel="shortcut icon" href="/static/crown.ico">
+	<link rel="icon" sizes="16x16 32x32 64x64" href="/static/crown.ico">
+	<link rel="icon" type="image/png" sizes="196x196" href="/static/crown-192.png">
+	<link rel="icon" type="image/png" sizes="160x160" href="/static/crown-160.png">
+	<link rel="icon" type="image/png" sizes="96x96" href="/static/crown-96.png">
+	<link rel="icon" type="image/png" sizes="64x64" href="/static/crown-64.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/static/crown-32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/static/crown-16.png">
+	<link rel="apple-touch-icon" href="/static/crown-57.png">
+	<link rel="apple-touch-icon" sizes="114x114" href="/static/crown-114.png">
+	<link rel="apple-touch-icon" sizes="72x72" href="/static/crown-72.png">
+	<link rel="apple-touch-icon" sizes="144x144" href="/static/crown-144.png">
+	<link rel="apple-touch-icon" sizes="60x60" href="/static/crown-60.png">
+	<link rel="apple-touch-icon" sizes="120x120" href="/static/crown-120.png">
+	<link rel="apple-touch-icon" sizes="76x76" href="/static/crown-76.png">
+	<link rel="apple-touch-icon" sizes="152x152" href="/static/crown-152.png">
+	<link rel="apple-touch-icon" sizes="180x180" href="/static/crown-180.png">
+	<meta name="msapplication-TileColor" content="#FFFFFF">
+	<meta name="msapplication-TileImage" content="/static/crown-144.png">
+	<meta name="msapplication-config" content="/static/browserconfig.xml">
+</head>
+<body>
+
+
+<div class="navbar header">
+    <a href="{% url 'britpick' %}"><img class="navbar image" src="/static/crown-32.png"></a>
+    <span class="navbar item"><a href="{% url 'britpick' %}">Britpick</a></span>
+    ·
+    <span class="navbar item"><a href="{% url 'topicslist' %}">Topics</a></span>
+    ·
+    <span class="navbar item">Search</span>
+    ·
+    <span class="navbar item"><a href="{% url 'references' %}">References</a></span>
+    ·
+    <span class="navbar item">About</span>
+</div>
+
+
+<div class="content">
+    <h1>{{ pagetitle }}</h1>
+    {% include template %}
+</div>
+
+<div class="navbar footer"></div>
+
+{% if showdebug %}
+<div class="content">
+    <h3>Debug:</h3>
+    <p>
+    {{ debug|safe }}
+    </p>
+</div>
+{% endif %}
+
+</body>
+</html>

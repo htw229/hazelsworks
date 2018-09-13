@@ -1,0 +1,18 @@
+{% if topics %}
+    <ul>
+    {% for topic in topics %}
+        <li class="main-list">
+            {{ topic.linkhtml|safe }}
+        </li>
+        {% if topic.relatedtopics.all %}
+        <li class="level-two">
+            {% for relatedtopic in topic.relatedtopics.all %}
+                {{ relatedtopic.linkhtml|safe }}{% if not forloop.last %} | {% endif %}
+            {% endfor %}
+        </li>
+        {% endif %}
+    {% endfor %}
+    </ul>
+{% else %}
+    <p>No topics found.</p>
+{%  endif %}

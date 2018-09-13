@@ -120,3 +120,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 STATIC_ROOT = '/home/htw/hazelsworks/static'
+
+
+# Other settings
+APPEND_SLASH = True
