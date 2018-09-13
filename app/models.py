@@ -26,7 +26,7 @@ class Citation(models.Model):
 
     @property
     def link(self) -> str:
-        s = '<a href="' + self.url + '">'
+        s = '<a href="' + self.url + '"><img class="external-link" src="/static/flag.png">'
         s += self.name
         s += '</a>'
         return s
@@ -50,7 +50,7 @@ class ReplacementTopic(models.Model):
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
     citations = models.ManyToManyField(Citation, blank=True)
-    relatedtopics = models.ManyToManyField("self", blank=True, help_text='back references are included when this is displayed in html')
+    relatedtopics = models.ManyToManyField("self", symmetrical=True, blank=True, help_text='back references are automatically created')
 
 
     @property
@@ -63,21 +63,27 @@ class ReplacementTopic(models.Model):
         s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
-    @property
-    def allrelatedtopics(self) -> list:
-        # returns all forward and back-referenced relatedtopics
-        topics = list(self.relatedtopics.all())
-        for t in ReplacementTopic.objects.all():
-            if t not in topics:
-                if self in t.relatedtopics.all():
-                    topics.append(t)
-        return topics
+    # @property
+    # def allrelatedtopics(self) -> list:
+    #     # returns all forward and back-referenced relatedtopics
+    #     topics = list(self.relatedtopics.all())
+    #     # topics = self.referenced_by_topics.all()
+    #     # topics = []
+    #     # topics = list(ReplacementTopic.objects.all())
+    #     # for t in ReplacementTopic.objects.all():
+    #     #     if t not in topics:
+    #     #         if self in t.relatedtopics.all():
+    #     #             topics.append(t)
 
-    @property
-    def minorrelatedtopics(self) -> list:
-        topics = self.allrelatedtopics
-        minortopics = [t for t in topics if t.maintopic == False]
-        return minortopics
+
+
+        # return topics
+
+    # @property
+    # def minorrelatedtopics(self) -> list:
+    #     topics = self.allrelatedtopics
+    #     minortopics = [t for t in topics if t.maintopic == False]
+    #     return minortopics
 
     @property
     def hascontent(self) -> bool:

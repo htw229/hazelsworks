@@ -4,11 +4,10 @@
         <li class="main-list">
             {{ topic.linkhtml|safe }}
         </li>
-        {% if topic.minorrelatedtopics %}
+        {% if topic.relatedtopics.all %}
         <li class="level-two">
-            See also:
-            {% for relatedtopic in topic.minorrelatedtopics %}
-                {{ relatedtopic.linkhtml|safe }}{% if not forloop.last %},{% endif %}
+            {% for relatedtopic in topic.relatedtopics.all %}
+                {{ relatedtopic.linkhtml|safe }}{% if not forloop.last %} | {% endif %}
             {% endfor %}
         </li>
         {% endif %}
