@@ -6,17 +6,23 @@ import app.appsettings as SETTINGS
 import app.strings as STRINGS
 
 
-dialoguechoices = [
-    (matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'], matchoptionsstrings['1']),
-    (matchoptions['SEARCH_DIALOGUE_ONLY'], matchoptionsstrings['2']),
-    (matchoptions['SEARCH_ALL'], matchoptionsstrings['3']),
-]
+# dialoguechoices = [
+#     (matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'], matchoptionsstrings['1']),
+#     (matchoptions['SEARCH_DIALOGUE_ONLY'], matchoptionsstrings['2']),
+#     (matchoptions['SEARCH_ALL'], matchoptionsstrings['3']),
+# ]
+#
+# searchreplacementchoices = [
+#     ('SEARCH_MANDATORY_REPLACEMENTS', 'mandatory'),
+#     ('SEARCH_SUGGESTED_REPLACEMENTS', 'suggested'),
+#     ('SEARCH_INFORMAL_REPLACEMENTS', 'informal'),
+#     ('SEARCH_SLANG_REPLACEMENTS', 'slang/profanity'),
+# ]
 
-searchreplacementchoices = [
-    ('SEARCH_MANDATORY_REPLACEMENTS', 'mandatory'),
-    ('SEARCH_SUGGESTED_REPLACEMENTS', 'suggested'),
-    ('SEARCH_INFORMAL_REPLACEMENTS', 'informal'),
-    ('SEARCH_SLANG_REPLACEMENTS', 'slang/profanity'),
+DIALOGUE_OPTION_CHOICES = [
+    ('SMART', STRINGS.BRITPICKFORM_DIALOGUE_SMART),
+    ('ALLTEXT', STRINGS.BRITPICKFORM_DIALOGUE_ALL_TEXT),
+    ('DIALOGUEONLY', STRINGS.BRITPICKFORM_DIALOGUE_DIALOGUE_ONLY),
 ]
 
 class BritpickForm(forms.Form):
@@ -41,29 +47,9 @@ class BritpickForm(forms.Form):
 
     dialogue_option = forms.ChoiceField(
         label=STRINGS.BRITPICKFORM_DIALOGUE_LABEL,
-        choices=[
-            ('SMART', STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL),
-            ('ALLTEXT', STRINGS.BRITPICKFORM_DIALOGUE_ALL_TEXT),
-            ('DIALOGUEONLY', STRINGS.BRITPICKFORM_DIALOGUE_DIALOGUE_ONLY),
-        ],
+        choices=DIALOGUE_OPTION_CHOICES,
         widget = forms.RadioSelect,
     )
-
-
-    # search_smart_text = forms.BooleanField(
-    #     label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL,
-    #     required=False
-    # )
-    #
-    # search_all_text = forms.BooleanField(
-    #     label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL,
-    #     required=False
-    # )
-    #
-    # search_dialogue_only = forms.BooleanField(
-    #     label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL,
-    #     required=False
-    # )
 
 
 

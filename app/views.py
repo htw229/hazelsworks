@@ -2,10 +2,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 import re
 
-from .forms import BritpickForm, BritpickfindwordForm
+from .forms import BritpickForm, BritpickfindwordForm, DIALOGUE_OPTION_CHOICES
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import Replacement, ReplacementTopic, Reference
+from .models import Replacement, ReplacementTopic, Reference, ReplacementCategory
 from .debug import Debug
 
 
@@ -20,30 +20,35 @@ def robotstxt(request):
 
 
 def britpickapp(request):
-    dialect = ''
-    text = ''
-    britpickedtext = ''
+    forminput = None
+    outputtext = ''
     debug = Debug()
 
     if request.method == 'POST':
         form = BritpickForm(request.POST)
         if form.is_valid():
             britpickeddata = britpick(form.cleaned_data)
-            text = britpickeddata['text']
+            outputtext = britpickeddata['text']
             debug = britpickeddata['debug']
 
+            forminput = {
+                'dialect': form.cleaned_data['dialect'],
+                'replacement_categories': [t.name for t in ReplacementCategory.objects.all().order_by('pk') if str(t.pk) in form.cleaned_data['replacement_categories']],
+                'dialogue_option': [x for x in DIALOGUE_OPTION_CHOICES if x[0]==form.cleaned_data['dialogue_option']][0][1]
+            }
         else:
-            britpickedtext = 'Form is not valid'
+            outputtext = 'Form is not valid'
     else:
         form = BritpickForm()
+
+
 
     responsedata = {
         'pagetitle': 'Britpick',
         'template': 'britpick.html',
         'form': form,
-        'text': text,
-        'dialect': dialect,
-        'britpickedtext': britpickedtext,
+        'forminput': forminput,
+        'outputtext': outputtext,
         'showdebug': True,
         'debug': debug.html,
     }
