@@ -1,11 +1,10 @@
 from django import forms
-from .models import BritpickDialects
+from .models import Dialect, ReplacementCategory
 from .britpick import matchoptions, matchoptionsstrings
 # from .appsettingstest import DEFAULT_DIALECT
 import app.appsettings as SETTINGS
 import app.strings as STRINGS
 
-dialectchoices = [(dialect.name, dialect.name) for dialect in BritpickDialects.objects.all().order_by('name')]
 
 dialoguechoices = [
     (matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'], matchoptionsstrings['1']),
@@ -26,19 +25,55 @@ class BritpickForm(forms.Form):
         widget=forms.Textarea,
     )
 
+    # TODO: add search type (all, dialogue only) OR add option for each category to search dialogue or all
+
     dialect = forms.ChoiceField(
         label=STRINGS.BRITPICKFORM_DIALECT_LABEL,
-        choices=dialectchoices,
+        choices= [(dialect.pk, dialect.name) for dialect in Dialect.objects.all().order_by('name')],
         widget=forms.RadioSelect
     )
 
-    replacement_categories = forms.MultipleChoiceField(label=STRINGS.BRITPICKFORM_REPLACEMENTCATEGORIES_LABEL, choices=STRINGS.BRITPICKFORM_REPLACEMENTCATEGORIES_CHOICES, widget=forms.CheckboxSelectMultiple)
+    replacement_categories = forms.MultipleChoiceField(
+        label=STRINGS.BRITPICKFORM_REPLACEMENTCATEGORIES_LABEL,
+        choices=[(t.pk, t.name) for t in ReplacementCategory.objects.all().order_by('pk')],
+        widget=forms.CheckboxSelectMultiple
+    )
 
-    informal_and_slang_in_dialogue_only = forms.BooleanField(label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL, required=False)
+    dialogue_option = forms.ChoiceField(
+        label=STRINGS.BRITPICKFORM_DIALOGUE_LABEL,
+        choices=[
+            ('SMART', STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL),
+            ('ALLTEXT', STRINGS.BRITPICKFORM_DIALOGUE_ALL_TEXT),
+            ('DIALOGUEONLY', STRINGS.BRITPICKFORM_DIALOGUE_DIALOGUE_ONLY),
+        ],
+        widget = forms.RadioSelect,
+    )
 
-    character_dialogue_name = forms.CharField(label=STRINGS.BRITPICKFORM_CHARACTERDIALOGUE_LABEL, max_length=200, required=False)
 
-    dialogue = forms.ChoiceField(label='Text to search', choices=dialoguechoices)
+    # search_smart_text = forms.BooleanField(
+    #     label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL,
+    #     required=False
+    # )
+    #
+    # search_all_text = forms.BooleanField(
+    #     label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL,
+    #     required=False
+    # )
+    #
+    # search_dialogue_only = forms.BooleanField(
+    #     label=STRINGS.BRITPICKFORM_SMARTDIALOGUE_LABEL,
+    #     required=False
+    # )
+
+
+
+
+    # character_dialogue_name = forms.CharField(
+    #     label=STRINGS.BRITPICKFORM_CHARACTERDIALOGUE_LABEL,
+    #     max_length=200,
+    #     required=False
+    # )
+
 
     def __init__(self, *args, **kwargs):
         super(BritpickForm, self).__init__(*args, **kwargs)
@@ -47,7 +82,7 @@ class BritpickForm(forms.Form):
         self.initial['dialect'] = SETTINGS.DEFAULT_DIALECT
 
         # search for all replacement categories by default
-        self.initial['replacement_categories'] = [s[0] for s in searchreplacementchoices]
+        self.initial['replacement_categories'] = [t.pk for t in ReplacementCategory.objects.all()]
 
 
 

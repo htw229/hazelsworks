@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import re
 
-from .models import BritpickFindReplace, ReplacementTopic, Citation
+from .models import Replacement, ReplacementTopic, Reference
 from .debug import Debug
 from .htmlutils import addspan, linebreakstoparagraphs, getlinkhtml
 
@@ -20,15 +20,13 @@ def britpicktopic(topic):
     citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
     text = replacecitations(text, citationpattern)
     text = replacecitationswithquotes(text)
-    # text = addspan(text, 'topictext', tagname='div')
-    # debug.add(text)
     text = linebreakstoparagraphs(text)
 
     responsedata = {
         'topic': topic,
         'topichtml': text,
         'citations': topic.citations.all(),
-        'searchwordobjects': BritpickFindReplace.objects.filter(replacementtopics__pk=topic.pk),
+        'searchwordobjects': Replacement.objects.filter(topics__pk=topic.pk),
         'debug': debug.html,
         'showdebug': True,
     }
@@ -48,7 +46,7 @@ def replacecitations(inputtext, templatepattern):
         citationpk = int(match.group('pk'))
 
         try:
-            citation = Citation.objects.get(pk=citationpk)
+            citation = Reference.objects.get(pk=citationpk)
 
             # citationlink = citation.link
             if '[' in match.group():
@@ -89,7 +87,7 @@ def replacecitationswithquotes(inputtext):
 
 def getcitationlinkhtml(citationpk, citationtemplate = '%s'):
     try:
-        citation = Citation.objects.get(pk=citationpk)
+        citation = Reference.objects.get(pk=citationpk)
         citationlink = getlinkhtml(citation.url, citationtemplate % citation.name)
 
     except ObjectDoesNotExist:

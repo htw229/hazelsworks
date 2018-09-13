@@ -14,6 +14,7 @@ x sort by length before adding suffixes (so that longer and multiple words found
 
 
 y -> -ies
+e -> -ing
 -d (not ed)
 -y
 
@@ -34,6 +35,8 @@ add irregular verbs
 add irregular plurals
 
 consider -> text "also consider"
+
+add "not" to pattern (ie "course" in uni sense could exclude "of course", "period" exclude "period of time")
 
 
 Dialect

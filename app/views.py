@@ -5,7 +5,7 @@ import re
 from .forms import BritpickForm, BritpickfindwordForm
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import BritpickFindReplace, ReplacementTopic, Citation
+from .models import Replacement, ReplacementTopic, Reference
 from .debug import Debug
 
 
@@ -23,17 +23,15 @@ def britpickapp(request):
     dialect = ''
     text = ''
     britpickedtext = ''
-    debug = ''
+    debug = Debug()
 
     if request.method == 'POST':
         form = BritpickForm(request.POST)
         if form.is_valid():
-            text = form.cleaned_data['text']
-            dialect = form.cleaned_data['dialect']
-            dialogue = form.cleaned_data['dialogue']
-            britpickedtext, debug = britpick(text, dialect, dialogue)
-            form.initial.update({'original_text': text})
-            debug = form.cleaned_data['replacement_categories']
+            britpickeddata = britpick(form.cleaned_data)
+            text = britpickeddata['text']
+            debug = britpickeddata['debug']
+
         else:
             britpickedtext = 'Form is not valid'
     else:
@@ -47,7 +45,7 @@ def britpickapp(request):
         'dialect': dialect,
         'britpickedtext': britpickedtext,
         'showdebug': True,
-        'debug': debug,
+        'debug': debug.html,
     }
 
     return render(request, 'britpicktemplate.html', responsedata)
@@ -55,7 +53,7 @@ def britpickapp(request):
 
 
 def britpickfindduplicates(request):
-    objects = BritpickFindReplace.objects.all()
+    objects = Replacement.objects.all()
     duplicateobjects = []
 
     for o in objects:
@@ -82,7 +80,7 @@ def britpickfindduplicates(request):
 
 
 def britpickfindword(request):
-    # objects = BritpickFindReplace.objects.all()
+    # objects = Replacement.objects.all()
     s = ''
     searchwords = []
     replacementwords = []
@@ -92,7 +90,7 @@ def britpickfindword(request):
         if form.is_valid():
             s = form.cleaned_data['searchword']
 
-            for o in BritpickFindReplace.objects.all():
+            for o in Replacement.objects.all():
                 if s in o.searchwords:
                     searchwords.append(o)
                 if o.directreplacement and s in o.directreplacement:
@@ -151,7 +149,7 @@ def topicslist(request):
 
 def referenceslist(request):
 
-    references = Citation.objects.filter(mainreference=True).order_by('name')
+    references = Reference.objects.filter(mainreference=True).order_by('name')
 
     responsedata = {
         'pagetitle': 'References',

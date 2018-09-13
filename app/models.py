@@ -5,7 +5,7 @@ from .htmlutils import getlinkhtml
 from appsettings import *
 # import appsettings as appsettingstest
 
-class BritpickDialects(models.Model):
+class Dialect(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
 
     def __str__(self):
@@ -20,7 +20,7 @@ class ReplacementExplanation(models.Model):
         return self.name
 
 
-class Citation(models.Model):
+class Reference(models.Model):
     name = models.CharField(max_length=300)
     adminname = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
@@ -51,7 +51,7 @@ class ReplacementTopic(models.Model):
 
     name = models.CharField(max_length=100)
     text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
-    citations = models.ManyToManyField(Citation, blank=True)
+    citations = models.ManyToManyField(Reference, blank=True)
     relatedtopics = models.ManyToManyField("self", symmetrical=True, blank=True, help_text='back references are automatically created')
 
 
@@ -64,28 +64,6 @@ class ReplacementTopic(models.Model):
     def linkhtml(self) -> str:
         s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
-
-    # @property
-    # def allrelatedtopics(self) -> list:
-    #     # returns all forward and back-referenced relatedtopics
-    #     topics = list(self.relatedtopics.all())
-    #     # topics = self.referenced_by_topics.all()
-    #     # topics = []
-    #     # topics = list(ReplacementTopic.objects.all())
-    #     # for t in ReplacementTopic.objects.all():
-    #     #     if t not in topics:
-    #     #         if self in t.relatedtopics.all():
-    #     #             topics.append(t)
-
-
-
-        # return topics
-
-    # @property
-    # def minorrelatedtopics(self) -> list:
-    #     topics = self.allrelatedtopics
-    #     minortopics = [t for t in topics if t.maintopic == False]
-    #     return minortopics
 
     @property
     def hascontent(self) -> bool:
@@ -111,36 +89,34 @@ class ReplacementTopic(models.Model):
         ordering = ['name']
 
 
-class ReplacementType(models.Model):
+class ReplacementCategory(models.Model):
     name = models.CharField(max_length=100)
     description = models.CharField(max_length=500)
+    dialogue = models.BooleanField(default=False)
 
     def __str__(self):
         s = self.name
         return s
 
-class BritpickFindReplace(models.Model):
-    # dialect = models.ForeignKey(BritpickDialects, default='British', on_delete=models.CASCADE)
-    dialect = models.ForeignKey(BritpickDialects, default=DEFAULT_DIALECT, on_delete=models.CASCADE)
+    class Meta:
+        ordering = ['pk']
+
+class Replacement(models.Model):
+    dialect = models.ForeignKey(Dialect, default=DEFAULT_DIALECT, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
 
-    replacementtype = models.ForeignKey(ReplacementType, blank=True, null=True, on_delete=models.CASCADE)
+    category = models.ForeignKey(ReplacementCategory, default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk, on_delete=models.CASCADE)
 
     searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
 
-    directreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for straightforward required replacements such as apartment -> flat")
-    considerreplacement = models.TextField(blank=True, null=True, help_text="for optional replacements such as cool -> brilliant")
-    clarifyreplacement = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
-    replacementexplanations = models.ManyToManyField(ReplacementExplanation, blank=True)
-    replacementtopics = models.ManyToManyField(ReplacementTopic, blank=True)
+    suggestreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for the strongest suggestion")
+    considerreplacements = models.TextField(blank=True, null=True, help_text="for less strong suggestions")
+    clarification = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
+    explanations = models.ManyToManyField(ReplacementExplanation, blank=True)
+    topics = models.ManyToManyField(ReplacementTopic, blank=True)
 
-    @property
-    def suggested(self) -> bool:
-        # if search not categorized as the above, categorize it as 'suggested'
-        if not self.mandatory and not self.informal and not self.slang:
-            return True
-        else:
-            return False
+    # TODO: change admin form to have checkboxes (like for topic)
+    # TODO: change search link BritpickFindReplace to Replacement so link to admin works
 
     @property
     def searchwordlist(self) -> list:
@@ -158,13 +134,13 @@ class BritpickFindReplace(models.Model):
 
     @property
     def considerreplacementlist(self) -> list:
-        wordlist = [w for w in self.considerreplacement.split('\r\n') if w.strip() != '']
+        wordlist = [w for w in self.considerreplacements.split('\r\n') if w.strip() != '']
         return wordlist
 
     @property
     def replacementwordsstring(self) -> str:
-        if self.directreplacement:
-            wordlist = [self.directreplacement]
+        if self.suggestreplacement:
+            wordlist = [self.suggestreplacement]
         else:
             wordlist = []
         wordlist.extend(self.considerreplacementlist)
@@ -173,35 +149,31 @@ class BritpickFindReplace(models.Model):
 
     @property
     def clarifyreplacementstring(self) -> str:
-        # get strings from clarifyreplacement text box
+        # get strings from clarification text box
         s = ''
 
-        if self.clarifyreplacement:
-            s = s + ' / '.join([w for w in self.clarifyreplacement.split('\r\n') if w.strip() != ''])
+        if self.clarification:
+            s = s + ' / '.join([w for w in self.clarification.split('\r\n') if w.strip() != ''])
 
-        if self.replacementexplanations:
+        if self.explanations:
             # get strings from all objects
-            explanationstrings = [o.text for o in self.replacementexplanations.all()]
+            explanationstrings = [o.text for o in self.explanations.all()]
             s = s + ' / '.join(explanationstrings)
 
         return s
 
     @property
     def objectstring(self) -> str:
-        if self.directreplacement:
-            directreplacement = self.directreplacement
+        if self.suggestreplacement:
+            directreplacement = self.suggestreplacement
         else:
             directreplacement = ''
 
-        if self.clarifyreplacement:
+        if self.clarification:
             clarifyreplacementexists = '+explanation'
         else:
             clarifyreplacementexists = ''
 
-        if self.informal:
-            dialogueonly = "[DIALOGUE]"
-        else:
-            dialogueonly = ''
 
         s = ' '.join([
             str(self.pk),
@@ -211,7 +183,6 @@ class BritpickFindReplace(models.Model):
             directreplacement,
             ', '.join(self.considerreplacementlist),
             clarifyreplacementexists,
-            dialogueonly,
             '(' + self.dialect.name + ')',
         ])
         return s
@@ -224,6 +195,17 @@ class BritpickFindReplace(models.Model):
             return s
         else:
             return s + ' (+ ' + str(len(wordlist) - 1) + ')'
+
+
+    def save(self, *args, **kwargs):
+        # if it's the non-default dialect, unless the words are manually marked as something different
+        # assign them to 'informal'
+        if self.dialect.name != DEFAULT_DIALECT and self.category.name == DEFAULT_REPLACEMENTTYPE:
+            self.category = ReplacementCategory.objects.get(name=DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE)
+
+        super().save(*args, **kwargs)
+
+
 
     def __str__(self):
         return self.objectstring

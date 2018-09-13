@@ -1,21 +1,21 @@
 from urllib.parse import unquote
 
-from .models import BritpickDialects, BritpickFindReplace, Citation, ReplacementType
+from .models import Dialect, Replacement, Reference, ReplacementCategory
 from .debug import Debug as DebugClass
 
 debug = DebugClass()
 
 
 def addreplacementtype():
-    for obj in BritpickFindReplace.objects.all():
+    for obj in Replacement.objects.all():
         if obj.mandatory:
-            obj.replacementtype = ReplacementType.objects.get(name='mandatory')
+            obj.replacementtype = ReplacementCategory.objects.get(name='mandatory')
         elif obj.informal:
-            obj.replacementtype = ReplacementType.objects.get(name='informal')
+            obj.replacementtype = ReplacementCategory.objects.get(name='informal')
         elif obj.slang:
-            obj.replacementtype = ReplacementType.objects.get(name='slang')
+            obj.replacementtype = ReplacementCategory.objects.get(name='slang')
         else:
-            obj.replacementtype = ReplacementType.objects.get(name='suggested')
+            obj.replacementtype = ReplacementCategory.objects.get(name='suggested')
         obj.save()
     print('done')
 
@@ -27,7 +27,7 @@ def addreplacementtype():
 
 
 def findmultiplecategories():
-    for obj in BritpickFindReplace.objects.all():
+    for obj in Replacement.objects.all():
         i = 0
         if obj.mandatory:
             i += 1
@@ -41,9 +41,9 @@ def findmultiplecategories():
 
 
 def changebritishdialectname():
-    for obj in BritpickFindReplace.objects.all():
+    for obj in Replacement.objects.all():
         if obj.dialect.name == 'British (Generic)':
-            obj.dialect = BritpickDialects.objects.get(name='British')
+            obj.dialect = Dialect.objects.get(name='British')
             obj.save()
             debug.add(['obj', obj], max=10)
     debug.print()
@@ -60,7 +60,7 @@ def addsbaclcitations():
         adminname = "zsbacl-" + labeltext
         name = "Separated by a Common Language: %s tag" % labeltext
 
-        citation = Citation(name=name, adminname=adminname, url=url)
+        citation = Reference(name=name, adminname=adminname, url=url)
         citation.save()
 
         print(citation)

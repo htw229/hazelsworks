@@ -1,11 +1,12 @@
-from .models import BritpickFindReplace, BritpickDialects, ReplacementExplanation
+from .models import Replacement, Dialect, ReplacementExplanation, ReplacementCategory
 from .debug import Debug
 from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
 
 import app.appsettings as settings
+import grammar
+import markup
 
 import re
-import regex
 
 debug = ''
 
@@ -23,56 +24,6 @@ matchoptionsstrings = {
     '3': 'Search all text',
 }
 
-numberstrings = ['\d+', '\d+st', '\d+nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-                 'nine', 'ten', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth',
-                 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth',
-                 'eighteenth', 'nineteenth', 'twentieth', 'thirtieth', 'fourtieth', 'fiftieth', 'hundredth',
-                 'thousandth', 'millionth']
-
-monthstrings = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
-                'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
-                'december']
-
-markups = [
-    {'markup': '\[number\]', 'wordlist': numberstrings},
-    {'markup': '\[month\]', 'wordlist': monthstrings},
-]
-
-# SEARCH_ALL = 1 # searches all text
-# SEARCH_DIALOGUE_ONLY = 2 # only searches dialogue
-# SEARCH_DIALOGUE_IF_SPECIFIED = 3 # searches dialogue if non-general dialect or if object specified as dialogue only
-
-suffixes = [
-    's',
-    'es',
-    r"\'s",
-    'ed',
-    'd',
-    'ly',
-    'ing',
-    'ped',
-    'ded',
-    'ping',
-    'ding',
-]
-
-# suffixes = [
-#     's',
-#     'es',
-#     r"\'s"
-# ]
-
-prepositions = [
-    'to',
-    'up',
-    'out',
-    'of',
-    'with',
-    'over',
-    'it',
-    'that',
-]
-
 
 findanywherepattern = r"""\b(%s)\b(?=[^}]*?{)"""
 findinquotespattern = r"""\b(%s)\b(?=[^"”}]*?[^\s\w}]["”])(?=[^}]*?{)"""
@@ -88,64 +39,108 @@ class britpicksearch():
         self.britpickobj = britpickobj
 
 
+class ReplacementOptions:
+    replacement_categories = None  # ReplacementCategory obj list
+    informal_and_slang_in_dialogue_only = False
 
 
+    def __init__(self, formdata):
+        self.replacement_categories = list(ReplacementCategory.objects.filter(pk__in=formdata['replacement_categories']))
+        self.informal_and_slang_in_dialogue_only = formdata['informal_and_slang_in_dialogue_only']
 
-def britpick(inputtext, dialectname, matchoption=matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']):
 
-    # debug
+def britpick(formdata):
     global debug
     debug = ''
     debug = Debug()
 
-    searches = createsearches(dialectname)
-    # debug.add(['number of searches:', len(searches)])
-    # debug.add(['searches[25]', searches[25].regexpattern])
+    searches = createsearches(formdata)
+    debug.add(['number of searches:', len(searches)])
 
-    # TODO: clean up matchoption
-    outputtext = createoutputtext(inputtext, searches, dialectname, matchoption)
+    outputtext = createoutputtext(formdata['text'], searches)
+    # debug.add(outputtext)
+
+    britpickeddata = {
+        'text': outputtext,
+        'debug': debug,
+    }
 
     debug.timer('britpick() finished')
+    return britpickeddata
 
-    return outputtext, debug.html
+# def britpick(inputtext, dialectname, matchoption=matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']):
+#
+#     # debug
+#     global debug
+#     debug = ''
+#     debug = Debug()
+#
+#     searches = createsearches(dialectname)
+#     # debug.add(['number of searches:', len(searches)])
+#     # debug.add(['searches[25]', searches[25].regexpattern])
+#
+#     # TODO: clean up matchoption, won't work until this is done
+#     outputtext = createoutputtext(inputtext, searches, dialectname, matchoption)
+#
+#     debug.timer('britpick() finished')
+#
+#     return outputtext, debug.html
 
 
 
+def getcategorypatterns(formdata):
+    categorypatterns = {}
+    for obj in ReplacementCategory.objects.all():
+        if str(obj.pk) in formdata['replacement_categories']:
+            pattern_template = ''
+            if formdata['dialogue_option'] == 'ALLTEXT':
+                pattern_template = findanywherepattern
+            elif formdata['dialogue_option'] == 'DIALOGUEONLY':
+                pattern_template = findinquotespattern
+            elif formdata['dialogue_option'] == 'SMART':
+                if obj.dialogue:
+                    pattern_template = findinquotespattern
+                else:
+                    pattern_template = findanywherepattern
+            categorypatterns.update({obj.pk: pattern_template})
 
-def createsearches(dialectname) -> list:
-    '''
+    return categorypatterns
 
-    :param dialectname: string as pk of dialect object
+
+
+def createsearches(formdata) -> list:
+    """
+    :param formdata:
     :return: list of britpicksearch objects (1 per britpickfindreplace)
-    '''
+    """
 
     global debug
 
+    categorypatterns = getcategorypatterns(formdata)
     searches = []
 
-    britpickobjs = BritpickFindReplace.objects\
-        .filter(dialect=dialectname)\
-        .filter(active=True)
+    for replaceobject in Replacement.objects\
+        .filter(dialect=formdata['dialect'])\
+        .filter(active=True)\
+        .filter(category__in=categorypatterns.keys()):
 
-    for britpickobj in britpickobjs:
-        searchpatternlist = []
-        for s in britpickobj.searchwordlist:
-            searchpatternlist.extend(createsearchwordpatterns(s, britpickobj))
-        regexpattern = '|'.join(searchpatternlist)
-        searches.append(britpicksearch(regexpattern, britpickobj))
+        # get all searchwords with markup and suffixes and join in one regex search pattern
+        objectpattern = '|'.join(['|'.join(createsearchwordpatterns(s, replaceobject)) for s in replaceobject.searchwordlist])
+        regexpattern = categorypatterns[replaceobject.category_id] % objectpattern
+        searches.append({'replaceobject': replaceobject, 'pattern': regexpattern})
 
     # sort by longest searchword (a kludgy way of getting compound words to be found before single words)
-    searches.sort(key=lambda search: search.britpickobj.longestsearchwordlength, reverse=True)
+    searches.sort(key=lambda search: search['replaceobject'].longestsearchwordlength, reverse=True)
 
     debug.timer('createsearches() finished')
     return searches
 
 
 
-def createoutputtext(inputtext, searches, dialectname, matchoption):
+def createoutputtext(inputtext, searches):
     '''
 
-    :param inputtext:
+    :param test:
     :param searches:
     :param dialectname:
     :param matchoption:
@@ -156,23 +151,14 @@ def createoutputtext(inputtext, searches, dialectname, matchoption):
     text = inputtext + '{'
 
     for search in searches:
-        if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
-            text = replacetext(search, text, findinquotespattern)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != settings.DEFAULT_DIALECT:
-            text = replacetext(search, text, findinquotespattern)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search.britpickobj.slang == True:
-            text = replacetext(search, text, findinquotespattern)
-        else:
-            # this is majority of replacements for generic dialect
-            text = replacetext(search, text, findanywherepattern)
-
+        text = replacetext(text, search)
 
     # create line breaks
     text = linebreakstoparagraphs(text)
     # remove created {}
     text = text.replace('{', '').replace('}', '')
 
-    debug.timer('createoutputtext() finished')
+    # debug.timer('createoutputtext() finished')
     return text
 
 
@@ -187,21 +173,19 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
 
     global debug
 
-
-
     # REGEX ESCAPING: retain special characters in search
     # (such as ?, which can help limit found words);
     # escape prior to substituting markup (substitutes may contain regex)
     # (errors occur if done earlier than try/except below)
 
     # create generic regex pattern for with/without suffix
-    suffixpattern = r'(|' + '|'.join(suffixes) + r')'
+    suffixpattern = r'(|' + '|'.join(grammar.SUFFIX_LIST) + r')'
 
     # create patternlist with individual searchwords and suffixes
     try:
         # will fail if rsplit returns only 1 string (ie if single word)
         word, preposition = searchword.rsplit(None, 1)
-        if preposition in prepositions:
+        if preposition in grammar.PREPOSITION_LIST:
             # debug.add([word, preposition], max=20)
             wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
             # debug.add(searchword)
@@ -219,7 +203,7 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     if '[' not in searchword:
         return patternlist
 
-    for m in markups:
+    for m in markup.MARKUP_LIST:
         for pattern in [p for p in patternlist]:
             if m['markup'] in pattern:
                 # remove the string that has markup still in it
@@ -232,23 +216,17 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     return patternlist
 
 
-def replacetext(search, inputtext, templatepattern):
+def replacetext(inputtext, search):
     global debug
 
     text = inputtext
     addedtextlength = 0     # increment starting position after every replacement
-    pattern = re.compile(templatepattern % search.regexpattern, re.IGNORECASE)
-
-    # if 'hospital' in search.regexpattern:
-    #     debug.add(templatepattern % search.regexpattern)
+    pattern = re.compile(search['pattern'], re.IGNORECASE)
 
     for match in pattern.finditer(inputtext):
-        # if 'hospital' in search.regexpattern:
-        #     debug.add('found hospital')
-
-        replacetext = createreplacetext(r'{' + match.group() + ' ', search.britpickobj) + r'}'
-        text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
-        addedtextlength += len(replacetext) - len(match.group())
+        replacementtext = createreplacetext(r'{' + match.group() + ' ', search['replaceobject']) + r'}'
+        text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
+        addedtextlength += len(replacementtext) - len(match.group())
 
     return text
 
@@ -274,32 +252,30 @@ def createreplacetext(textstring, britpickobj):
     # create replacement text that will be in []
     stringlist = []
 
-    if britpickobj.directreplacement:
-        if britpickobj.mandatory:
-            stringlist.append(addspan(britpickobj.directreplacement, 'mandatory'))
+    if britpickobj.suggestreplacement:
+        if britpickobj.category.name == 'mandatory':
+            stringlist.append(addspan(britpickobj.suggestreplacement, 'mandatory'))
         else:
-            stringlist.append(addspan(britpickobj.directreplacement, 'directreplacement'))
-    if britpickobj.considerreplacement:
+            stringlist.append(addspan(britpickobj.suggestreplacement, 'suggestreplacement'))
+    if britpickobj.category.name == 'suggested':
         c = ', '.join(w for w in britpickobj.considerreplacementlist)
-        stringlist.append(addspan(c, 'considerreplacement'))
-
-    explanationtext = ''
+        stringlist.append(addspan(c, 'considerreplacements'))
 
     # add explanations
     if britpickobj.clarifyreplacementstring:
         if len(stringlist) == 0:
             # if no other text, then don't add parenthesis
-            stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarifyreplacement'))
+            stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarification'))
         else:
-            stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarifyreplacement', '(', ')'))
+            stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarification', '(', ')'))
 
     # add topic
-    for topic in britpickobj.replacementtopics.all():
+    for topic in britpickobj.topics.all():
         stringlist.append(addspan(topic.linkhtml, 'topiclink'))
 
     # if it's mandatory and there's no replacement/explanation, then add generic explanation
-    if britpickobj.mandatory and len(stringlist) == 0:
-        stringlist.append(addspan(ReplacementExplanation.objects.get(name='not used').text, 'clarifyreplacement'))
+    if britpickobj.category.name == 'mandatory' and len(stringlist) == 0:
+        stringlist.append(addspan(ReplacementExplanation.objects.get(name='not used').text, 'clarification'))
 
     s = ' '.join(stringlist)
     s = addspan(s, 'replacement', '[', ']')
