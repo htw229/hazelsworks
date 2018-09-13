@@ -2,10 +2,10 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render
 import re
 
-from .forms import BritpickForm, BritpickfindwordForm
+from .forms import BritpickForm, BritpickfindwordForm, DIALOGUE_OPTION_CHOICES
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import BritpickFindReplace, ReplacementTopic, Citation
+from .models import Replacement, ReplacementTopic, Reference, ReplacementCategory
 from .debug import Debug
 
 
@@ -20,29 +20,37 @@ def robotstxt(request):
 
 
 def britpickapp(request):
-    dialect = ''
-    text = ''
-    britpickedtext = ''
-    debug = ''
+    forminput = None
+    outputtext = ''
+    debug = Debug()
 
     if request.method == 'POST':
         form = BritpickForm(request.POST)
         if form.is_valid():
-            text = form.cleaned_data['text']
-            dialect = form.cleaned_data['dialect']
-            dialogue = form.cleaned_data['dialogue']
-            britpickedtext, debug = britpick(text, dialect, dialogue)
-            form.initial.update({'original_text': text})
+            britpickeddata = britpick(form.cleaned_data)
+            outputtext = britpickeddata['text']
+            debug = britpickeddata['debug']
+
+            forminput = {
+                'dialect': form.cleaned_data['dialect'],
+                'replacement_categories': [t.name for t in ReplacementCategory.objects.all().order_by('pk') if str(t.pk) in form.cleaned_data['replacement_categories']],
+                'dialogue_option': [x for x in DIALOGUE_OPTION_CHOICES if x[0]==form.cleaned_data['dialogue_option']][0][1]
+            }
+        else:
+            outputtext = 'Form is not valid'
+    else:
+        form = BritpickForm()
+
+
 
     responsedata = {
         'pagetitle': 'Britpick',
         'template': 'britpick.html',
-        'form': BritpickForm,
-        'text': text,
-        'dialect': dialect,
-        'britpickedtext': britpickedtext,
+        'form': form,
+        'forminput': forminput,
+        'outputtext': outputtext,
         'showdebug': True,
-        'debug': debug,
+        'debug': debug.html,
     }
 
     return render(request, 'britpicktemplate.html', responsedata)
@@ -50,7 +58,7 @@ def britpickapp(request):
 
 
 def britpickfindduplicates(request):
-    objects = BritpickFindReplace.objects.all()
+    objects = Replacement.objects.all()
     duplicateobjects = []
 
     for o in objects:
@@ -77,7 +85,7 @@ def britpickfindduplicates(request):
 
 
 def britpickfindword(request):
-    # objects = BritpickFindReplace.objects.all()
+    # objects = Replacement.objects.all()
     s = ''
     searchwords = []
     replacementwords = []
@@ -87,7 +95,7 @@ def britpickfindword(request):
         if form.is_valid():
             s = form.cleaned_data['searchword']
 
-            for o in BritpickFindReplace.objects.all():
+            for o in Replacement.objects.all():
                 if s in o.searchwords:
                     searchwords.append(o)
                 if o.directreplacement and s in o.directreplacement:
@@ -146,7 +154,7 @@ def topicslist(request):
 
 def referenceslist(request):
 
-    references = Citation.objects.filter(mainreference=True).order_by('name')
+    references = Reference.objects.filter(mainreference=True).order_by('name')
 
     responsedata = {
         'pagetitle': 'References',

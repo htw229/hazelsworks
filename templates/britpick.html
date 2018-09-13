@@ -4,14 +4,32 @@
     {% csrf_token %}
 
 {#    <input type="text" id="id_text" name="text" value="{{ text }}">#}
-    <textarea id="id_text" name="text" rows="10" cols="30">{{ text }}</textarea>
-    <br />
+{#    <textarea id="id_text" name="text" rows="10" cols="30">{{ text }}</textarea>#}
+{#    <br />#}
 {#    {{ form.text }}#}
-    {{ form.dialect }}
-    {{ form.dialogue }}
+{#    {{ form.dialect }}#}
+{#    {{ form.dialogue }}#}
+{##}
+{#    {{ form.search_replacements }}#}
+{#    {{ form.informal_and_slang_in_dialogue_only }}#}
+
+    {{ form }}
 
     <input type="submit" value="Submit">
 </form>
 
-<h2>Dialect: {{ dialect }}</h2>
-{{ britpickedtext|safe }}
+{% if forminput %}
+
+    <h2>Britpicked</h2>
+    <ul>
+        <li>Dialect: {{ forminput.dialect }}</li>
+        <li>Words:
+        {% for category in forminput.replacement_categories %}
+            {% if forloop.first %}{{ category }}{% else %} | {{ category }}{% endif %}
+        {% endfor %}</li>
+        <li>Search in: {{ forminput.dialogue_option }}</li>
+    </ul>
+
+    {{ outputtext|safe }}
+
+{% endif %}

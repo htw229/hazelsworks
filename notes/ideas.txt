@@ -14,6 +14,7 @@ x sort by length before adding suffixes (so that longer and multiple words found
 
 
 y -> -ies
+e -> -ing
 -d (not ed)
 -y
 
@@ -29,3 +30,39 @@ make topic page not found to go to topic list (make into single view, and single
 x make URLs reverse : https://stackoverflow.com/questions/11241668/what-is-reverse-in-django
 x make admin boxes larger: https://stackoverflow.com/questions/910169/resize-fields-in-django-admin
 
+add british spelling
+add irregular verbs
+add irregular plurals
+
+consider -> text "also consider"
+
+add "not" to pattern (ie "course" in uni sense could exclude "of course", "period" exclude "period of time")
+
+
+Dialect
+Search preset
+
+Dialog by character
+Exclude profanity
+Exclude dialogue
+
+
+[] smart search - mandatory and suggested in all text; informal and slang/profanity in dialogue only; non-default dialect in dialogue only
+[] search dialogue only
+[] search all text
+
+- slang in dialogue only
+- informal in dialogue only
+
+[] mandatory replacement
+[] suggested
+[] informal
+[] slang/profanity
+
+[] replace informal and slang/profanity in dialogue only
+
+
+Displays search options chosen & display form with them chosen
+Display (mouseover?) instructions
+
+Standardize form options and english text

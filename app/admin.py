@@ -3,14 +3,14 @@ from django.forms import Textarea, CheckboxSelectMultiple
 from django.db import models
 
 # Register your models here.
-from .models import BritpickDialects
-admin.site.register(BritpickDialects)
+from .models import Dialect
+admin.site.register(Dialect)
 
 from .models import ReplacementExplanation
 admin.site.register(ReplacementExplanation)
 
-from .models import BritpickFindReplace
-admin.site.register(BritpickFindReplace)
+from .models import Replacement
+admin.site.register(Replacement)
 
 from .models import ReplacementTopic
 
@@ -28,5 +28,8 @@ class TopicAdmin(admin.ModelAdmin):
 
 admin.site.register(ReplacementTopic, TopicAdmin)
 
-from .models import Citation
-admin.site.register(Citation)
+from .models import Reference
+admin.site.register(Reference)
+
+from .models import ReplacementCategory
+admin.site.register(ReplacementCategory)
