@@ -29,7 +29,7 @@ html {
 }
 
 .content {
-    margin: 0 3% 0 3%;
+    margin: 0 10% 0 5%;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -45,18 +45,27 @@ h2 {
 }
 
 h3 {
-    font-size: 100%;
+    font-size: 1.1em;
+    -webkit-margin-before: 2em;
+    -webkit-margin-after: 0.5em;
+    -webkit-margin-start: 0px;
+    -webkit-margin-end: 0px;
+    font-weight: bold;
 }
 
 p {
     /*font-size: 14px;*/
-    font-size: small;
+    font-size: 80%;
 }
 
 ul {
     list-style-type: none;
     margin: 0;
     padding: 0;
+}
+
+li {
+    font-size: 80%;
 }
 
 a:link {
@@ -80,8 +89,9 @@ a:active {
     text-decoration: underline;
 }
 
-
-/*NAVBAR*/
+/*--------------------------------------------*/
+/*  NAVBAR  */
+/*--------------------------------------------*/
 
 .navbar {
     font-family: 'Vollkorn', serif;
@@ -130,19 +140,29 @@ a:active {
     padding-top: 40px;
 }
 
-/*.navbaritem {*/
-    /*margin-left: 2%;*/
-    /*margin-right: 2%;*/
 
-/*}*/
+/*--------------------------------------------*/
+/*  LISTS  */
+/*--------------------------------------------*/
 
-/*.navbar a:link, .navbar a:visited {*/
-    /*color: white;*/
-/*}*/
+.content ul {
+    line-height: 175%;
+}
 
-/*.navbar a:hover, .navbar a:active {*/
-    /*text-decoration: underline;*/
-/*}*/
+.content li {
+
+}
+
+.main-list {
+    font-size: 100%;
+}
+
+.level-two {
+    font-size: 80%;
+    margin-left: 2em;
+}
+
+
 
 
 

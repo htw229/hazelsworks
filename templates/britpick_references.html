@@ -1,0 +1,7 @@
+{% if references %}
+    <ul>
+    {% for reference in references %}
+        <li>{{ reference.link|safe }}</li>
+    {% endfor %}
+    </ul>
+{% endif %}

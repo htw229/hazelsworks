@@ -22,6 +22,7 @@ class Citation(models.Model):
     name = models.CharField(max_length=300)
     adminname = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
+    mainreference = models.BooleanField(default=False)
 
     @property
     def link(self) -> str:
@@ -71,6 +72,12 @@ class ReplacementTopic(models.Model):
                 if self in t.relatedtopics.all():
                     topics.append(t)
         return topics
+
+    @property
+    def minorrelatedtopics(self) -> list:
+        topics = self.allrelatedtopics
+        minortopics = [t for t in topics if t.maintopic == False]
+        return minortopics
 
     @property
     def hascontent(self) -> bool:

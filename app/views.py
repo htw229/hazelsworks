@@ -5,7 +5,7 @@ import re
 from .forms import BritpickForm, BritpickfindwordForm
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import BritpickFindReplace, ReplacementTopic
+from .models import BritpickFindReplace, ReplacementTopic, Citation
 from .debug import Debug
 
 
@@ -131,12 +131,27 @@ def topicview(request, topicslug):
 
 def topicslist(request):
 
-    topics = ReplacementTopic.objects.order_by('name')
+    topics = ReplacementTopic.objects.filter(maintopic=True).order_by('name')
 
     responsedata = {
         'pagetitle': 'Topics',
         'template': 'topicslist.html',
         'topics': topics,
+        'debug': '',
+        'showdebug': True,
+    }
+
+    return render(request, 'britpicktemplate.html', responsedata)
+
+
+def referenceslist(request):
+
+    references = Citation.objects.filter(mainreference=True).order_by('name')
+
+    responsedata = {
+        'pagetitle': 'References',
+        'template': 'britpick_references.html',
+        'references': references,
         'debug': '',
         'showdebug': True,
     }

@@ -1,9 +1,17 @@
 {% if topics %}
-    <ul class="topiclist">
+    <ul>
     {% for topic in topics %}
-        <li class="topiclistitem {% if topic.maintopic %}main{% endif %}">
+        <li class="main-list">
             {{ topic.linkhtml|safe }}
         </li>
+        {% if topic.minorrelatedtopics %}
+        <li class="level-two">
+            See also:
+            {% for relatedtopic in topic.minorrelatedtopics %}
+                {{ relatedtopic.linkhtml|safe }}{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        </li>
+        {% endif %}
     {% endfor %}
     </ul>
 {% else %}
