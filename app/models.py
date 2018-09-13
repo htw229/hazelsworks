@@ -2,6 +2,8 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 from .htmlutils import getlinkhtml
+from appsettings import *
+# import appsettings as appsettingstest
 
 class BritpickDialects(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -108,13 +110,21 @@ class ReplacementTopic(models.Model):
     class Meta:
         ordering = ['name']
 
+
+class ReplacementType(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.CharField(max_length=500)
+
+    def __str__(self):
+        s = self.name
+        return s
+
 class BritpickFindReplace(models.Model):
-    dialect = models.ForeignKey(BritpickDialects, default="British", on_delete=models.CASCADE)
+    # dialect = models.ForeignKey(BritpickDialects, default='British', on_delete=models.CASCADE)
+    dialect = models.ForeignKey(BritpickDialects, default=DEFAULT_DIALECT, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
 
-    mandatory = models.BooleanField(default=False)
-    dialogue = models.BooleanField(default=False, help_text="limit to character's speech")
-    slang = models.BooleanField(default=False, help_text="similar to dialogue but may be crude or grammatically incorrect")
+    replacementtype = models.ForeignKey(ReplacementType, blank=True, null=True, on_delete=models.CASCADE)
 
     searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
 
@@ -123,6 +133,14 @@ class BritpickFindReplace(models.Model):
     clarifyreplacement = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
     replacementexplanations = models.ManyToManyField(ReplacementExplanation, blank=True)
     replacementtopics = models.ManyToManyField(ReplacementTopic, blank=True)
+
+    @property
+    def suggested(self) -> bool:
+        # if search not categorized as the above, categorize it as 'suggested'
+        if not self.mandatory and not self.informal and not self.slang:
+            return True
+        else:
+            return False
 
     @property
     def searchwordlist(self) -> list:
@@ -180,7 +198,7 @@ class BritpickFindReplace(models.Model):
         else:
             clarifyreplacementexists = ''
 
-        if self.dialogue:
+        if self.informal:
             dialogueonly = "[DIALOGUE]"
         else:
             dialogueonly = ''

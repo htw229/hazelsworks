@@ -30,3 +30,6 @@ admin.site.register(ReplacementTopic, TopicAdmin)
 
 from .models import Citation
 admin.site.register(Citation)
+
+from .models import ReplacementType
+admin.site.register(ReplacementType)

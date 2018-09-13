@@ -1,9 +1,44 @@
 from urllib.parse import unquote
 
-from .models import BritpickDialects, BritpickFindReplace, Citation
+from .models import BritpickDialects, BritpickFindReplace, Citation, ReplacementType
 from .debug import Debug as DebugClass
 
 debug = DebugClass()
+
+
+def addreplacementtype():
+    for obj in BritpickFindReplace.objects.all():
+        if obj.mandatory:
+            obj.replacementtype = ReplacementType.objects.get(name='mandatory')
+        elif obj.informal:
+            obj.replacementtype = ReplacementType.objects.get(name='informal')
+        elif obj.slang:
+            obj.replacementtype = ReplacementType.objects.get(name='slang')
+        else:
+            obj.replacementtype = ReplacementType.objects.get(name='suggested')
+        obj.save()
+    print('done')
+
+
+
+
+
+
+
+
+def findmultiplecategories():
+    for obj in BritpickFindReplace.objects.all():
+        i = 0
+        if obj.mandatory:
+            i += 1
+        if obj.informal:
+            i += 1
+        if obj.slang:
+            i += 1
+        if i > 1:
+            print (obj)
+
+
 
 def changebritishdialectname():
     for obj in BritpickFindReplace.objects.all():

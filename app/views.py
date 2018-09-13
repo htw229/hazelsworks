@@ -33,11 +33,16 @@ def britpickapp(request):
             dialogue = form.cleaned_data['dialogue']
             britpickedtext, debug = britpick(text, dialect, dialogue)
             form.initial.update({'original_text': text})
+            debug = form.cleaned_data['replacement_categories']
+        else:
+            britpickedtext = 'Form is not valid'
+    else:
+        form = BritpickForm()
 
     responsedata = {
         'pagetitle': 'Britpick',
         'template': 'britpick.html',
-        'form': BritpickForm,
+        'form': form,
         'text': text,
         'dialect': dialect,
         'britpickedtext': britpickedtext,

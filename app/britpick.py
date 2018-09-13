@@ -1,8 +1,8 @@
 from .models import BritpickFindReplace, BritpickDialects, ReplacementExplanation
 from .debug import Debug
-from .htmlutils import addspan, getlinkhtml
+from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
 
-import app.settings as settings
+import app.appsettings as settings
 
 import re
 import regex
@@ -158,9 +158,9 @@ def createoutputtext(inputtext, searches, dialectname, matchoption):
     for search in searches:
         if matchoption == matchoptions['SEARCH_DIALOGUE_ONLY']:
             text = replacetext(search, text, findinquotespattern)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != settings.DEFAULT_DIALOG:
+        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and dialectname != settings.DEFAULT_DIALECT:
             text = replacetext(search, text, findinquotespattern)
-        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search.britpickobj.dialogue == True:
+        elif matchoption == matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED'] and search.britpickobj.slang == True:
             text = replacetext(search, text, findinquotespattern)
         else:
             # this is majority of replacements for generic dialect
@@ -168,7 +168,7 @@ def createoutputtext(inputtext, searches, dialectname, matchoption):
 
 
     # create line breaks
-    text = text.replace('\r\n', '<br />')
+    text = linebreakstoparagraphs(text)
     # remove created {}
     text = text.replace('{', '').replace('}', '')
 
@@ -204,7 +204,7 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
         if preposition in prepositions:
             # debug.add([word, preposition], max=20)
             wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
-            debug.add(searchword)
+            # debug.add(searchword)
         else:
             raise ValueError('not a preposition')
     except ValueError:
@@ -239,12 +239,12 @@ def replacetext(search, inputtext, templatepattern):
     addedtextlength = 0     # increment starting position after every replacement
     pattern = re.compile(templatepattern % search.regexpattern, re.IGNORECASE)
 
-    if 'hospital' in search.regexpattern:
-        debug.add(templatepattern % search.regexpattern)
+    # if 'hospital' in search.regexpattern:
+    #     debug.add(templatepattern % search.regexpattern)
 
     for match in pattern.finditer(inputtext):
-        if 'hospital' in search.regexpattern:
-            debug.add('found hospital')
+        # if 'hospital' in search.regexpattern:
+        #     debug.add('found hospital')
 
         replacetext = createreplacetext(r'{' + match.group() + ' ', search.britpickobj) + r'}'
         text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
@@ -266,7 +266,7 @@ def createreplacetext(textstring, britpickobj):
     '''
 
     global debug
-    debug.timer('createreplacetext() start')
+    # debug.timer('createreplacetext() start')
 
     # format original string
     textstring = addspan(textstring, 'found word')
@@ -307,5 +307,5 @@ def createreplacetext(textstring, britpickobj):
     # combine texts
     text = addspan(textstring, 'foundword') + ' ' + s
 
-    debug.timer('createreplacetext()')
+    # debug.timer('createreplacetext()')
     return text

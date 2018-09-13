@@ -4,11 +4,16 @@
     {% csrf_token %}
 
 {#    <input type="text" id="id_text" name="text" value="{{ text }}">#}
-    <textarea id="id_text" name="text" rows="10" cols="30">{{ text }}</textarea>
-    <br />
+{#    <textarea id="id_text" name="text" rows="10" cols="30">{{ text }}</textarea>#}
+{#    <br />#}
 {#    {{ form.text }}#}
-    {{ form.dialect }}
-    {{ form.dialogue }}
+{#    {{ form.dialect }}#}
+{#    {{ form.dialogue }}#}
+{##}
+{#    {{ form.search_replacements }}#}
+{#    {{ form.informal_and_slang_in_dialogue_only }}#}
+
+    {{ form }}
 
     <input type="submit" value="Submit">
 </form>
