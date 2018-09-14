@@ -140,6 +140,11 @@ def searchview(request):
 # TODO: make search more powerful (looking for not just words but inside topics) and using search parameters from britpick.py to get suffixes etc; also can stop separate input/output
 # TODO: create word html (later - since now only using admin)
 # TODO: create about page
+# TODO: add do not find
+# TODO: add any single word markup
+# TODO: option don't add suffix
+# TODO: option require punctuation (like ? or !)
+# TODO: link to topic icon only with mouseover text
 
 def topicview(request, topicslug):
 

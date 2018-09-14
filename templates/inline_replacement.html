@@ -7,7 +7,8 @@
 
     {% if replacement.topics.all %}
         {% for topic in replacement.topics.all %}
-            [<span class="topiclink"><img src="/static/red-crown-16.png"> {{ topic.linkhtml|safe }}</span>]
+            [<a href="{% url 'topic' topicslug=topic.slug %}" title="{{ topic.name }}"><img src="/static/red-crown-16.png"></a>]
+{#            [<span class="topiclink"><img src="/static/red-crown-16.png"> {{ topic.linkhtml|safe }}</span>]#}
         {% endfor %}
     {% endif %}
 </span>

@@ -4,8 +4,6 @@ from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
 
 import app.appsettings as settings
 import grammar
-import markup
-import os
 
 import re
 
@@ -164,26 +162,34 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
 
     global debug
 
+    # TODO: is this actually working, though?
     # REGEX ESCAPING: retain special characters in search
     # (such as ?, which can help limit found words);
     # escape prior to substituting markup (substitutes may contain regex)
     # (errors occur if done earlier than try/except below)
 
-    # create generic regex pattern for with/without suffix
-    suffixpattern = r'(|' + '|'.join(grammar.SUFFIX_LIST) + r')'
+    # TODO: count apostrophe and dash as word?
 
-    # create patternlist with individual searchwords and suffixes
-    try:
-        # will fail if rsplit returns only 1 string (ie if single word)
-        word, preposition = searchword.rsplit(None, 1)
-        if preposition in grammar.PREPOSITION_LIST:
-            # debug.add([word, preposition], max=20)
-            wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
-            # debug.add(searchword)
-        else:
-            raise ValueError('not a preposition')
-    except ValueError:
-        wordsuffixpattern = re.escape(searchword) + suffixpattern
+    # '#' indicates that cannot add suffix to it and cannot have dash or letter after it
+    if '#' in searchword:
+        wordsuffixpattern = re.escape(searchword.replace('#',''))
+        wordsuffixpattern += r'[^-a-zA-Z]+?'
+    else:
+        # create generic regex pattern for with/without suffix
+        suffixpattern = r'(|' + '|'.join(grammar.SUFFIX_LIST) + r')'
+
+        # create patternlist with individual searchwords and suffixes
+        try:
+            # will fail if rsplit returns only 1 string (ie if single word)
+            word, preposition = searchword.rsplit(None, 1)
+            if preposition in grammar.PREPOSITION_LIST:
+                # debug.add([word, preposition], max=20)
+                wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
+                # debug.add(searchword)
+            else:
+                raise ValueError('not a preposition')
+        except ValueError:
+            wordsuffixpattern = re.escape(searchword) + suffixpattern
 
     # dash in word can be dash, space or no space (ie ice-cream matches ice cream, icecream and ice-cream)
     wordsuffixpattern = wordsuffixpattern.replace(r'\-', r"[-\s]*")
@@ -194,7 +200,7 @@ def createsearchwordpatterns(searchword, britpickobj) -> list:
     if '[' not in searchword:
         return patternlist
 
-    for m in markup.MARKUP_LIST:
+    for m in grammar.MARKUP_LIST:
         for pattern in [p for p in patternlist]:
             if m['markup'] in pattern:
                 # remove the string that has markup still in it
