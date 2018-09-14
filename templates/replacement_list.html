@@ -1,0 +1,17 @@
+<span class="replacementwrapper category-{{ replacement.category.name }}">
+    <a href="/admin/app/replacement/{{ replacement.pk }}/change/" target="_blank">
+    <span class="inputtext">{{ replacement.searchwordstring }}</span>
+
+    {% if replacement.replacementhtml %}
+        [{{ replacement.replacementhtml|safe }}]
+    {% endif %}
+    </a>
+
+    {% if showtopics %}
+        {% if replacement.topics.all %}
+            {% for topic in replacement.topics.all %}
+                [<span class="topiclink"><img src="/static/red-crown-16.png"> {{ topic.linkhtml|safe }}</span>]
+            {% endfor %}
+        {% endif %}
+    {% endif %}
+</span>

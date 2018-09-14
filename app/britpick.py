@@ -58,11 +58,13 @@ def britpick(formdata):
     searches = createsearches(formdata)
     debug.add(['number of searches:', len(searches)])
 
-    outputtext = createoutputtext(formdata['text'], searches)
+    text = createoutputtext(formdata['text'], searches)
     # debug.add(outputtext)
 
+    text = postprocesstext(text)
+
     britpickeddata = {
-        'text': outputtext,
+        'text': text,
         'debug': debug,
     }
 
@@ -72,6 +74,13 @@ def britpick(formdata):
 
 
 
+def postprocesstext(text):
+    # remove created {}
+    text = text.replace('<', '').replace('>', '')
+    # create line breaks
+    text = linebreakstoparagraphs(text)
+
+    return text
 
 
 def getcategorypatterns(formdata):
@@ -139,11 +148,6 @@ def createoutputtext(inputtext, searches):
     for search in searches:
         text = replacetext(text, search)
 
-
-    # remove created {}
-    text = text.replace('<', '').replace('>', '')
-    # create line breaks
-    text = linebreakstoparagraphs(text)
 
     # debug.timer('createoutputtext() finished')
     return text

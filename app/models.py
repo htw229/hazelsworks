@@ -181,21 +181,6 @@ class Replacement(models.Model):
         s = '; '.join(w)
         s = htmlutils.addspan(s, 'explanation')
 
-        #
-        # if len(clarificationstrings) > 0:
-        #     s += '<span class="clarification">'
-        #     s += '; '.join(clarificationstrings)
-        #     s += '</span>'
-        #
-        # explanationstrings =
-        # if len(explanationstrings) > 0:
-        #     s += '<span class="explanation">'
-        #     s += '; '.join(explanationstrings)
-        #     s += '</span>'
-        #
-        # if s == '':
-        #     return False
-
         return s
 
     @property

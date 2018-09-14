@@ -1,11 +1,14 @@
 :root {
     --red: #950d19;
     --darkred: #7b0b15;
+    --lightyellow: #f6e98b;
     --yellow: #eed82d;
     --darkyellow: #c4b125;
+    --lightblue: #527bb2;
     --blue: #21569c;
     --darkblue: #1a4277;
     --lightgray:#e6e6e6;
+    --gray:#555354;
     --darkgray: #1f1d1e;
 }
 
@@ -182,6 +185,10 @@ textarea {
 /* replacementwrapper "inputtext [replacement"considerstring: wordwrapper"word, word" (clarification; explanation)"] [topiclink]" */
 /*--------------------------------------------*/
 
+.outputtext {
+    line-height: 1.5em;
+}
+
 .replacementwrapper {
     font-weight: bold;
     /*background-color: var(--lightgray);*/
@@ -189,36 +196,76 @@ textarea {
     padding: 0 3px 0 3px;
 }
 
-.replacement {
-    background-color: var(--lightgray);
-}
 
-.replacement, .topiclink a, .wordwrapper {
+
+.inputtext, .replacement, .topiclink, .wordwrapper, .explanation {
     padding: 0 3px 0 3px;
 }
 
 .inputtext {
     /*background-color: var(--darkgray);*/
+    color: var(--darkgray);
+    margin-right: 3px;
+    border-bottom: 1px dotted var(--darkgray);
 }
 
 .replacementwrapper.category-mandatory {
     /*background-color: lightgoldenrodyellow;*/
 }
 
-.category-mandatory span.inputtext, .category-mandatory span.replacement {
-    /*background-color: var(--yellow);*/
-    /*background-color: var(--red);*/
-    background-color: lightyellow;
+
+
+.replacementwrapper a {
+    text-decoration: none;
+}
+
+span.replacement {
+    color: black;
+}
+
+span.replacement .wordwrapper {
+    color: var(--blue)
+}
+
+span.replacement:hover .wordwrapper {
+    color: var(--red)
+}
+
+.replacement {
+    background-color: var(--lightgray);
+    color: var(--blue);
+}
+
+
+
+
+.categorystring {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 80%;
+}
+
+span.categorystring:hover {
+    color: black;
+}
+
+.replacementwrapper span.categorystring:hover {
+    color: black;
 }
 
 .category-mandatory span.replacement {
-    /*background-color: var(--darkyellow);*/
-    /*background-color: lightyellow;*/
+    background-color: var(--lightyellow);
 }
 
 .category-mandatory span.wordwrapper {
     background-color: var(--yellow);
 }
+
+
+
+
+
+
 
 
 .category-suggested {
@@ -230,18 +277,18 @@ textarea {
 
 }
 
-.replacement {
-    /*background-color: var(--lightgray);*/
-}
 
-.categorystring {
-    font-style: italic;
-    font-weight: normal;
-    font-size: 80%;
-}
+
+/*.category-mandatory .replacement {*/
+    /*color: black;*/
+/*}*/
+
+
 
 .clarification, .explanation {
     font-style: italic;
+    color: var(--darkgray);
+    font-size: 80%;
 }
 
 .considerstring {
@@ -254,7 +301,14 @@ textarea {
     /*color: white;*/
 }
 
+.topiclink a:hover {
+    text-decoration: underline;
+}
 
+.topiclink img {
+    vertical-align: middle;
+    padding-bottom: 5px;
+}
 
 
 

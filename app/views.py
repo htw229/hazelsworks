@@ -102,7 +102,7 @@ def britpickfindduplicates(request):
     return render(request, 'britpick_findduplicates.html', responsedata)
 
 
-def britpickfindword(request):
+def searchview(request):
     # objects = Replacement.objects.all()
     s = ''
     searchwords = []
@@ -116,20 +116,30 @@ def britpickfindword(request):
             for o in Replacement.objects.all():
                 if s in o.searchwords:
                     searchwords.append(o)
-                if o.directreplacement and s in o.directreplacement:
+                if o.replacementwordshtml and s in o.replacementwordshtml:
                     replacementwords.append(o)
-                if o.considerreplacement and s in o.considerreplacement:
-                    replacementwords.append(o)
+                # if o.directreplacement and s in o.directreplacement:
+                #     replacementwords.append(o)
+                # if o.considerreplacement and s in o.considerreplacement:
+                #     replacementwords.append(o)
 
     responsedata = {
         'form': BritpickfindwordForm,
+        'template': 'search.html',
         'search': s,
         'searchwordobjects': searchwords,
         'replacementwordobjects': replacementwords,
     }
 
-    return render(request, 'britpick_findword.html', responsedata)
+    return render(request, 'britpicktemplate.html', responsedata)
 
+# TODO: add dialect, category to replacement_list.html
+# TODO: reformat replacement_list.html
+# TODO: integrate replacement_list.html into topics
+# TODO: rename replacement snippets to standardized with 'snippet'
+# TODO: make search more powerful (looking for not just words but inside topics) and using search parameters from britpick.py to get suffixes etc; also can stop separate input/output
+# TODO: create word html (later - since now only using admin)
+# TODO: create about page
 
 def topicview(request, topicslug):
 

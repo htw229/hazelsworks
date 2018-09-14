@@ -22,7 +22,7 @@ from app import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls, name='admin'),
     url(r'^robots.txt', views.robotstxt, name='robots.txt'),
-    url(r'^britpick/search/', views.britpickfindword, name='britpick_findword.html'),
+    url(r'^britpick/search/', views.searchview, name='search'),
     url(r'^britpick/findduplicates/', views.britpickfindduplicates, name='britpick_findduplicates.html'),
     path(r'britpick/topics/<slug:topicslug>', views.topicview, name='topic'),
     url(r'^britpick/topics', views.topicslist, name='topicslist'),

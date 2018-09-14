@@ -24,6 +24,8 @@
         <li>Search in: {{ forminput.dialogue_option }}</li>
     </ul>
 
-    {%  outputtexttemplate outputtext|safe replacements %}
+    <div class="outputtext">
+        {%  outputtexttemplate outputtext|safe replacements %}
+    </div>
 
 {% endif %}
