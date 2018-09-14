@@ -1,11 +1,14 @@
 :root {
     --red: #950d19;
     --darkred: #7b0b15;
+    --lightyellow: #f6e98b;
     --yellow: #eed82d;
     --darkyellow: #c4b125;
+    --lightblue: #527bb2;
     --blue: #21569c;
     --darkblue: #1a4277;
     --lightgray:#e6e6e6;
+    --gray:#555354;
     --darkgray: #1f1d1e;
 }
 
@@ -177,39 +180,142 @@ textarea {
 
 
 
+/*--------------------------------------------*/
+/*  OUTPUT  */
+/* replacementwrapper "inputtext [replacement"considerstring: wordwrapper"word, word" (clarification; explanation)"] [topiclink]" */
+/*--------------------------------------------*/
 
+.outputtext {
+    line-height: 1.5em;
+}
 
-
-
-
-
-.mandatory {
-    background-color: var(--yellow);
-    color: white;
+.replacementwrapper {
     font-weight: bold;
+    /*background-color: var(--lightgray);*/
+    /*padding-left: 3px;*/
+    padding: 0 3px 0 3px;
+}
+
+
+
+.inputtext, .replacement, .topiclink, .wordwrapper, .explanation {
+    padding: 0 3px 0 3px;
+}
+
+.inputtext {
+    /*background-color: var(--darkgray);*/
+    color: var(--darkgray);
+    margin-right: 3px;
+    border-bottom: 1px dotted var(--darkgray);
+}
+
+.replacementwrapper.category-mandatory {
+    /*background-color: lightgoldenrodyellow;*/
+}
+
+
+
+.replacementwrapper a {
+    text-decoration: none;
+}
+
+span.replacement {
+    color: black;
+}
+
+span.replacement .wordwrapper {
+    color: var(--blue)
+}
+
+span.replacement:hover .wordwrapper {
+    color: var(--red)
 }
 
 .replacement {
     background-color: var(--lightgray);
-    font-weight: bold;
+    color: var(--blue);
 }
 
-.directreplacement {
+
+
+
+.categorystring {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 80%;
+}
+
+span.categorystring:hover {
+    color: black;
+}
+
+.replacementwrapper span.categorystring:hover {
+    color: black;
+}
+
+.category-mandatory span.replacement {
+    background-color: var(--lightyellow);
+}
+
+.category-mandatory span.wordwrapper {
+    background-color: var(--yellow);
+}
+
+
+
+
+
+
+
+
+.category-suggested {
+
+}
+
+
+.category-informal, .category-slang {
+
+}
+
+
+
+/*.category-mandatory .replacement {*/
     /*color: black;*/
-    /*font-weight: bold;*/
-    /*background-color: orange;*/
+/*}*/
+
+
+
+.clarification, .explanation {
+    font-style: italic;
+    color: var(--darkgray);
+    font-size: 80%;
+}
+
+.considerstring {
+    font-weight: normal;
+}
+
+.topiclink a {
+    /*background-color: var(--lightgray);*/
+    color: var(--red);
     /*color: white;*/
 }
 
-.considerreplacement {
-    /*color: black;*/
+.topiclink a:hover {
+    text-decoration: underline;
 }
 
-.clarifyreplacement {
-    /*color: black;*/
-    font-style: italic;
-    font-size: smaller;
+.topiclink img {
+    vertical-align: middle;
+    padding-bottom: 5px;
 }
+
+
+
+
+
+
+
 
 .foundword {
     font-weight: bold;

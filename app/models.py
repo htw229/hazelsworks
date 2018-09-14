@@ -2,6 +2,7 @@ from django.db import models
 from django.template.defaultfilters import slugify
 
 from .htmlutils import getlinkhtml
+import htmlutils
 from appsettings import *
 # import appsettings as appsettingstest
 
@@ -133,6 +134,83 @@ class Replacement(models.Model):
         return len(max(self.searchwordlist, key=lambda l: len(l)))
 
     @property
+    def multiplereplacements(self) -> bool:
+        if (self.suggestreplacement == '') or (len(self.considerreplacementlist) == 0):
+            return False
+        else:
+            return True
+
+
+
+    @property
+    def replacementwordshtml(self) -> str or bool:
+        w = []
+        if self.suggestreplacement:
+            w.append(r'<span class="word">' + self.suggestreplacement.strip() + r'</span>')
+        if self.considerreplacementlist:
+            w.extend([r'<span class="word">' + s + r'</span>' for s in self.considerreplacementlist])
+
+        if len(w) == 0:
+            return False
+
+        s = ', '.join(w)
+        s = htmlutils.addspan(s, 'wordwrapper')
+
+        # if self.category.name != 'mandatory' and self.category.name != 'suggested':
+        if self.category.name == 'slang':
+            # s = r'<span class="considerstring">consider</span>: ' + s
+            categorystring = self.category.name + ': '
+            s = htmlutils.addspan(categorystring, 'categorystring') + s
+
+        return s
+
+
+#TODO: not treating dialogue correctly
+
+    @property
+    def clarifyexplanationhtml(self) -> str or bool:
+        # get strings from clarification and explanations
+        # s = ''
+
+        w = [w for w in self.clarification.split('\r\n') if w.strip() != '']
+        w.extend([o.text for o in self.explanations.all()])
+
+        if len(w) == 0:
+            return False
+
+        s = '; '.join(w)
+        s = htmlutils.addspan(s, 'explanation')
+
+        return s
+
+    @property
+    def replacementhtml(self) -> str or bool:
+
+        words = self.replacementwordshtml
+        explanation = self.clarifyexplanationhtml
+
+        if words and explanation:
+            s = words + r' | ' + explanation
+        elif words:
+            s = words
+        elif explanation:
+            s = explanation
+        else:
+            return None
+
+        s = htmlutils.addspan(s, 'replacement')
+
+        # if s:
+        #     s = '<span class="category-' + self.category.name + '">' + s + '</span>'
+
+        return s
+
+
+
+
+
+
+    @property
     def considerreplacementlist(self) -> list:
         wordlist = [w for w in self.considerreplacements.split('\r\n') if w.strip() != '']
         return wordlist
@@ -147,20 +225,7 @@ class Replacement(models.Model):
         s = ', '.join(wordlist)
         return s
 
-    @property
-    def clarifyreplacementstring(self) -> str:
-        # get strings from clarification text box
-        s = ''
 
-        if self.clarification:
-            s = s + ' / '.join([w for w in self.clarification.split('\r\n') if w.strip() != ''])
-
-        if self.explanations:
-            # get strings from all objects
-            explanationstrings = [o.text for o in self.explanations.all()]
-            s = s + ' / '.join(explanationstrings)
-
-        return s
 
     @property
     def objectstring(self) -> str:

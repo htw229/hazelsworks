@@ -5,6 +5,7 @@ from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
 import app.appsettings as settings
 import grammar
 import markup
+import os
 
 import re
 
@@ -25,8 +26,8 @@ matchoptionsstrings = {
 }
 
 
-findanywherepattern = r"""\b(%s)\b(?=[^}]*?{)"""
-findinquotespattern = r"""\b(%s)\b(?=[^"”}]*?[^\s\w}]["”])(?=[^}]*?{)"""
+findanywherepattern = r"""\b(%s)\b(?=[^>]*?<)"""
+findinquotespattern = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 
 
 
@@ -57,35 +58,29 @@ def britpick(formdata):
     searches = createsearches(formdata)
     debug.add(['number of searches:', len(searches)])
 
-    outputtext = createoutputtext(formdata['text'], searches)
+    text = createoutputtext(formdata['text'], searches)
     # debug.add(outputtext)
 
+    text = postprocesstext(text)
+
     britpickeddata = {
-        'text': outputtext,
+        'text': text,
         'debug': debug,
     }
+
 
     debug.timer('britpick() finished')
     return britpickeddata
 
-# def britpick(inputtext, dialectname, matchoption=matchoptions['SEARCH_DIALOGUE_IF_SPECIFIED']):
-#
-#     # debug
-#     global debug
-#     debug = ''
-#     debug = Debug()
-#
-#     searches = createsearches(dialectname)
-#     # debug.add(['number of searches:', len(searches)])
-#     # debug.add(['searches[25]', searches[25].regexpattern])
-#
-#     # TODO: clean up matchoption, won't work until this is done
-#     outputtext = createoutputtext(inputtext, searches, dialectname, matchoption)
-#
-#     debug.timer('britpick() finished')
-#
-#     return outputtext, debug.html
 
+
+def postprocesstext(text):
+    # remove created {}
+    text = text.replace('<', '').replace('>', '')
+    # create line breaks
+    text = linebreakstoparagraphs(text)
+
+    return text
 
 
 def getcategorypatterns(formdata):
@@ -148,15 +143,11 @@ def createoutputtext(inputtext, searches):
     '''
     global debug
 
-    text = inputtext + '{'
+    text = inputtext + '<'
 
     for search in searches:
         text = replacetext(text, search)
 
-    # create line breaks
-    text = linebreakstoparagraphs(text)
-    # remove created {}
-    text = text.replace('{', '').replace('}', '')
 
     # debug.timer('createoutputtext() finished')
     return text
@@ -224,7 +215,8 @@ def replacetext(inputtext, search):
     pattern = re.compile(search['pattern'], re.IGNORECASE)
 
     for match in pattern.finditer(inputtext):
-        replacementtext = createreplacetext(r'{' + match.group() + ' ', search['replaceobject']) + r'}'
+        # replacementtext = createreplacetext(r'{' + match.group() + ' ', search['replaceobject']) + r'}'
+        replacementtext = r'<' + createreplacementhtml(match.group(), search['replaceobject'].pk) + r'>'
         text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
         addedtextlength += len(replacementtext) - len(match.group())
 
@@ -235,6 +227,29 @@ def replacetext(inputtext, search):
 # ------------------------------------
 # CREATE AND FORMAT REPLACEMENT TEXTS
 # ------------------------------------
+
+def createreplacementhtml(inputtext, replacementpk):
+    global debug
+    # templatepath = os.path.dirname(os.path.dirname(__file__)) + r'/templates/inline_replacement_python.html'
+    # replacementhtml = open(templatepath, 'r').read()
+    #
+    # replacementdata = {
+    #     'inputtext': inputtext,
+    #     'suggestreplacement': replacement.suggestreplacement,
+    #     'considerreplacements': ', '.join(replacement.considerreplacementlist),
+    #     'clarification': replacement.clarifyreplacementstring,
+    #     'category': replacement.category.name,
+    #     'explanation': str(replacement.explanations),
+    #     'topic': str(replacement.topics),
+    # }
+    #
+    # html = replacementhtml.format(**replacementdata)
+
+
+    html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
+
+    debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
+    return html
 
 def createreplacetext(textstring, britpickobj):
     '''
@@ -262,12 +277,12 @@ def createreplacetext(textstring, britpickobj):
         stringlist.append(addspan(c, 'considerreplacements'))
 
     # add explanations
-    if britpickobj.clarifyreplacementstring:
+    if britpickobj.clarifyexplanationspan:
         if len(stringlist) == 0:
             # if no other text, then don't add parenthesis
-            stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarification'))
+            stringlist.append(addspan(britpickobj.clarifyexplanationspan, 'clarification'))
         else:
-            stringlist.append(addspan(britpickobj.clarifyreplacementstring, 'clarification', '(', ')'))
+            stringlist.append(addspan(britpickobj.clarifyexplanationspan, 'clarification', '(', ')'))
 
     # add topic
     for topic in britpickobj.topics.all():

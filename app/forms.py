@@ -70,6 +70,8 @@ class BritpickForm(forms.Form):
         # search for all replacement categories by default
         self.initial['replacement_categories'] = [t.pk for t in ReplacementCategory.objects.all()]
 
+        # search smart by default
+        self.initial['dialogue_option'] = DIALOGUE_OPTION_CHOICES[0][0]
 
 
 
