@@ -7,7 +7,7 @@ BRITPICKFORM_REPLACEMENTCATEGORIES_LABEL = 'Search for words marked as'
 #     ('informal', 'informal'),
 #     ('slang', 'slang/profanity'),
 # ]
-BRITPICKFORM_SMARTDIALOGUE_LABEL = 'Suggest informal, slang and non-British dialect replacements in dialogue only'
+# BRITPICKFORM_SMARTDIALOGUE_LABEL = 'Suggest informal, slang and non-British dialect replacements in dialogue only'
 # BRITPICKFORM_CHARACTERDIALOGUE_LABEL = 'Search only dialogue near character name'
 
 BRITPICKFORM_DIALOGUE_LABEL = 'Suggest replacements in'

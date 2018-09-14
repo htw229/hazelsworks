@@ -1,6 +1,11 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
 import re
+import os
+
+from django.template.loader import get_template
+from django.http import HttpResponse
+from django.template import RequestContext, Template
 
 from .forms import BritpickForm, BritpickfindwordForm, DIALOGUE_OPTION_CHOICES
 from .britpick import britpick
@@ -42,6 +47,9 @@ def britpickapp(request):
         form = BritpickForm()
 
 
+    replacements = {}
+    for r in Replacement.objects.all():
+        replacements[r.pk] = r
 
     responsedata = {
         'pagetitle': 'Britpick',
@@ -49,13 +57,23 @@ def britpickapp(request):
         'form': form,
         'forminput': forminput,
         'outputtext': outputtext,
+        'replacements': replacements,
         'showdebug': True,
         'debug': debug.html,
     }
 
+    # template = get_template('britpicktemplate.html')
+    # html = template.render(responsedata)
+
+    # template = get_template('britpicktemplate.html')
+    # context = RequestContext(request, responsedata)
+    # html = template.render(context)
+    #
+    # return HttpResponse(html)
+
     return render(request, 'britpicktemplate.html', responsedata)
 
-
+# TODO: give form's suggest replacements a default
 
 def britpickfindduplicates(request):
     objects = Replacement.objects.all()

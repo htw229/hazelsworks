@@ -1,0 +1,13 @@
+<span class="replacementwrapper category-{{ replacement.category.name }}">
+    <span class="inputtext">{{ inputtext }}</span>
+
+    {% if replacement.replacementhtml %}
+        [{{ replacement.replacementhtml|safe }}]
+    {% endif %}
+
+    {% if replacement.topics.all %}
+        {% for topic in replacement.topics.all %}
+            [<span class="topiclink">{{ topic.linkhtml|safe }}</span>]
+        {% endfor %}
+    {% endif %}
+</span>

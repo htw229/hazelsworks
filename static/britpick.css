@@ -177,39 +177,91 @@ textarea {
 
 
 
+/*--------------------------------------------*/
+/*  OUTPUT  */
+/* replacementwrapper "inputtext [replacement"considerstring: wordwrapper"word, word" (clarification; explanation)"] [topiclink]" */
+/*--------------------------------------------*/
 
-
-
-
-
-
-.mandatory {
-    background-color: var(--yellow);
-    color: white;
+.replacementwrapper {
     font-weight: bold;
+    /*background-color: var(--lightgray);*/
+    /*padding-left: 3px;*/
+    padding: 0 3px 0 3px;
 }
 
 .replacement {
     background-color: var(--lightgray);
-    font-weight: bold;
 }
 
-.directreplacement {
-    /*color: black;*/
-    /*font-weight: bold;*/
-    /*background-color: orange;*/
+.replacement, .topiclink a, .wordwrapper {
+    padding: 0 3px 0 3px;
+}
+
+.inputtext {
+    /*background-color: var(--darkgray);*/
+}
+
+.replacementwrapper.category-mandatory {
+    /*background-color: lightgoldenrodyellow;*/
+}
+
+.category-mandatory span.inputtext, .category-mandatory span.replacement {
+    /*background-color: var(--yellow);*/
+    /*background-color: var(--red);*/
+    background-color: lightyellow;
+}
+
+.category-mandatory span.replacement {
+    /*background-color: var(--darkyellow);*/
+    /*background-color: lightyellow;*/
+}
+
+.category-mandatory span.wordwrapper {
+    background-color: var(--yellow);
+}
+
+
+.category-suggested {
+
+}
+
+
+.category-informal, .category-slang {
+
+}
+
+.replacement {
+    /*background-color: var(--lightgray);*/
+}
+
+.categorystring {
+    font-style: italic;
+    font-weight: normal;
+    font-size: 80%;
+}
+
+.clarification, .explanation {
+    font-style: italic;
+}
+
+.considerstring {
+    font-weight: normal;
+}
+
+.topiclink a {
+    /*background-color: var(--lightgray);*/
+    color: var(--red);
     /*color: white;*/
 }
 
-.considerreplacement {
-    /*color: black;*/
-}
 
-.clarifyreplacement {
-    /*color: black;*/
-    font-style: italic;
-    font-size: smaller;
-}
+
+
+
+
+
+
+
 
 .foundword {
     font-weight: bold;

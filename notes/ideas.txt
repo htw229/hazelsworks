@@ -43,26 +43,29 @@ Dialect
 Search preset
 
 Dialog by character
-Exclude profanity
-Exclude dialogue
 
 
-[] smart search - mandatory and suggested in all text; informal and slang/profanity in dialogue only; non-default dialect in dialogue only
-[] search dialogue only
-[] search all text
+# TODO: is smart search not working?
+# replacements not being displayed correct inline
 
-- slang in dialogue only
-- informal in dialogue only
 
-[] mandatory replacement
-[] suggested
-[] informal
-[] slang/profanity
 
-[] replace informal and slang/profanity in dialogue only
+britpick.py will output:
+{% include "inline_replacement.html" with replacement=replacement.1 %}
+as well as list of objects being replaced (index number will correspond with object)
 
+output replacements objects from view
+
+inline_replacement.html
+[<span style="category">{{ replacement.suggestreplacement }} | replacement.considerreplacements, (replacement.clarification | replacement.explanation)</span>][replacement.topic]
+
+category -> css style
+
+- if replacement doesn't contain anything (text or topic link), then make it a 'may not be used in BrE'
+- change (am) and (br) to AmE and BrE
 
 Displays search options chosen & display form with them chosen
 Display (mouseover?) instructions
 
 Standardize form options and english text
+Format form
