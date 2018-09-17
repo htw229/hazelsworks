@@ -1,11 +1,14 @@
 from .models import Replacement, Dialect, ReplacementExplanation, ReplacementCategory
 from .debug import Debug
 from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
+from __init__ import *
 
-import app.appsettings as settings
-import grammar
+# import appsettings as settings
+# import grammar
 
 import re
+
+import collections
 
 debug = ''
 
@@ -14,30 +17,181 @@ findanywherepattern = r"""\b(%s)\b(?=[^>]*?<)"""
 findinquotespattern = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 
 
+# ReplacementCategory.object.dialogue == (False, True)
+searchpatterns = {
+    'DIALOGUEONLY':(findinquotespattern, findinquotespattern),
+    'ALLTEXT':(findanywherepattern, findanywherepattern),
+    'SMART':(findanywherepattern, findinquotespattern),
+}
+
 
 def britpick(formdata):
     global debug
     debug = ''
     debug = Debug()
 
-    searches = createsearches(formdata)
-    debug.add(['number of searches:', len(searches)])
+    searchwords = getsearchwords(formdata)
+    debug.add([len(searchwords), 'searchwords'])
+    debug.timer('create searchwords')
 
-    text = createoutputtext(formdata['text'], searches)
-    # debug.add(outputtext)
+    for word in searchwords:
+        word['pattern'] = getwordpattern(word['str'])
+    debug.timer('create word patterns')
+
+    text = formdata['text']
+
+    i = 0
+    for searchpattern in searchpatterngenerator(searchwords, formdata):
+        debug.add(['searchpattern', searchpattern], max=10)
+        text = maketextreplacements(searchpattern, text)
+        i += 1
+        if i > 10000:
+            break
+    debug.timer('get search patterns from generator')
+    debug.add(['ITERATIONS', i], max=500)
 
     text = postprocesstext(text)
 
-    # debug.add(text)
+    debug.timer('britpick() finished')
 
     britpickeddata = {
         'text': text,
         'debug': debug,
     }
 
-
-    debug.timer('britpick() finished')
     return britpickeddata
+
+
+
+def getsearchwords(formdata) -> list:
+    global debug
+
+    searchwords = []
+    patternsbycategory = getcategorypatternwrappers(formdata)
+
+    for r in Replacement.objects\
+        .filter(dialect=formdata['dialect'])\
+        .filter(active=True)\
+        .filter(category__in=formdata['replacement_categories']):
+
+        patternwrapper = patternsbycategory[r.category_id]
+
+        searchwords.extend([{
+            'str': s,
+            'obj': r,
+            'patternwrapper': patternwrapper,
+        } for s in r.searchwordlist])
+
+    searchwords = sorted(searchwords, key=lambda w: len(w['str']), reverse=True)
+
+    return searchwords
+
+
+def getwordpattern(searchstring) -> str:
+    if PROTECTED_WORD_MARKER in searchstring:
+        return searchstring
+
+
+
+
+    # add alternate spellings (british, australian, canadian) -> substitute (||||)
+    # add verb tenses -> substitute (||||)
+    # add suffixes -> at end - (||||)
+    # add markup -> list
+    # change "-" to (|\s|\-)
+    # combine into string
+
+    wordpattern = searchstring
+
+    return wordpattern
+
+def getalternatespellings(searchstring) -> list:
+    return []
+
+def getverbtenses(searchstring) -> list:
+    return []
+
+def getsuffixes(searchstring) -> list:
+    return []
+
+
+
+def searchpatterngenerator(searchwords, formdata) -> str:
+    global debug
+
+    # get pattern of next searchword
+    # then get patterns of next one, if matches include it
+    # until get NUMBER_COMBINED_SEARCHES of words
+    # then combine them with wrapper
+
+    while len(searchwords) > 0:
+        nextwords = []
+        for i, word in enumerate(searchwords):
+            if word['patternwrapper'] == searchwords[0]['patternwrapper'] and \
+                    word['obj'] not in [w['obj'] for w in nextwords]: # cannot have multiple regex groups with same pk
+                nextwords.append(searchwords.pop(i))
+            if len(nextwords) == NUMBER_COMBINED_SEARCHES:
+                break
+
+        # debug.add(['nextwords', [w['obj'].pk for w in nextwords]])
+
+        wordspatterns = []
+        for word in nextwords:
+            wordspatterns.append(WORD_PATTERN_GROUP.format(pk=word['obj'].pk, wordpattern=word['pattern']))
+
+        patternwrapper = nextwords[0]['patternwrapper']
+        pattern = patternwrapper % '|'.join(wordspatterns)
+
+        yield pattern
+
+
+
+    # for searchword in searchwords:
+    #     yield searchword
+
+
+
+
+def maketextreplacements(patternstring, inputtext) -> str:
+    global debug
+
+    pattern = re.compile(patternstring, re.IGNORECASE) #TODO: allow case for instances of ER
+
+    text = inputtext + ' <'
+    # debug.add(['text', text])
+
+    addedtextlength = 0  # increment starting position after every replacement
+
+    for match in pattern.finditer(text):
+        debug.add(['match group', match.groupdict()])
+        for groupname in match.groupdict().keys():
+            if match.groupdict()[groupname]:
+                debug.add(['OBJECT PK FOUND=', groupname])
+                pk = groupname[2:] # trim first two characters ('pk456' -> '456')
+                replacementtext = r'<' + createreplacementhtml(match.group(), pk) + r'>'
+
+        # replacementtext = 'found'
+                text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
+                addedtextlength += len(replacementtext) - len(match.group())
+
+    outputtext = text[:-2] # remove added '<' from text
+
+
+    return outputtext
+
+
+
+
+
+
+
+
+
+
+
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
+#------------------------------------------------------------------------
 
 
 
@@ -105,24 +259,39 @@ def getcategorypatternwrappers(formdata) -> dict:
     """
     global debug
 
-    patternsbycategory = {}
+    patternsbycategory = collections.defaultdict()
     for obj in ReplacementCategory.objects.all():
         if str(obj.pk) in formdata['replacement_categories']:
             pattern_template = ''
             if formdata['dialogue_option'] == 'ALLTEXT':
                 pattern_template = findanywherepattern
-                debug.add([obj, 'ALLTEXT','findanywherepattern'])
             elif formdata['dialogue_option'] == 'DIALOGUEONLY':
                 pattern_template = findinquotespattern
-                debug.add([obj, 'DIALOGUEONLY', 'findinquotespattern'])
             elif formdata['dialogue_option'] == 'SMART':
                 if obj.dialogue:
                     pattern_template = findinquotespattern
-                    debug.add([obj, 'SMART', 'findinquotespattern'])
                 else:
                     pattern_template = findanywherepattern
-                    debug.add([obj, 'SMART', 'findanywherepattern'])
-            patternsbycategory.update({obj.pk: pattern_template})
+            patternsbycategory[obj.pk] = pattern_template
+
+    # patternsbycategory = collections.defaultdict()
+    # for obj in ReplacementCategory.objects.all():
+    #     if str(obj.pk) in formdata['replacement_categories']:
+    #         pattern_template = ''
+    #         if formdata['dialogue_option'] == 'ALLTEXT':
+    #             pattern_template = findanywherepattern
+    #             debug.add([obj, 'ALLTEXT','findanywherepattern'])
+    #         elif formdata['dialogue_option'] == 'DIALOGUEONLY':
+    #             pattern_template = findinquotespattern
+    #             debug.add([obj, 'DIALOGUEONLY', 'findinquotespattern'])
+    #         elif formdata['dialogue_option'] == 'SMART':
+    #             if obj.dialogue:
+    #                 pattern_template = findinquotespattern
+    #                 debug.add([obj, 'SMART', 'findinquotespattern'])
+    #             else:
+    #                 pattern_template = findanywherepattern
+    #                 debug.add([obj, 'SMART', 'findanywherepattern'])
+    #         patternsbycategory.update({obj.pk: pattern_template})
 
     return patternsbycategory
 
@@ -329,7 +498,6 @@ def replacetext(inputtext, search):
         debug.add(['inputtext', inputtext])
 
     for match in pattern.finditer(inputtext):
-        # replacementtext = createreplacetext(r'{' + match.group() + ' ', search['replaceobject']) + r'}'
         replacementtext = r'<' + createreplacementhtml(match.group(), search['replaceobject'].pk) + r'>'
         text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
         addedtextlength += len(replacementtext) - len(match.group())
@@ -346,21 +514,6 @@ def replacetext(inputtext, search):
 
 def createreplacementhtml(inputtext, replacementpk):
     global debug
-    # templatepath = os.path.dirname(os.path.dirname(__file__)) + r'/templates/inline_replacement_python.html'
-    # replacementhtml = open(templatepath, 'r').read()
-    #
-    # replacementdata = {
-    #     'inputtext': inputtext,
-    #     'suggestreplacement': replacement.suggestreplacement,
-    #     'considerreplacements': ', '.join(replacement.considerreplacementlist),
-    #     'clarification': replacement.clarifyreplacementstring,
-    #     'category': replacement.category.name,
-    #     'explanation': str(replacement.explanations),
-    #     'topic': str(replacement.topics),
-    # }
-    #
-    # html = replacementhtml.format(**replacementdata)
-
 
     html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
 

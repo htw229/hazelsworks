@@ -1,6 +1,7 @@
 from timeit import default_timer
+import html
 
-class Debug():
+class Debug:
     debugstrings = []
     starttime = ''
     counter = 0
@@ -22,7 +23,7 @@ class Debug():
         self.debugstrings.append(s)
 
     def timer(self, string = 'timer'):
-        self.add(
+        self.debugstrings.append(
             string + ': ' + str(default_timer() - self.starttime)
         )
 
@@ -47,7 +48,7 @@ class Debug():
 
     @property
     def html(self) -> str:
-        s = '<br />'.join(self.debugstrings)
+        s = '<br />'.join([html.escape(s) for s in self.debugstrings])
         return s
 
     def print(self):

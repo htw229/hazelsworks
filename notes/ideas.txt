@@ -69,3 +69,60 @@ Display (mouseover?) instructions
 
 Standardize form options and english text
 Format form
+
+
+
+
+
+
+
+
+
+x get every searchword, store it with its object (multiple per object)
+x sort searchwords by length
+for each searchword, generate a pattern with suffix options, markup, verb tenses (single string per object)
+
+x for each N words of same match type (quotes, no quotes) - maybe make generator?:
+    x group N of them together that have same wrapping pattern
+    x create full regex search with wrapper quote/no quote wrapper and inner pattern (?P<pk456>wordsubpattern)|<?P<pk567>wordsubpattern)|etc
+
+- compile pattern, find matches with finditer and loop through them
+    - find out which group matched with m.lastgroup
+    - make replacementtext
+
+
+
+
+
+
+
+
+markup:
+# do not add suffix
+^ add suffix here
+[markup] markup substitution
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
