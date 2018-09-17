@@ -23,7 +23,7 @@ def addspan(string, cssclass, wrapperstart='', wrapperend='', tagname='span'):
 
 def linebreakstoparagraphs(inputtext):
     paragraphs = [w for w in inputtext.split('\r\n') if w.strip() != '']
-    text = r'<p>' + r'</p><p>'.join(paragraphs)
+    text = r'<p>' + r'</p><p>'.join(paragraphs) + r'</p>'
     return text
 
 def getlinkhtml(url = '', text = 'link', mouseovertext ='', newbrowsertab = False, urlname = None, urlkwargs = None):

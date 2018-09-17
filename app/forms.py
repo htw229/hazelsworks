@@ -1,6 +1,6 @@
 from django import forms
 from .models import Dialect, ReplacementCategory
-from .britpick import matchoptions, matchoptionsstrings
+# from .britpick import matchoptions, matchoptionsstrings
 # from .appsettingstest import DEFAULT_DIALECT
 import app.appsettings as SETTINGS
 import app.strings as STRINGS

@@ -126,7 +126,7 @@ class Replacement(models.Model):
 
     @property
     def searchwordlist(self) -> list:
-        wordlist = [w for w in self.searchwords.split('\r\n') if w.strip() != '']
+        wordlist = [w.strip() for w in self.searchwords.split('\r\n') if w.strip() != '']
         return wordlist
 
     @property

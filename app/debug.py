@@ -4,8 +4,12 @@ class Debug():
     debugstrings = []
     starttime = ''
     counter = 0
+    paused = False
 
-    def add(self, item, max = 50):
+    def add(self, item, max = 100):
+        if self.paused:
+            return
+
         self.counter += 1
         if self.counter > max:
             return
@@ -18,12 +22,18 @@ class Debug():
         self.debugstrings.append(s)
 
     def timer(self, string = 'timer'):
-        self.debugstrings.append(
+        self.add(
             string + ': ' + str(default_timer() - self.starttime)
         )
 
     def resetcounter(self):
         self.counter = 0
+
+    def pause(self):
+        self.paused = True
+
+    def unpause(self):
+        self.paused = False
 
     def __init__(self):
         self.debugstrings = []
@@ -32,7 +42,7 @@ class Debug():
         self.debugstrings.append('debug timer started')
 
     def __str__(self):
-        s = r'\r\n'.join(self.debugstrings)
+        s = r'  |  '.join(self.debugstrings)
         return s
 
     @property

@@ -13,6 +13,29 @@ SUFFIX_LIST = [
     'ding',
 ]
 
+PLURAL_SUFFIX_LIST = [
+    's',
+    'es',
+]
+
+VERB_SUFFIX_LIST = [
+    'ing',
+    's',
+]
+
+ADJECTIVE_ADVERB_SUFFIX_LIST = [
+    'ly',
+    'ingly',
+]
+
+IRREGULAR_VERBS = {
+
+}
+
+
+SUFFIX_IGNORE_PATTERN = r'\[\]\s'
+
+
 PREPOSITION_LIST = [
     'to',
     'up',
@@ -22,6 +45,12 @@ PREPOSITION_LIST = [
     'over',
     'it',
     'that',
+    'from',
+    'a',
+    'the',
+    'this',
+    'that',
+    'the',
 ]
 
 MARKUP_LIST = [
