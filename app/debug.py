@@ -6,13 +6,16 @@ class Debug:
     starttime = ''
     counter = 0
     paused = False
+    max_reached_message = False
 
-    def add(self, item, max = 100):
+    def add(self, item, max = 500):
         if self.paused:
             return
 
         self.counter += 1
         if self.counter > max:
+            if not self.max_reached_message:
+                self.debugstrings.append('...')
             return
 
         if type(item) == list:
