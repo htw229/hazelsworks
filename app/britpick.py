@@ -13,17 +13,24 @@ import collections
 debug = ''
 
 
-findanywherepattern = r"""\b(%s)\b(?=[^>]*?<)"""
-findinquotespattern = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+# REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
+# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 
 
 # ReplacementCategory.object.dialogue == (False, True)
 searchpatterns = {
-    'DIALOGUEONLY':(findinquotespattern, findinquotespattern),
-    'ALLTEXT':(findanywherepattern, findanywherepattern),
-    'SMART':(findanywherepattern, findinquotespattern),
+    'DIALOGUEONLY':(REPLACE_FIND_QUOTES_ONLY, REPLACE_FIND_QUOTES_ONLY),
+    'ALLTEXT':(REPLACE_FIND_ANYWHERE, REPLACE_FIND_ANYWHERE),
+    'SMART':(REPLACE_FIND_ANYWHERE, REPLACE_FIND_QUOTES_ONLY),
 }
 
+
+def removewordboundary(oldpattern) -> str:
+    global debug
+
+    p = oldpattern[:oldpattern.rfind(r"\b")] + oldpattern[oldpattern.rfind(r"\b")+2:]
+    debug.add('removing word boundary', oldpattern, '->', p)
+    return p
 
 def britpick(formdata):
     global debug
@@ -36,6 +43,9 @@ def britpick(formdata):
 
     for word in searchwords:
         word['pattern'] = getwordpattern(word['str'])
+        if word['pattern'][-1] in r",.!?":
+            debug.add('removing boundary for',word)
+            word['patternwrapper'] = removewordboundary(word['patternwrapper'])
     debug.timer('create word patterns')
 
     text = formdata['text']
@@ -92,33 +102,16 @@ def getregexlistpattern(items) -> str:
     s = r'(' + r'|'.join(items) + r')'
     return s
 
+def getoptionalwordplaceholder(word) -> str:
+    s = SEARCH_OPTIONAL_PLACEHOLDER % word
+    return s
 
 def getwordpattern(searchstring) -> str:
     global debug
 
-    # if PROTECTED_WORD_MARKER in searchstring:
-    #     return searchstring
-
-
-
-    # when to add escape? if do before markup, will need to change markup to use escape characters (could do this on the fly)
-
-    # chop up words
     # for each word:
-    #   if single letter, skip
-    #   if in ignore word list, skip
-    #   if irregular verb tense, change and continue
     #   add british/american variable word endings
     #   add regular suffixes (verb tenses, plurals, adverb -- doubling last consonant, not doubling and doubling l's)
-
-    # flags for protect word, protect full phrase, protect case
-    # handle (keep) punctuation
-
-    # find words with regex
-    # decide if protected
-    # with each word, go through noun, verb, adj endings
-    # add irregular verbs (do this in addition to above, in case it's not used that way)
-    # combine all into one subpattern (find a way to optimize this)
 
     pattern = re.compile(SEARCH_STRING_PATTERN, re.IGNORECASE)
     searchpattern = ''
@@ -126,7 +119,7 @@ def getwordpattern(searchstring) -> str:
     matches = [m for m in re.finditer(pattern, searchstring)]
 
     protectedphrase = False
-    ignorecase = True
+    ignorecase = True #TODO: use ignorecase later
 
     if matches[-1].groupdict()['flags']:
         if matches[-1].groupdict()[SEARCH_PROTECTED_PHRASE]:
@@ -143,63 +136,94 @@ def getwordpattern(searchstring) -> str:
             s = replacemarkup(matchgroups[SEARCH_MARKUP])
 
         elif matchgroups[SEARCH_EXCLUDE]:
-            s = addexcludedword(matchgroups[SEARCH_EXCLUDE])
+            s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: not working
             replacedashes = False
 
-        elif matchgroups[SEARCH_PUNCTUATION]:
+        elif matchgroups[SEARCH_PUNCTUATION]: # spaces are here
             s = re.escape(match.group())
 
-        elif matchgroups[SEARCH_NONMUTABLE]:
-            s = re.escape(match.group())
+        # TODO: do this manually so have more control
+        # elif matchgroups[SEARCH_NONMUTABLE]:
+        #     s = re.escape(match.group())
 
-        elif matchgroups[SEARCH_WORD]:
+        # main category
+        elif matchgroups[SEARCH_WORD] or matchgroups[SEARCH_OPTIONAL]: # process optional word just like others
+
+            if matchgroups[SEARCH_WORD]:
+                word = matchgroups[SEARCH_WORD]
+                optional = False
+            else: # matchgroups[SEARCH_OPTIONAL]
+                word = matchgroups[SEARCH_OPTIONAL]
+                optional = True
+
             if protectedphrase or matchgroups[SEARCH_PROTECTED_WORD]:
-                s = matchgroups[SEARCH_WORD]
+                s = word
+                # debug.add([word, 'protected word'])
+
+            elif word.lower() in PROTECTED_WORDS:
+                if word.lower() in OPTIONAL_WORDS_LIST:
+                    s = word
+                    optional = True
+                else:
+                    s = word
             else:
                 # TODO: process word
-                s = matchgroups[SEARCH_WORD]
+                # get irregular verbs
+                conjugateslist = getirregularconjugates(word)
+                if conjugateslist:
+                    s = getregexlistpattern(conjugateslist)
+                    # debug.add(word, conjugateslist, s)
+                else:
+                    s = word
+
+            if optional:
+                s = getoptionalwordplaceholder(s)
+                # debug.add('getoptionalwordplaceholder',s)
+
+
+                # s = word
 
         if replacedashes:
             s = s.replace('-', DASH_REPLACEMENT_PATTERN)
+
+
 
         searchpattern += s
 
             # s = searchstring + "word"
 
+    # create OR pattern
+    # (if put the regex in earlier, cannot easily manage spaces before/after it)
+    searchpattern = re.sub(SEARCH_OPTIONAL_PLACEHOLDER_SEARCH, SEARCH_OPTIONAL_PATTERN % r'\1', searchpattern)
 
+    # remove trailing, leading and multiple spaces
+    # (spaces may be escaped, so easier to use regex)
+    searchpattern = re.sub(r'( +|(\\ )+)', ' ', searchpattern)
+    searchpattern = searchpattern.strip()
 
-    # irregular verb tenses
-    # for verblist in IRREGULAR_VERBS:
-    #     addedtextlength = 0  # increment starting position after every replacement
-    #     pattern = re.compile(r'\b' + getregexlistpattern(verblist) + r'\b', re.IGNORECASE)
-    #     # debug.add(['pattern', pattern], max=5)
-    #     for match in pattern.finditer(s):
-    #         replacementtext = getregexlistpattern(verblist)
-    #         s = s[:match.start() + addedtextlength] + replacementtext + s[match.end() + addedtextlength:]
-    #         addedtextlength += len(replacementtext) - len(match.group())
-    #         debug.add(['irregular',s])
-
-
-
-    # add markup
-    # if '[' in s:
-    #     # debug.add(["'[' in", s])
-    #     for m in MARKUP_LIST:
-    #         if m['markup'] in s:
-    #             replacepattern = '(' + '|'.join(m['wordlist']) + ')'
-    #             s = s.replace(m['markup'], replacepattern)
-                # do not add break here - may have additional matches
-
-    # change "-" to dash, space or no space options
-    # wordpattern = s.replace('-', DASH_REPLACEMENT_PATTERN)
-
-    # if 'pregnant' in wordpattern:
-        # debug.add(['wordpattern', wordpattern])
-
-    # combine into string
-
+    # if 'yay' in searchpattern:
+    #     debug.add('yay:', searchpattern)
 
     return searchpattern
+
+
+def getirregularconjugates(word) -> list:
+    global debug
+
+    conjugateslist = []
+    for irregularconjugateslist in IRREGULAR_CONJUGATES:
+        if word.lower() in irregularconjugateslist:
+            conjugateslist.extend(irregularconjugateslist)
+            # continue loop, may be a conjugate of multiple different verbs
+
+    if word[0] == word[0].upper():
+        conjugateslist = [x[0].upper() + x[1:] for x in conjugateslist]
+    else:
+        conjugateslist = conjugateslist
+
+
+
+    return conjugateslist
 
 
 def replacemarkup(markupstring):
@@ -237,14 +261,17 @@ def searchpatterngenerator(searchwords, formdata) -> str:
     # until get NUMBER_COMBINED_SEARCHES of words
     # then combine them with wrapper
 
-    while len(searchwords) > 0:
-        nextwords = []
+    iterations = 0
+    while len(searchwords) > 0 and iterations < MAX_SEARCHPATTERNGENERATOR_ITERATIONS:
+        iterations += 1
+
+        nextwords = [searchwords.pop(0)]
         for i, word in enumerate(searchwords):
+            if len(nextwords) == NUMBER_COMBINED_SEARCHES:
+                break
             if word['patternwrapper'] == searchwords[0]['patternwrapper'] and \
                     word['obj'] not in [w['obj'] for w in nextwords]: # cannot have multiple regex groups with same pk
                 nextwords.append(searchwords.pop(i))
-            if len(nextwords) == NUMBER_COMBINED_SEARCHES:
-                break
 
         # debug.add(['nextwords', [w['obj'].pk for w in nextwords]])
 
@@ -259,6 +286,7 @@ def searchpatterngenerator(searchwords, formdata) -> str:
 
 
 
+
     # for searchword in searchwords:
     #     yield searchword
 
@@ -268,8 +296,8 @@ def searchpatterngenerator(searchwords, formdata) -> str:
 def maketextreplacements(patternstring, inputtext) -> str:
     global debug
 
-    # if 'pregnant' in patternstring:
-    #     debug.add(['patternstring:', patternstring])
+    if 'yay' in patternstring:
+        debug.add(['yay:', patternstring])
 
     try:
         pattern = re.compile(patternstring, re.IGNORECASE) #TODO: allow case for instances of ER
@@ -277,6 +305,7 @@ def maketextreplacements(patternstring, inputtext) -> str:
         debug.add("regex error")
         debug.add(patternstring)
         return inputtext + 'ERROR'
+
 
     text = inputtext + ' <'
     # debug.add(['text', text])
@@ -385,14 +414,14 @@ def getcategorypatternwrappers(formdata) -> dict:
         if str(obj.pk) in formdata['replacement_categories']:
             pattern_template = ''
             if formdata['dialogue_option'] == 'ALLTEXT':
-                pattern_template = findanywherepattern
+                pattern_template = REPLACE_FIND_ANYWHERE
             elif formdata['dialogue_option'] == 'DIALOGUEONLY':
-                pattern_template = findinquotespattern
+                pattern_template = REPLACE_FIND_QUOTES_ONLY
             elif formdata['dialogue_option'] == 'SMART':
                 if obj.dialogue:
-                    pattern_template = findinquotespattern
+                    pattern_template = REPLACE_FIND_QUOTES_ONLY
                 else:
-                    pattern_template = findanywherepattern
+                    pattern_template = REPLACE_FIND_ANYWHERE
             patternsbycategory[obj.pk] = pattern_template
 
     # patternsbycategory = collections.defaultdict()
@@ -400,18 +429,18 @@ def getcategorypatternwrappers(formdata) -> dict:
     #     if str(obj.pk) in formdata['replacement_categories']:
     #         pattern_template = ''
     #         if formdata['dialogue_option'] == 'ALLTEXT':
-    #             pattern_template = findanywherepattern
-    #             debug.add([obj, 'ALLTEXT','findanywherepattern'])
+    #             pattern_template = REPLACE_FIND_ANYWHERE
+    #             debug.add([obj, 'ALLTEXT','REPLACE_FIND_ANYWHERE'])
     #         elif formdata['dialogue_option'] == 'DIALOGUEONLY':
-    #             pattern_template = findinquotespattern
-    #             debug.add([obj, 'DIALOGUEONLY', 'findinquotespattern'])
+    #             pattern_template = REPLACE_FIND_QUOTES_ONLY
+    #             debug.add([obj, 'DIALOGUEONLY', 'REPLACE_FIND_QUOTES_ONLY'])
     #         elif formdata['dialogue_option'] == 'SMART':
     #             if obj.dialogue:
-    #                 pattern_template = findinquotespattern
-    #                 debug.add([obj, 'SMART', 'findinquotespattern'])
+    #                 pattern_template = REPLACE_FIND_QUOTES_ONLY
+    #                 debug.add([obj, 'SMART', 'REPLACE_FIND_QUOTES_ONLY'])
     #             else:
-    #                 pattern_template = findanywherepattern
-    #                 debug.add([obj, 'SMART', 'findanywherepattern'])
+    #                 pattern_template = REPLACE_FIND_ANYWHERE
+    #                 debug.add([obj, 'SMART', 'REPLACE_FIND_ANYWHERE'])
     #         patternsbycategory.update({obj.pk: pattern_template})
 
     return patternsbycategory

@@ -8,20 +8,28 @@ class Debug:
     paused = False
     max_reached_message = False
 
-    def add(self, item, max = 500):
+    def add(self, item, *args, max = 500):
         if self.paused:
             return
 
         self.counter += 1
         if self.counter > max:
+            # indicate that have reached max in counter
             if not self.max_reached_message:
                 self.debugstrings.append('...')
+                self.max_reached_message = True
             return
 
+        strings = []
+
         if type(item) == list:
-            s = ' : '.join([str(s) for s in item])
+            strings.extend(item)
         else:
-            s = str(item)
+            strings.append(item)
+
+        strings.extend(args)
+
+        s = ' : '.join([str(s) for s in strings])
 
         self.debugstrings.append(s)
 

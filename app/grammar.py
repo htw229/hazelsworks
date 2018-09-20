@@ -54,6 +54,12 @@ PREPOSITION_LIST = [
     'the',
 ]
 
+OPTIONAL_WORDS_LIST = [
+    'a',
+    'an',
+    'the',
+]
+
 MARKUP_LIST = [
     {'markup': 'number',
      'wordlist': ['\d+', '\d+st', '\d+nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
@@ -78,7 +84,16 @@ MARKUP_LIST = [
 # british transformations
 VARIABLE_WORD_ENDINGS=[("ence", "ense"),("ogue", "og"),("yse", "yze"),("ize", "ise"),("our", "or"),("er", "re")]
 
-IRREGULAR_VERBS =[
+# too much work for very little use? add replacing pronouns in if needed
+#
+# PRONOUNS = [
+#     ['i', 'we', 'you', 'you all', 'she', 'he', 'they'],
+#     ['my', 'your', '']
+# ]
+
+
+IRREGULAR_CONJUGATES =[
+# irregular verbs
     ['abides', 'abiding', 'abide', 'abode'],
     ['alighting', 'alit', 'alights', 'alight'],
     ['arise', 'arisen', 'arose', 'arises', 'arising'],
@@ -277,10 +292,123 @@ IRREGULAR_VERBS =[
     ['winding', 'wound', 'wind', 'winds'],
     ['withdraws', 'withdrawn', 'withdrawing', 'withdraw', 'withdrew'],
     ['wring', 'wrings', 'wringing', 'wrung'],
-    ['wrote', 'writes', 'write', 'written', 'writing']
+    ['wrote', 'writes', 'write', 'written', 'writing'],
+
+# IRREGULAR NOUNS
+    ["addendum", "addenda", "addendums"],
+    ["aircraft", "aircraft"],
+    ["alumna", "alumnae"],
+    ["alumnus", "alumni"],
+    ["analysis", "analyses"],
+    ["antenna", "antennae", "antennas"],
+    ["antithesis", "antitheses"],
+    ["apex", "apices", "apexes"],
+    ["appendix", "appendices", "appendixes"],
+    ["axis", "axes"],
+    ["bacillus", "bacilli"],
+    ["bacterium", "bacteria"],
+    ["basis", "bases"],
+    ["beau", "beaux", "beaus"],
+    ["bison", "bison"],
+    ["bureau", "bureaux", "bureaus"],
+    ["cactus", "cacti", "cactus", "cactuses"],
+    ["château", "châteaux", "châteaus"],
+    ["child", "children"],
+    ["codex", "codices"],
+    ["concerto", "concerti", "concertos"],
+    ["corpus", "corpora"],
+    ["crisis", "crises"],
+    ["criterion", "criteria", "criterions"],
+    ["curriculum", "curricula", "curriculums"],
+    ["datum", "data"],
+    ["deer", "deer", "deers"],
+    ["diagnosis", "diagnoses"],
+    ["die", "dice", "dies"],
+    ["dwarf", "dwarves", "dwarfs"],
+    ["ellipsis", "ellipses"],
+    ["erratum", "errata"],
+    ["faux pas", "faux pas"],
+    ["fez", "fezzes", "fezes"],
+    ["fish", "fish", "fishes"],
+    ["focus", "foci", "focuses"],
+    ["foot", "feet", "foot"],
+    ["formula", "formulae", "formulas"],
+    ["fungus", "fungi", "funguses"],
+    ["genus", "genera", "genuses"],
+    ["goose", "geese"],
+    ["graffito", "graffiti"],
+    ["grouse", "grouse", "grouses"],
+    ["half", "halves"],
+    ["hoof", "hooves", "hoofs"],
+    ["hypothesis", "hypotheses"],
+    ["index", "indices", "indexes"],
+    ["larva", "larvae", "larvas"],
+    ["libretto", "libretti", "librettos"],
+    ["loaf", "loaves"],
+    ["locus", "loci"],
+    ["louse", "lice"],
+    ["man", "men"],
+    ["matrix", "matrices", "matrixes"],
+    ["medium", "media", "mediums"],
+    ["memorandum", "memoranda", "memorandums"],
+    ["minutia", "minutiae"],
+    ["moose", "moose"],
+    ["mouse", "mice"],
+    ["nebula", "nebulae", "nebulas"],
+    ["nucleus", "nuclei", "nucleuses"],
+    ["oasis", "oases"],
+    ["offspring", "offspring", "offsprings"],
+    ["opus", "opera", "opuses"],
+    ["ovum", "ova"],
+    ["ox", "oxen", "ox"],
+    ["parenthesis", "parentheses"],
+    ["phenomenon", "phenomena", "phenomenons"],
+    ["phylum", "phyla"],
+    ["prognosis", "prognoses"],
+    ["quiz", "quizzes"],
+    ["radius", "radii", "radiuses"],
+    ["referendum", "referenda", "referendums"],
+    ["salmon", "salmon", "salmons"],
+    ["scarf", "scarves", "scarfs"],
+    ["self", "selves"],
+    ["series", "series"],
+    ["sheep", "sheep"],
+    ["shrimp", "shrimp", "shrimps"],
+    ["species", "species"],
+    ["stimulus", "stimuli"],
+    ["stratum", "strata"],
+    ["swine", "swine"],
+    ["syllabus", "syllabi", "syllabuses"],
+    ["symposium", "symposia", "symposiums"],
+    ["synopsis", "synopses"],
+    ["tableau", "tableaux", "tableaus"],
+    ["thesis", "theses"],
+    ["thief", "thieves"],
+    ["tooth", "teeth"],
+    ["trout", "trout", "trouts"],
+    ["tuna", "tuna", "tunas"],
+    ["vertebra", "vertebrae", "vertebras"],
+    ["vertex", "vertices", "vertexes"],
+    ["vita", "vitae"],
+    ["vortex", "vortices", "vortexes"],
+    ["wharf", "wharves", "wharfs"],
+    ["wife", "wives"],
+    ["wolf", "wolves"],
+    ["woman", "women"],
+    ["foot", "feet"],
+    ["tooth", "teeth"],
+    ["goose", "geese"],
+    ["man", "men"],
+    ["woman", "women"],
+    ["louse", "lice"],
+    ["mouse", "mice"],
+    ["die", "dice"],
+    ["ox", "oxen"],
+    ["child", "children"],
+    ["person", "people"],
+    ["penny", "pence"],
 ]
 
-#TODO: don't transform words with apostrophe
 
 # words to ignore when transforming
 # includes determiners, pronouns, prepositions, postpositions, particles
