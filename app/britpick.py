@@ -42,19 +42,20 @@ def britpick(formdata):
     debug.timer('create searchwords')
 
     for word in searchwords:
-        word['pattern'] = getwordpattern(word['str'])
+        word = getwordpattern(word)
+        # word['pattern'] = getwordpattern(word['str'])
         if word['pattern'][-1] in r",.!?":
-            debug.add('removing boundary for',word)
+            # debug.add('removing boundary for',word)
             word['patternwrapper'] = removewordboundary(word['patternwrapper'])
     debug.timer('create word patterns')
 
     text = formdata['text']
 
     i = 0
-    for searchpattern in searchpatterngenerator(searchwords, formdata):
+    for searchpattern, ignorecase in searchpatterngenerator(searchwords, formdata):
         # debug.add(['searchpattern', searchpattern], max=10)
         # debug.add(['searchpattern', searchpattern])
-        text = maketextreplacements(searchpattern, text)
+        text = maketextreplacements(searchpattern, text, ignorecase)
         i += 1
         if i > 2000:
             break
@@ -106,12 +107,14 @@ def getoptionalwordplaceholder(word) -> str:
     s = SEARCH_OPTIONAL_PLACEHOLDER % word
     return s
 
-def getwordpattern(searchstring) -> str:
+def getwordpattern(searchword) -> dict:
     global debug
 
     # for each word:
     #   add british/american variable word endings
     #   add regular suffixes (verb tenses, plurals, adverb -- doubling last consonant, not doubling and doubling l's)
+
+    searchstring = searchword['str']
 
     pattern = re.compile(SEARCH_STRING_PATTERN, re.IGNORECASE)
     searchpattern = ''
@@ -119,12 +122,17 @@ def getwordpattern(searchstring) -> str:
     matches = [m for m in re.finditer(pattern, searchstring)]
 
     protectedphrase = False
-    ignorecase = True #TODO: use ignorecase later
+    ignorecase = not any(x.isupper() for x in searchstring) #ignore case if there are no capital letters; otherwise ignorecase will be false
+
+    # if str has capital word, then ignorecase automatically true
+
+
+    #TODO: is optional actually needed? can have phrase that doesn't have word and have another that has [word]
 
     if matches[-1].groupdict()['flags']:
         if matches[-1].groupdict()[SEARCH_PROTECTED_PHRASE]:
             protectedphrase = True
-        if matches[-1].groupdict()[SEARCH_PRESERVE_CASE]:
+        if matches[-1].groupdict()[SEARCH_PRESERVE_CASE]: #TODO: get rid of this - not needed, will automatically ignore case if no words are capitalized and vice versa
             ignorecase = False
 
     for match in matches:
@@ -139,12 +147,9 @@ def getwordpattern(searchstring) -> str:
             s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: not working
             replacedashes = False
 
-        elif matchgroups[SEARCH_PUNCTUATION]: # spaces are here
+        elif matchgroups[SEARCH_PUNCTUATION]: # spaces are here; #TODO: punctuation not working
             s = re.escape(match.group())
 
-        # TODO: do this manually so have more control
-        # elif matchgroups[SEARCH_NONMUTABLE]:
-        #     s = re.escape(match.group())
 
         # main category
         elif matchgroups[SEARCH_WORD] or matchgroups[SEARCH_OPTIONAL]: # process optional word just like others
@@ -152,7 +157,7 @@ def getwordpattern(searchstring) -> str:
             if matchgroups[SEARCH_WORD]:
                 word = matchgroups[SEARCH_WORD]
                 optional = False
-            else: # matchgroups[SEARCH_OPTIONAL]
+            else: # matchgroups[SEARCH_OPTIONAL] #TODO: skip this? or make a word or no word option
                 word = matchgroups[SEARCH_OPTIONAL]
                 optional = True
 
@@ -204,7 +209,10 @@ def getwordpattern(searchstring) -> str:
     # if 'yay' in searchpattern:
     #     debug.add('yay:', searchpattern)
 
-    return searchpattern
+    searchword['pattern'] = searchpattern
+    searchword['ignorecase'] = ignorecase
+
+    return searchword
 
 
 def getirregularconjugates(word) -> list:
@@ -221,8 +229,6 @@ def getirregularconjugates(word) -> list:
     else:
         conjugateslist = conjugateslist
 
-
-
     return conjugateslist
 
 
@@ -234,6 +240,7 @@ def replacemarkup(markupstring):
             s = s.replace(m['markup'], replacepattern)
 
     return s
+
 
 def addexcludedword(word) -> str:
     # add negative look-behind and look-ahead
@@ -253,7 +260,7 @@ def getsuffixes(searchstring) -> list:
 
 #
 
-def searchpatterngenerator(searchwords, formdata) -> str:
+def searchpatterngenerator(searchwords, formdata) -> list:
     global debug
 
     # get pattern of next searchword
@@ -266,11 +273,14 @@ def searchpatterngenerator(searchwords, formdata) -> str:
         iterations += 1
 
         nextwords = [searchwords.pop(0)]
+        ignorecase = nextwords[0]['ignorecase']
+
         for i, word in enumerate(searchwords):
             if len(nextwords) == NUMBER_COMBINED_SEARCHES:
                 break
-            if word['patternwrapper'] == searchwords[0]['patternwrapper'] and \
-                    word['obj'] not in [w['obj'] for w in nextwords]: # cannot have multiple regex groups with same pk
+            if word['patternwrapper'] == nextwords[0]['patternwrapper'] \
+                and word['ignorecase'] == ignorecase \
+                and word['obj'] not in [w['obj'] for w in nextwords]: # cannot have multiple regex groups with same pk
                 nextwords.append(searchwords.pop(i))
 
         # debug.add(['nextwords', [w['obj'].pk for w in nextwords]])
@@ -282,7 +292,7 @@ def searchpatterngenerator(searchwords, formdata) -> str:
         patternwrapper = nextwords[0]['patternwrapper']
         pattern = patternwrapper % '|'.join(wordspatterns)
 
-        yield pattern
+        yield (pattern, ignorecase)
 
 
 
@@ -293,14 +303,18 @@ def searchpatterngenerator(searchwords, formdata) -> str:
 
 
 
-def maketextreplacements(patternstring, inputtext) -> str:
+def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
+
 
     if 'yay' in patternstring:
         debug.add(['yay:', patternstring])
 
     try:
-        pattern = re.compile(patternstring, re.IGNORECASE) #TODO: allow case for instances of ER
+        if ignorecase:
+            pattern = re.compile(patternstring, re.IGNORECASE) #TODO: allow case for instances of ER
+        else:
+            pattern = re.compile(patternstring)
     except:
         debug.add("regex error")
         debug.add(patternstring)

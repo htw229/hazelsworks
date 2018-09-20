@@ -73,12 +73,16 @@ MARKUP_LIST = [
                 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
                 'december']},
 
-    # [word] matches between 1-3 words, including apostrophe
+    # [word] matches between 1-3 words, including apostrophes
     {'markup': 'word',
      'wordlist': [r"([\w\']+ ?){1,3}"]},
+
+    # [opt] matches between 0-3 words, including apostrophes #TODO: not working
+    {'markup': 'opt',
+     'wordlist': [r"", r"([\w\']+ ?){1,3}"]},
 ]
 
-#TODO: add british spellings and irregular verbs, unusual endings (ie adding extra consonant)
+#TODO: add british spellings, unusual endings (ie adding extra consonant)
 
 
 # british transformations
