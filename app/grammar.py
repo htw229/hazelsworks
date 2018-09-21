@@ -1,36 +1,45 @@
 
 
+SUFFIXES_LIST = [
+    {'ending': [''], 'suffix': ['s'], 'replace': False}, # for purals and verbs, always try just adding s
 
+    # PLURALS
+    {'ending': ['s', 'sh', 'ch', 'x'], 'suffix': ['es'], 'replace': False},
+    {'ending': ['z'], 'suffix': ['zzes'], 'replace': True},
+    {'ending': ['s'], 'suffix': ['sses'], 'replace': True},
+    {'ending': ['y'], 'suffix': ['ies'], 'replace': True},
+    {'ending': ['f', 'fe'], 'suffix': ['ves'], 'replace': True},
+    {'ending': ['o'], 'suffix': ['oes'], 'replace': True},
+    {'ending': ['us'], 'suffix': ['i'], 'replace': True},
+    {'ending': ['is'], 'suffix': ['es'], 'replace': True},
+    {'ending': ['on'], 'suffix': ['a'], 'replace': True},
+    {'ending': ['um'], 'suffix': ['a'], 'replace': True},
+    {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True},
 
+    # POSSESSIVE
+    {'ending': [''], 'suffix':[r"'s"], 'replace': False},
+    {'ending': ['s'], 'suffix':[r"'"], 'replace': False},
 
-SUFFIX_LIST = [
-    's',
-    'es',
-    r"\'s",
-    'ed',
-    'd',
-    'ly',
-    'ing',
-    'ped',
-    'ded',
-    'ping',
-    'ding',
+    # ADJECTIVES
+    {'ending': [''], 'suffix': ['al', 'y', 'ful', 'ous', 'ious', 'ic'], 'replace': False},
+    {'ending': ['e'], 'suffix': ['al', 'y'], 'replace': True},
+    {'ending': ['y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True},
+    {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2al', r'\1\2\2y', r'\1\2\2ful', r'\1\2\2ous', r'\1\2\2ious', r'\1\2\2ic'], 'replace': True}, # double ending consonant if vowel-consonant
+
+    # ADVERBS
+    {'ending': [''], 'suffix': ['ly'], 'replace': False},
+    {'ending': ['y'], 'suffix': ['ily'], 'replace': True},
+    {'ending': ['le'], 'suffix': ['ly'], 'replace': True},
+    {'ending': ['ic'], 'suffix': ['ally'], 'replace': False},
+    {'ending': [''], 'suffix': ['edly', 'ingly'], 'replace': False},
+    {'ending': ['e'], 'suffix': ['edly', 'ingly'], 'replace': True},
+
+    # VERBS
+    {'ending': [''], 'suffix': ['ed', 'ing'], 'replace': False},
+    {'ending': ['e'], 'suffix': ['ed', 'ing'], 'replace': True},
+    {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True}, # double ending consonant if vowel-consonant
 ]
 
-PLURAL_SUFFIX_LIST = [
-    's',
-    'es',
-]
-
-VERB_SUFFIX_LIST = [
-    'ing',
-    's',
-]
-
-ADJECTIVE_ADVERB_SUFFIX_LIST = [
-    'ly',
-    'ingly',
-]
 
 
 
@@ -80,6 +89,7 @@ MARKUP_LIST = [
     # [opt] matches between 0-3 words, including apostrophes #TODO: not working
     {'markup': 'opt',
      'wordlist': [r"", r"([\w\']+ ?){1,3}"]},
+
 ]
 
 #TODO: add british spellings, unusual endings (ie adding extra consonant)

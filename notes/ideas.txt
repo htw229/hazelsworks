@@ -110,12 +110,24 @@ markup:
 
 
 
+remove duplicates
 
+then sort so that:
 
+take the first one (will be shortest): abc
+get everything that begins with that:
+abc
+abcd
+abcdef
+abcghy
+cut off beginning:
+d
+def
+ghy
+add |
 
-
-
-
+so that:
+(abc(|d|def|ghy)|xyz...)
 
 
 

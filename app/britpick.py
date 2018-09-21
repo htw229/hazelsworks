@@ -3,6 +3,8 @@ from .debug import Debug
 from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
 from __init__ import *
 
+import trie
+
 # import appsettings as settings
 # import grammar
 
@@ -25,12 +27,7 @@ searchpatterns = {
 }
 
 
-def removewordboundary(oldpattern) -> str:
-    global debug
 
-    p = oldpattern[:oldpattern.rfind(r"\b")] + oldpattern[oldpattern.rfind(r"\b")+2:]
-    debug.add('removing word boundary', oldpattern, '->', p)
-    return p
 
 def britpick(formdata):
     global debug
@@ -44,10 +41,9 @@ def britpick(formdata):
     for word in searchwords:
         word = getwordpattern(word)
         # word['pattern'] = getwordpattern(word['str'])
-        if word['pattern'][-1] in r",.!?":
-            # debug.add('removing boundary for',word)
-            word['patternwrapper'] = removewordboundary(word['patternwrapper'])
+
     debug.timer('create word patterns')
+    debug.resetcounter()
 
     text = formdata['text']
 
@@ -107,6 +103,14 @@ def getoptionalwordplaceholder(word) -> str:
     s = SEARCH_OPTIONAL_PLACEHOLDER % word
     return s
 
+def removewordboundary(oldpattern) -> str:
+    # for word patterns that contain trailing punctuation, remove word boundary
+    global debug
+
+    p = oldpattern[:oldpattern.rfind(r"\b")] + oldpattern[oldpattern.rfind(r"\b")+2:]
+    # debug.add('removing word boundary', oldpattern, '->', p)
+    return p
+
 def getwordpattern(searchword) -> dict:
     global debug
 
@@ -122,44 +126,35 @@ def getwordpattern(searchword) -> dict:
     matches = [m for m in re.finditer(pattern, searchstring)]
 
     protectedphrase = False
-    ignorecase = not any(x.isupper() for x in searchstring) #ignore case if there are no capital letters; otherwise ignorecase will be false
+    ignorecase = not any(x.isupper() for x in searchstring) #ignore case if there are no capital letters; otherwise ignorecase will be false; do not need special flag for this
 
-    # if str has capital word, then ignorecase automatically true
-
-
-    #TODO: is optional actually needed? can have phrase that doesn't have word and have another that has [word]
-
-    if matches[-1].groupdict()['flags']:
-        if matches[-1].groupdict()[SEARCH_PROTECTED_PHRASE]:
-            protectedphrase = True
-        if matches[-1].groupdict()[SEARCH_PRESERVE_CASE]: #TODO: get rid of this - not needed, will automatically ignore case if no words are capitalized and vice versa
-            ignorecase = False
 
     for match in matches:
         s = ''
         replacedashes = True
 
         matchgroups = match.groupdict()
+
+        if matchgroups[SEARCH_PROTECTED_PHRASE]:
+            protectedphrase = True
+
         if matchgroups[SEARCH_MARKUP]:
             s = replacemarkup(matchgroups[SEARCH_MARKUP])
 
         elif matchgroups[SEARCH_EXCLUDE]:
-            s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: not working
+            s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: working opposite of expected
             replacedashes = False
 
-        elif matchgroups[SEARCH_PUNCTUATION]: # spaces are here; #TODO: punctuation not working
+        elif matchgroups[SEARCH_PUNCTUATION]: # spaces are here
             s = re.escape(match.group())
 
-
         # main category
-        elif matchgroups[SEARCH_WORD] or matchgroups[SEARCH_OPTIONAL]: # process optional word just like others
+        elif matchgroups[SEARCH_WORD]:
 
-            if matchgroups[SEARCH_WORD]:
-                word = matchgroups[SEARCH_WORD]
-                optional = False
-            else: # matchgroups[SEARCH_OPTIONAL] #TODO: skip this? or make a word or no word option
-                word = matchgroups[SEARCH_OPTIONAL]
-                optional = True
+            word = matchgroups[SEARCH_WORD_MAIN] #TODO: MAKE THIS WORK - words with dashes strange behavior - can extract just after dash and add back together but this is unfinished below
+            beginningword = matchgroups[SEARCH_WORD][:len(matchgroups[SEARCH_WORD])-len(word)]
+
+            optional = False
 
             if protectedphrase or matchgroups[SEARCH_PROTECTED_WORD]:
                 s = word
@@ -172,21 +167,29 @@ def getwordpattern(searchword) -> dict:
                 else:
                     s = word
             else:
-                # TODO: process word
-                # get irregular verbs
-                conjugateslist = getirregularconjugates(word)
-                if conjugateslist:
-                    s = getregexlistpattern(conjugateslist)
-                    # debug.add(word, conjugateslist, s)
-                else:
-                    s = word
+                wordtrie = trie.Trie()
+                wordlist = [word]
+                wordlist.extend(getirregularconjugates(word))
+                wordlist.extend(getsuffixes(word))
+
+                wordlist = casematchedwordlist(word, wordlist)
+
+                # s = getregexlistpattern(wordlist)
+
+                debug.add('LIST', wordlist, max=50)
+
+                # s = createregexfromlist(wordlist)
+
+                for w in wordlist:
+                    wordtrie.add(w)
+
+                s = wordtrie.pattern()
+                debug.add('TRIE', s, max=50)
 
             if optional:
                 s = getoptionalwordplaceholder(s)
                 # debug.add('getoptionalwordplaceholder',s)
 
-
-                # s = word
 
         if replacedashes:
             s = s.replace('-', DASH_REPLACEMENT_PATTERN)
@@ -206,6 +209,12 @@ def getwordpattern(searchword) -> dict:
     searchpattern = re.sub(r'( +|(\\ )+)', ' ', searchpattern)
     searchpattern = searchpattern.strip()
 
+    if searchpattern[-1] in r",.!?":
+        # debug.add('removing boundary for',word)
+        searchword['patternwrapper'] = removewordboundary(searchword['patternwrapper'])
+    # elif fullstop:
+    #     searchpattern += SEARCH_FULL_STOP_PATTERN
+
     # if 'yay' in searchpattern:
     #     debug.add('yay:', searchpattern)
 
@@ -224,12 +233,20 @@ def getirregularconjugates(word) -> list:
             conjugateslist.extend(irregularconjugateslist)
             # continue loop, may be a conjugate of multiple different verbs
 
-    if word[0] == word[0].upper():
-        conjugateslist = [x[0].upper() + x[1:] for x in conjugateslist]
-    else:
-        conjugateslist = conjugateslist
+    # if word[0] == word[0].upper():
+    #     conjugateslist = [x[0].upper() + x[1:] for x in conjugateslist]
+    # else:
+    #     conjugateslist = conjugateslist
 
     return conjugateslist
+
+def casematchedwordlist(originalword, wordlist) -> list:
+    if originalword[0] != originalword[0].upper():
+        return wordlist
+
+    capitalizedwordlist = [w[0].upper() + w[1:] for w in wordlist]
+
+    return capitalizedwordlist
 
 
 def replacemarkup(markupstring):
@@ -246,7 +263,6 @@ def addexcludedword(word) -> str:
     # add negative look-behind and look-ahead
     s = r"(?<!%s)" % word
     s += r"(?!%s)" % word
-    # TODO: works for t-shirt but not for test
     return s
 
 def getalternatespellings(searchstring) -> list:
@@ -255,10 +271,76 @@ def getalternatespellings(searchstring) -> list:
 def getverbtenses(searchstring) -> list:
     return []
 
-def getsuffixes(searchstring) -> list:
-    return []
 
+
+
+# trim end of string by num letters in ending; if matches then add suffixes to it (end up with list of full words)
+# return list of words
+
+
+def getsuffixes(searchstring) -> list:
+    word = searchstring.strip()
+    wordlist = []
+
+    for suffixformula in SUFFIXES_LIST:
+        for ending in suffixformula['ending']:
+            for suffix in suffixformula['suffix']:
+                if suffixformula['replace']:
+                    s = re.sub(ending + r'$', suffix, word)
+                else:
+                    s = re.sub(ending + r'$', ending + suffix, word)
+                wordlist.append(s)
+
+    wordlist = list(set(wordlist)) # remove duplicates
+
+    return wordlist
+
+# TODO: get possessives (separate function, run both irregular and regular words through it)
+
+
+
+
+# def createregexfromlist(originalwordlist):
+#     global debug
+#     patternstrings = []
 #
+#     wordlist = list(set([w for w in sorted(originalwordlist)])) # sort and remove duplicates
+#
+#     iteration = 0
+#     maxiterations = 30
+#
+#     while len(wordlist) > 0 and iteration < maxiterations:
+#         iteration += 1
+#         word = wordlist.pop(0)
+#         matchingwordendings = []
+#
+#
+#         for i, w in [(i, w) for (i, w) in enumerate(wordlist) if word in w]:
+#             matchingwordendings.append(wordlist.pop(i)[:len(word)-1])
+#
+#         patternstrings.append(word + '(|' + '|'.join(matchingwordendings) + ')')
+#
+#     debug.add(patternstrings, max=50)
+#     pattern = r"(%s)" % '|'.join(patternstrings)
+#
+#     return pattern
+
+
+# sort so that
+
+# abcd
+# abcdef
+
+
+
+
+
+
+
+
+
+
+
 
 def searchpatterngenerator(searchwords, formdata) -> list:
     global debug
@@ -307,18 +389,18 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
 
-    if 'yay' in patternstring:
-        debug.add(['yay:', patternstring])
+    # if 'yay' in patternstring:
+    #     debug.add(['yay:', patternstring])
 
     try:
         if ignorecase:
-            pattern = re.compile(patternstring, re.IGNORECASE) #TODO: allow case for instances of ER
+            pattern = re.compile(patternstring, re.IGNORECASE)
         else:
             pattern = re.compile(patternstring)
     except:
         debug.add("regex error")
         debug.add(patternstring)
-        return inputtext + 'ERROR'
+        return inputtext + '| pattern error:  ' + patternstring + '  |'
 
 
     text = inputtext + ' <'
@@ -495,7 +577,7 @@ def getwordsuffixpattern(searchword) -> str:
 
     #TODO: do all separate words, sorted by length, then at end combine them as possible -- so store only one word at a time in the searchwords
 
-    debug.add(['getwordsuffixpattern()',searchword])
+    # debug.add(['getwordsuffixpattern()',searchword])
 
     # no suffix: '#' in l
     if '#' in searchword:
@@ -681,7 +763,7 @@ def createreplacementhtml(inputtext, replacementpk):
 
     html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
 
-    debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
+    # debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
     return html
 
 def createreplacetext(textstring, britpickobj):
