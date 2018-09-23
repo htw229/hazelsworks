@@ -42,12 +42,16 @@ SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
 # SEARCH_STRING_PATTERN_UNFORMATTED = r"""\<(?P<exclude>(\w+-))\>|\((?P<optional>\w+)\]|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]])|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"""
 
-SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|((?P<word>(?P<mainword>\w+-?)+)(?P<protectedword>(\#)?)?)|(\s)+"
+# SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|((?P<word>(?P<mainword>\w+-?)+)(?P<protectedword>(\#)?)?)|(\s)+"
+
+SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
+# note protected phrase ### must have preceding space
 
 SEARCH_MARKUP = 'markup'
 SEARCH_PUNCTUATION = 'punctuation'
 SEARCH_WORD = 'word'
-SEARCH_WORD_MAIN = 'mainword'
+# SEARCH_WORD_MAIN = 'mainword'
+SEARCH_WORD_WITH_APOSTROPHE = 'apostropheword'
 SEARCH_PROTECTED_WORD = 'protectedword'
 SEARCH_PROTECTED_PHRASE = 'protectedphrase'
 SEARCH_EXCLUDE = 'exclude'

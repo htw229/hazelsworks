@@ -126,8 +126,9 @@ def getwordpattern(searchword) -> dict:
     matches = [m for m in re.finditer(pattern, searchstring)]
 
     protectedphrase = False
-    ignorecase = not any(x.isupper() for x in searchstring) #ignore case if there are no capital letters; otherwise ignorecase will be false; do not need special flag for this
+    ignorecase = not any(x.isupper() for x in searchstring) #ignore case if there are no capital letters; otherwise ignorecase will be false; do not need special flag for this and done before processing string (so that protectedphrases get included if needed)
 
+# TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
 
     for match in matches:
         s = ''
@@ -136,27 +137,36 @@ def getwordpattern(searchword) -> dict:
         matchgroups = match.groupdict()
 
         if matchgroups[SEARCH_PROTECTED_PHRASE]:
-            protectedphrase = True
+            searchpattern = searchstring.replace(matchgroups[SEARCH_PROTECTED_PHRASE], '')
+            break
 
         if matchgroups[SEARCH_MARKUP]:
             s = replacemarkup(matchgroups[SEARCH_MARKUP])
 
         elif matchgroups[SEARCH_EXCLUDE]:
-            s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: working opposite of expected
+            s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: working opposite of expected --> create custom capture group that if found during later parsing will not consider it found (what happens if is part of conjugation added? such as think<ing> -> reckon)
             replacedashes = False
 
         elif matchgroups[SEARCH_PUNCTUATION]: # spaces are here
             s = re.escape(match.group())
 
         # main category
-        elif matchgroups[SEARCH_WORD]:
+        elif matchgroups[SEARCH_WORD] or matchgroups[SEARCH_WORD_WITH_APOSTROPHE]:
+            word = matchgroups[SEARCH_WORD]
+            s = ''
 
-            word = matchgroups[SEARCH_WORD_MAIN] #TODO: MAKE THIS WORK - words with dashes strange behavior - can extract just after dash and add back together but this is unfinished below
-            beginningword = matchgroups[SEARCH_WORD][:len(matchgroups[SEARCH_WORD])-len(word)]
+            # word = matchgroups[SEARCH_WORD_MAIN] #TODO: MAKE THIS WORK - words with dashes strange behavior - can extract just after dash and add back together but this is unfinished below
+            # beginningword = matchgroups[SEARCH_WORD][:len(matchgroups[SEARCH_WORD])-len(word)]
 
             optional = False
 
-            if protectedphrase or matchgroups[SEARCH_PROTECTED_WORD]:
+        # TODO: make curly quotes and apostrophes regular?
+
+            if matchgroups[SEARCH_WORD_WITH_APOSTROPHE]:
+                s = matchgroups[SEARCH_WORD_WITH_APOSTROPHE]
+
+
+            elif protectedphrase or matchgroups[SEARCH_PROTECTED_WORD] or len(word) < 3:
                 s = word
                 # debug.add([word, 'protected word'])
 
@@ -176,20 +186,24 @@ def getwordpattern(searchword) -> dict:
 
                 # s = getregexlistpattern(wordlist)
 
-                debug.add('LIST', wordlist, max=50)
+                # debug.add('LIST', wordlist, max=30)
 
                 # s = createregexfromlist(wordlist)
 
-                for w in wordlist:
-                    wordtrie.add(w)
+                # for w in wordlist:
+                #     wordtrie.add(w)
+                #
+                # s = wordtrie.pattern()
+                # debug.add('TRIE', s, max=50)
 
-                s = wordtrie.pattern()
-                debug.add('TRIE', s, max=50)
+                s = r"(%s)" % '|'.join(wordlist)
+                # debug.add('S', s, max=30)
 
             if optional:
                 s = getoptionalwordplaceholder(s)
                 # debug.add('getoptionalwordplaceholder',s)
 
+        # TODO: optional markup not working
 
         if replacedashes:
             s = s.replace('-', DASH_REPLACEMENT_PATTERN)
@@ -215,8 +229,9 @@ def getwordpattern(searchword) -> dict:
     # elif fullstop:
     #     searchpattern += SEARCH_FULL_STOP_PATTERN
 
-    # if 'yay' in searchpattern:
-    #     debug.add('yay:', searchpattern)
+
+    if 'er' in searchpattern:
+        debug.add('yay:', searchpattern)
 
     searchword['pattern'] = searchpattern
     searchword['ignorecase'] = ignorecase
