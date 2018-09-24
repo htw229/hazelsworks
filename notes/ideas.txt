@@ -133,8 +133,18 @@ so that:
 
 
 
-- go through gemma's article
+- go through gemma's article, chat transcripts
 
 
 
 
+MORE EFFICIENT:
+atomic group
+- make search term + \b the first to match
+- full search term first
+- then each individually (will need word boundary anyways)
+
+
+
+
+- make search term the first to match, followed by word marker - make it atomic group (this will not affect punctuation since \b is before the punctuation)

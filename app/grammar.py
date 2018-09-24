@@ -1,7 +1,52 @@
 
 
+# SUFFIXES_LIST = [
+#     {'ending': [''], 'suffix': ['s'], 'replace': False}, # for purals and verbs, always try just adding s
+#
+#     # PLURALS
+#     {'ending': ['s', 'sh', 'ch', 'x'], 'suffix': ['es'], 'replace': False},
+#     {'ending': ['z'], 'suffix': ['zzes'], 'replace': True},
+#     {'ending': ['s'], 'suffix': ['sses'], 'replace': True},
+#     {'ending': ['y'], 'suffix': ['ies'], 'replace': True},
+#     {'ending': ['f', 'fe'], 'suffix': ['ves'], 'replace': True},
+#     {'ending': ['o'], 'suffix': ['oes'], 'replace': True},
+#     {'ending': ['us'], 'suffix': ['i'], 'replace': True},
+#     {'ending': ['is'], 'suffix': ['es'], 'replace': True},
+#     {'ending': ['on'], 'suffix': ['a'], 'replace': True},
+#     {'ending': ['um'], 'suffix': ['a'], 'replace': True},
+#     {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True},
+#
+#     # POSSESSIVE
+#     {'ending': [''], 'suffix':[r"'s"], 'replace': False},
+#     {'ending': ['s'], 'suffix':[r"'"], 'replace': False},
+#
+#     # ADJECTIVES
+#     {'ending': [''], 'suffix': ['al', 'y', 'ful', 'ous', 'ious', 'ic'], 'replace': False},
+#     {'ending': ['e'], 'suffix': ['al', 'y'], 'replace': True},
+#     {'ending': ['y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True},
+#     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2al', r'\1\2\2y', r'\1\2\2ous', r'\1\2\2ious', r'\1\2\2ic'], 'replace': True}, # double ending consonant if vowel-consonant
+#
+#     # ADVERBS
+#     {'ending': [''], 'suffix': ['ly'], 'replace': False},
+#     {'ending': ['y'], 'suffix': ['ily'], 'replace': True},
+#     {'ending': ['le'], 'suffix': ['ly'], 'replace': True},
+#     {'ending': ['ic'], 'suffix': ['ally'], 'replace': False},
+#     {'ending': [''], 'suffix': ['edly', 'ingly'], 'replace': False},
+#     {'ending': ['e'], 'suffix': ['edly', 'ingly'], 'replace': True},
+#
+#     # VERBS
+#     {'ending': [''], 'suffix': ['ed', 'ing'], 'replace': False},
+#     {'ending': ['e'], 'suffix': ['ed', 'ing'], 'replace': True},
+#     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True}, # double ending consonant if vowel-consonant
+# ]
+
+
+# test deleting uncommon ones
 SUFFIXES_LIST = [
     {'ending': [''], 'suffix': ['s'], 'replace': False}, # for purals and verbs, always try just adding s
+    # POSSESSIVE
+    {'ending': [''], 'suffix': [r"'s"], 'replace': False},
+    {'ending': ['s'], 'suffix': [r"'"], 'replace': False},
 
     # PLURALS
     {'ending': ['s', 'sh', 'ch', 'x'], 'suffix': ['es'], 'replace': False},
@@ -10,35 +55,26 @@ SUFFIXES_LIST = [
     {'ending': ['y'], 'suffix': ['ies'], 'replace': True},
     {'ending': ['f', 'fe'], 'suffix': ['ves'], 'replace': True},
     {'ending': ['o'], 'suffix': ['oes'], 'replace': True},
-    {'ending': ['us'], 'suffix': ['i'], 'replace': True},
     {'ending': ['is'], 'suffix': ['es'], 'replace': True},
-    {'ending': ['on'], 'suffix': ['a'], 'replace': True},
-    {'ending': ['um'], 'suffix': ['a'], 'replace': True},
     {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True},
 
-    # POSSESSIVE
-    {'ending': [''], 'suffix':[r"'s"], 'replace': False},
-    {'ending': ['s'], 'suffix':[r"'"], 'replace': False},
-
     # ADJECTIVES
-    {'ending': [''], 'suffix': ['al', 'y', 'ful', 'ous', 'ious', 'ic'], 'replace': False},
-    {'ending': ['e'], 'suffix': ['al', 'y'], 'replace': True},
-    {'ending': ['y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True},
-    {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2al', r'\1\2\2y', r'\1\2\2ful', r'\1\2\2ous', r'\1\2\2ious', r'\1\2\2ic'], 'replace': True}, # double ending consonant if vowel-consonant
+    {'ending': [''], 'suffix': ['y'], 'replace': False},
+    {'ending': ['e'], 'suffix': ['y'], 'replace': True},
+    {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2y'], 'replace': True}, # double ending consonant if vowel-consonant
 
     # ADVERBS
     {'ending': [''], 'suffix': ['ly'], 'replace': False},
     {'ending': ['y'], 'suffix': ['ily'], 'replace': True},
     {'ending': ['le'], 'suffix': ['ly'], 'replace': True},
     {'ending': ['ic'], 'suffix': ['ally'], 'replace': False},
-    {'ending': [''], 'suffix': ['edly', 'ingly'], 'replace': False},
-    {'ending': ['e'], 'suffix': ['edly', 'ingly'], 'replace': True},
 
     # VERBS
-    {'ending': [''], 'suffix': ['ed', 'ing'], 'replace': False},
+    {'ending': ['[^e]'], 'suffix': ['ed', 'ing'], 'replace': False},
     {'ending': ['e'], 'suffix': ['ed', 'ing'], 'replace': True},
     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True}, # double ending consonant if vowel-consonant
 ]
+
 
 
 
@@ -86,13 +122,13 @@ MARKUP_LIST = [
     {'markup': 'word',
      'wordlist': [r"([\w\']+ ?){1,3}"]},
 
-    # [opt] matches between 0-3 words, including apostrophes #TODO: not working
+    # [opt] matches between 0-3 words, including apostrophes # TODO: optional markup not working
     {'markup': 'opt',
      'wordlist': [r"", r"([\w\']+ ?){1,3}"]},
 
 ]
 
-#TODO: add british spellings, unusual endings (ie adding extra consonant)
+#TODO: add british spellings
 
 
 # british transformations
@@ -426,4 +462,4 @@ IRREGULAR_CONJUGATES =[
 
 # words to ignore when transforming
 # includes determiners, pronouns, prepositions, postpositions, particles
-PROTECTED_WORDS = ["'gainst", "'long", "'mong, mong, 'mongst", "'neath", "'nough", "a", "a few", "a good few", "a good many", "a little", "a whole 'nother", "a whole nother", "aboard", "about", "above", "absent", "according to", "across", "across from", "adjacent to", "after", "again", "against", "ahead of", "ahind", "all", "all y'all", "alls", "almost all", "along", "along with", "alongside", "alotta", "amid", "amidst", "among", "amongst", "an", "anny", "anoda", "anotha", "anotha'", "another", "any", "any and all", "any ol'", "any old", "any ole", "any-and-all", "anybody", "anyone", "anything", "apart", "apart from", "apropos", "apud", "around", "ary", "as", "as for", "as of", "as per", "as regards", "aside", "aside from", "ask out", "astride", "at", "atop, ontop", "atta", "atween", "aught", "away", "ayond", "back", "back to", "bar", "beaucoup", "because of", "before", "behind", "below", "beneath", "beside", "besides", "best part of", "between", "beyond", "bofe", "boku", "bolth", "bookoo", "both", "bothe", "buku", "but", "by", "ca", "certain", "cha", "chez", "circa", "close to", "co's", "come", "concerning", "counter to", "couple", "cross", "da", "dat", "de", "dehors", "dem", "dese", "despite", "dis", "down", "down on", "doze", "due to", "during", "e'ry", "each", "each and every", "each other", "ebery", "either", "em", "enny", "enough", "enuf", "enuff", "eny", "euerie", "euery", "ever", "everie", "everwhat", "every", "everybody", "everyone", "everything", "except", "except for", "eyther", "far from", "few", "fewer", "fewest", "fewscore", "fiew", "following", "for", "forward", "from", "fuck all", "gainst", "he", "hecka", "hella", "her", "hers", "herself", "hes", "hevery", "him", "himself", "his", "hits", "hoi", "how many", "how much", "hundredsome", "hys", "idem", "illness)", "in", "including", "inside", "inside of", "instead of", "into", "it", "it's", "its", "itself", "last", "le", "least", "left of", "less", "less and less", "like", "little", "ma", "mah", "mai", "many", "many a", "many another", "manye", "me", "mickle", "mid", "midst", "mine", "minus", "more", "more and more", "mos'", "most", "much", "muchee", "muchell", "muh", "my", "myself", "nantee", "nanti", "nanty", "nary a", "naught", "near", "near to", "nearer", "nearest", "neath", "neither", "next", "next to", "nil", "no", "no one", "nobody", "nobody's", "none", "nope", "not a little", "not even one", "nothing", "notwithstanding", "nought", "nuntee", "nunty", "o'", "o'er", "of", "off", "on", "one", "one and the same", "one another", "one or two", "onto", "opposite", "opposite of", "opposite to", "other", "other than", "others", "ought", "our", "ours", "ourself", "ourselves", "out", "out from", "out of", "outside", "outside of", "over", "overmuch", "owing to", "owne", "pace", "past", "per", "plenty", "plus", "post", "pre", "prior to", "pro", "pursuant to", "q", "quite a few", "quodque", "rather than", "re", "regardless of", "right of", "said", "sans", "sauf", "save", "sech", "several", "severall", "she", "short", "since", "sithence", "som", "some", "some few", "some kind of", "some kinda", "some ol'", "some old", "some ole", "somebody", "someone", "something", "somewhat", "sorra", "spite", "subsequent to", "such", "such as", "such-and-such", "suchlike", "sufficient", "t'", "teh", "than", "thanks to", "that", "that there", "thatt", "thay", "the", "thee", "their", "theirs", "theirself", "theirselves", "them", "themself", "themselves", "there", "these", "thet", "they", "they're", "they's", "thilk", "thine", "thir", "this", "this here", "tho", "those", "thou", "thousandsome", "through", "throughout", "thru", "thy", "Thy", "thyself", "til", "till", "to", "together", "too many", "too much", "toward, towards", "towards", "tree)", "umpteen", "under", "underneath", "unlike", "until", "unto", "up", "up to", "upon", "upside", "us", "various", "versus", "via", "vice", "vich", "vis-à-vis", "vs", "wat", "we", "what", "whate'er", "whatevah", "whatever", "whatevuh", "whath", "whatnot", "whatsoever", "whence", "where", "whereby", "wherefrom", "wherein", "whereinto", "whereof", "whereon", "wheresoever", "whereto", "whereunto", "wherever", "wherewith", "wherewithal", "whether", "which", "whichever", "whichsoever", "who", "whoever", "whom", "whomever", "whomso", "whomsoever", "whose", "whosesoever", "whosever", "whoso", "whosoever", "whoze", "with", "within", "without", "wor", "worth", "xyr", "y'all", "ya", "ye", "yer", "yes", "yisser", "yizzer", "yo", "yo'", "yon", "yonder", "yonders", "you", "your", "yours", "yourself", "yourselves", "yous", "youse", "yousser", "yr", "yup", "yure", "zis"]
+PROTECTED_WORDS = ["'gainst", "'long", "'mong, mong, 'mongst", "'neath", "'nough", "a", "a few", "a good few", "a good many", "a little", "a whole 'nother", "a whole nother", "aboard", "about", "above", "absent", "according to", "across", "across from", "adjacent to", "after", "again", "against", "ahead of", "ahind", "all", "all y'all", "alls", "almost all", "along", "along with", "alongside", "alotta", "amid", "amidst", "among", "amongst", "an", "anny", "anoda", "anotha", "anotha'", "another", "any", "any and all", "any ol'", "any old", "any ole", "any-and-all", "anybody", "anyone", "anything", "apart", "apart from", "apropos", "apud", "around", "ary", "as", "as for", "as of", "as per", "as regards", "aside", "aside from", "ask out", "astride", "at", "atop, ontop", "atta", "atween", "aught", "away", "ayond", "back", "back to", "bar", "beaucoup", "because of", "before", "behind", "below", "beneath", "beside", "besides", "best part of", "between", "beyond", "bofe", "boku", "bolth", "bookoo", "both", "bothe", "buku", "but", "by", "ca", "certain", "cha", "chez", "circa", "close to", "co's", "come", "concerning", "counter to", "couple", "cross", "da", "dat", "de", "dehors", "dem", "dese", "despite", "dis", "down", "down on", "doze", "due to", "during", "e'ry", "each", "each and every", "each other", "ebery", "either", "em", "enny", "enough", "enuf", "enuff", "eny", "euerie", "euery", "ever", "everie", "everwhat", "every", "everybody", "everyone", "everything", "except", "except for", "eyther", "far from", "few", "fewer", "fewest", "fewscore", "fiew", "following", "for", "forward", "from", "fuck all", "gainst", "he", "hecka", "hella", "her", "hers", "herself", "hes", "hevery", "him", "himself", "his", "hits", "hoi", "how many", "how much", "hundredsome", "hys", "idem", "illness)", "in", "including", "inside", "inside of", "instead of", "into", "it", "it's", "its", "itself", "last", "le", "least", "left of", "less", "less and less", "like", "little", "ma", "mah", "mai", "many", "many a", "many another", "manye", "me", "mickle", "mid", "midst", "mine", "minus", "more", "more and more", "mos'", "most", "much", "muchee", "muchell", "muh", "my", "myself", "nantee", "nanti", "nanty", "nary a", "naught", "near", "near to", "nearer", "nearest", "neath", "neither", "next", "next to", "nil", "no", "no one", "nobody", "nobody's", "none", "nope", "not a little", "not even one", "nothing", "notwithstanding", "nought", "nuntee", "nunty", "o'", "o'er", "of", "off", "on", "one", "one and the same", "one another", "one or two", "onto", "opposite", "opposite of", "opposite to", "other", "other than", "others", "ought", "our", "ours", "ourself", "ourselves", "out", "out from", "out of", "outside", "outside of", "over", "overmuch", "owing to", "owne", "pace", "past", "per", "plenty", "plus", "post", "pre", "prior to", "pro", "pursuant to", "q", "quite a few", "quodque", "rather than", "re", "regardless of", "right of", "said", "sans", "sauf", "save", "sech", "several", "severall", "she", "short", "since", "sithence", "som", "some", "some few", "some kind of", "some kinda", "some ol'", "some old", "some ole", "somebody", "someone", "something", "somewhat", "sorra", "spite", "subsequent to", "such", "such as", "such-and-such", "suchlike", "sufficient", "t'", "teh", "than", "thanks to", "that", "that there", "thatt", "thay", "the", "thee", "their", "theirs", "theirself", "theirselves", "them", "themself", "themselves", "there", "these", "thet", "they", "they're", "they's", "thilk", "thine", "thir", "this", "this here", "tho", "those", "thou", "thousandsome", "through", "throughout", "thru", "thy", "Thy", "thyself", "til", "till", "to", "together", "too many", "too much", "toward, towards", "towards", "tree)", "umpteen", "under", "underneath", "unlike", "until", "unto", "up", "up to", "upon", "upside", "us", "various", "versus", "via", "vice", "vich", "vis-à-vis", "vs", "wat", "we", "what", "whate'er", "whatevah", "whatever", "whatevuh", "whath", "whatnot", "whatsoever", "whence", "where", "whereby", "wherefrom", "wherein", "whereinto", "whereof", "whereon", "wheresoever", "whereto", "whereunto", "wherever", "wherewith", "wherewithal", "whether", "which", "whichever", "whichsoever", "who", "whoever", "whom", "whomever", "whomso", "whomsoever", "whose", "whosesoever", "whosever", "whoso", "whosoever", "whoze", "with", "within", "without", "wor", "worth", "xyr", "y'all", "ya", "ye", "yer", "yes", "yisser", "yizzer", "yo", "yo'", "yon", "yonder", "yonders", "you", "your", "yours", "yourself", "yourselves", "yous", "youse", "yousser", "yr", "yup", "yure", "zis", "and", "or", "if",]

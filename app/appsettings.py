@@ -6,14 +6,17 @@ MAX_SEARCHPATTERNGENERATOR_ITERATIONS = 2000
 
 # used when inputting searchwords to disallow tenses and suffixes
 PROTECTED_WORD_MARKER = '#'
+PROTECTED_PHRASE_MARKER = "###"
+
+MIN_WORD_LENGTH_FOR_SUFFIX = 3
 
 # number of search word patterns to combine for each regex finditer()
-NUMBER_COMBINED_SEARCHES =5 # TODO: find optimal number
+NUMBER_COMBINED_SEARCHES =1 # TODO: find optimal number
 
 WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 
-REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
-REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+REPLACE_FIND_ANYWHERE = r"""\b%s\b(?=[^>]*?<)"""
+REPLACE_FIND_QUOTES_ONLY = r"""\b%s\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 
 
 
@@ -21,7 +24,7 @@ REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)""
 
 SEARCH_OPTIONAL_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"
 SEARCH_OPTIONAL_PLACEHOLDER_SEARCH = r"[ \\]*\<OPTIONAL\>(.*)\<\/OPTIONAL\>[ \\]*"
-SEARCH_OPTIONAL_PATTERN = "( %s | )"
+SEARCH_OPTIONAL_PATTERN = "(?: %s | )"
 
 SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
@@ -46,6 +49,9 @@ SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
 SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
 # note protected phrase ### must have preceding space
+
+
+
 
 SEARCH_MARKUP = 'markup'
 SEARCH_PUNCTUATION = 'punctuation'
@@ -72,4 +78,4 @@ SEARCH_EXCLUDE = 'exclude'
 #     markup=SEARCH_MARKUP,
 # )
 
-DASH_REPLACEMENT_PATTERN = r"(|-|\s)"
+DASH_REPLACEMENT_PATTERN = r"(?:|\-|\s)"
