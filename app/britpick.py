@@ -55,7 +55,7 @@ def britpick(formdata):
         i += 1
         if i > 2000:
             break
-    debug.timer('get search patterns from generator')
+    debug.timer('text replacements')
     debug.add(['ITERATIONS', i], max=500)
 
     text = postprocesstext(text)
@@ -177,12 +177,15 @@ def getwordpattern(searchword) -> dict:
                 else:
                     s = word
             else:
-                wordtrie = trie.Trie()
+
                 wordlist = [word]
                 wordlist.extend(getirregularconjugates(word))
                 wordlist.extend(getsuffixes(word))
+                wordlist = list(set(wordlist))
 
-                wordlist = casematchedwordlist(word, wordlist)
+                wordlist = casematchedwordlist(wordlist, word)
+
+                s = r"(%s)" % '|'.join(wordlist)
 
                 # s = getregexlistpattern(wordlist)
 
@@ -190,13 +193,17 @@ def getwordpattern(searchword) -> dict:
 
                 # s = createregexfromlist(wordlist)
 
+                # Actually a lot slower to match for some reason
+                # wordtrie = trie.Trie()
                 # for w in wordlist:
-                #     wordtrie.add(w)
+                #     if not '-' in w:
+                #         wordtrie.add(w)
                 #
                 # s = wordtrie.pattern()
+                # s = r"(%s)" % wordtrie.pattern()
                 # debug.add('TRIE', s, max=50)
 
-                s = r"(%s)" % '|'.join(wordlist)
+
                 # debug.add('S', s, max=30)
 
             if optional:
@@ -214,6 +221,10 @@ def getwordpattern(searchword) -> dict:
 
             # s = searchstring + "word"
 
+    # optimize by trying first search over again
+    searchpattern = '(' + searchstring + '|(%s)' % searchpattern + ')'
+
+
     # create OR pattern
     # (if put the regex in earlier, cannot easily manage spaces before/after it)
     searchpattern = re.sub(SEARCH_OPTIONAL_PLACEHOLDER_SEARCH, SEARCH_OPTIONAL_PATTERN % r'\1', searchpattern)
@@ -230,13 +241,28 @@ def getwordpattern(searchword) -> dict:
     #     searchpattern += SEARCH_FULL_STOP_PATTERN
 
 
-    if 'er' in searchpattern:
-        debug.add('yay:', searchpattern)
+    if 'foot' in searchpattern:
+        debug.add('searchpattern:', searchpattern, max = 10)
 
     searchword['pattern'] = searchpattern
     searchword['ignorecase'] = ignorecase
 
     return searchword
+
+
+def compressregexsearchlist(wordlist) -> str:
+    # returns regex pattern not a group
+
+    pattern = ''
+    # most likely to match first
+    # original word, then possessives, then verb tenses
+
+    # whole phrase first?
+
+    # atomic groups -> only processed one time; if code fails after that, does not go back and try to match again (ie \b(?>fir|first)\b, in case of first, will not match
+    # (?>first phrase|ins|
+
+    return pattern
 
 
 def getirregularconjugates(word) -> list:
@@ -255,7 +281,7 @@ def getirregularconjugates(word) -> list:
 
     return conjugateslist
 
-def casematchedwordlist(originalword, wordlist) -> list:
+def casematchedwordlist(wordlist, originalword) -> list:
     if originalword[0] != originalword[0].upper():
         return wordlist
 
@@ -280,11 +306,11 @@ def addexcludedword(word) -> str:
     s += r"(?!%s)" % word
     return s
 
-def getalternatespellings(searchstring) -> list:
-    return []
-
-def getverbtenses(searchstring) -> list:
-    return []
+# def getalternatespellings(searchstring) -> list:
+#     return []
+#
+# def getverbtenses(searchstring) -> list:
+#     return []
 
 
 
@@ -404,8 +430,8 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
 
-    # if 'yay' in patternstring:
-    #     debug.add(['yay:', patternstring])
+    if 'foot' in patternstring:
+        debug.add(['foot:', patternstring])
 
     try:
         if ignorecase:

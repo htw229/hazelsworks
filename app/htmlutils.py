@@ -22,9 +22,23 @@ def addspan(string, cssclass, wrapperstart='', wrapperend='', tagname='span'):
     return s
 
 def linebreakstoparagraphs(inputtext):
-    paragraphs = [w for w in inputtext.split('\r\n') if w.strip() != '']
-    text = r'<p>' + r'</p><p>'.join(paragraphs) + r'</p>'
-    return text
+
+    paragraphs = [w for w in inputtext.split('\r\n')]
+
+    # if double carriage returns, create blank paragraph
+    blanklines = 0
+    for i, p in enumerate(paragraphs):
+        if not p and blanklines > 2:
+            paragraphs[i] = '&nbsp;'
+            blanklines = 0
+        elif not p:
+            blanklines += 1
+        else:
+            blanklines = 0
+    paragraphs = [p for p in paragraphs if p]
+
+    html = r'<p>' + r'</p><p>'.join(paragraphs) + r'</p>'
+    return html
 
 def getlinkhtml(url = '', text = 'link', mouseovertext ='', newbrowsertab = False, urlname = None, urlkwargs = None):
     """
