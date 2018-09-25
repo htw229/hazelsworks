@@ -11,12 +11,19 @@ PROTECTED_PHRASE_MARKER = "###"
 MIN_WORD_LENGTH_FOR_SUFFIX = 3
 
 # number of search word patterns to combine for each regex finditer()
-NUMBER_COMBINED_SEARCHES =1 # TODO: find optimal number
+NUMBER_COMBINED_SEARCHES =5
+# 10000 -> 34s
+# 1 -> 4s
+# 5 -> 3.2s
+# 10 -> 3.9s
+# 8 -> 3.7s
+# 3 -> 3.3s
+# remove word as separate search -> 3.1s (5 iterations)
 
 WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 
-REPLACE_FIND_ANYWHERE = r"""\b%s\b(?=[^>]*?<)"""
-REPLACE_FIND_QUOTES_ONLY = r"""\b%s\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
+REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 
 
 

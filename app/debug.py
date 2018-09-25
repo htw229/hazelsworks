@@ -7,6 +7,7 @@ class Debug:
     counter = 0
     paused = False
     max_reached_message = False
+    timers = {}
 
     def add(self, item, *args, max = 500):
         if self.paused:
@@ -37,6 +38,15 @@ class Debug:
         self.debugstrings.append(
             string + ': ' + str(default_timer() - self.starttime)
         )
+
+    def timerstart(self, timername):
+        self.timers[str(timername)] = default_timer()
+
+    def timerend(self, timername):
+        self.debugstrings.append(
+            'TIMER: ' + str(timername) + ': ' + str(default_timer() - self.timers[str(timername)])
+        )
+
 
     def resetcounter(self):
         self.counter = 0
