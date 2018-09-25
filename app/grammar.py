@@ -59,15 +59,15 @@ SUFFIXES_LIST = [
     {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True},
 
     # ADJECTIVES
-    {'ending': [''], 'suffix': ['y'], 'replace': False},
-    {'ending': ['e'], 'suffix': ['y'], 'replace': True},
-    {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2y'], 'replace': True}, # double ending consonant if vowel-consonant
+    # {'ending': [''], 'suffix': ['y'], 'replace': False},
+    # {'ending': ['e'], 'suffix': ['y'], 'replace': True},
+    # {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2y'], 'replace': True}, # double ending consonant if vowel-consonant
 
     # ADVERBS
-    {'ending': [''], 'suffix': ['ly'], 'replace': False},
-    {'ending': ['y'], 'suffix': ['ily'], 'replace': True},
-    {'ending': ['le'], 'suffix': ['ly'], 'replace': True},
-    {'ending': ['ic'], 'suffix': ['ally'], 'replace': False},
+    # {'ending': [''], 'suffix': ['ly'], 'replace': False},
+    # {'ending': ['y'], 'suffix': ['ily'], 'replace': True},
+    # {'ending': ['le'], 'suffix': ['ly'], 'replace': True},
+    # {'ending': ['ic'], 'suffix': ['ally'], 'replace': False},
 
     # VERBS
     {'ending': ['[^e]'], 'suffix': ['ed', 'ing'], 'replace': False},

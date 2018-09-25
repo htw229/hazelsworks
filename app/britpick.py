@@ -4,6 +4,7 @@ from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
 from __init__ import *
 
 import trie
+# import nltk
 
 # import appsettings as settings
 # import grammar
@@ -13,6 +14,9 @@ import re
 import collections
 
 debug = ''
+
+# wordtags = nltk.ConditionalFreqDist((w.lower(), t)
+#         for w, t in nltk.corpus.brown.tagged_words(tagset="universal"))
 
 
 # REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
@@ -368,6 +372,13 @@ def getsuffixpattern(searchstring) -> str:
     word = searchstring.strip()
     wordlist = []
     s = ''
+
+    tag = ''
+
+
+    # global wordtags
+    # debug.add('wordtags', wordtags[word], max=20)
+
 
     for suffixformula in SUFFIXES_LIST:
         for ending in suffixformula['ending']:
