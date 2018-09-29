@@ -1,5 +1,6 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from picklefield.fields import PickledObjectField
 
 from .htmlutils import getlinkhtml
 import htmlutils
@@ -111,10 +112,11 @@ class ReplacementCategory(models.Model):
 class Replacement(models.Model):
     dialect = models.ForeignKey(Dialect, default=DEFAULT_DIALECT, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
+    verified = models.BooleanField(default=True)
 
     category = models.ForeignKey(ReplacementCategory, default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk, on_delete=models.CASCADE)
 
-    searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
+    searchstrings = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
 
     suggestreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for the strongest suggestion")
     considerreplacements = models.TextField(blank=True, null=True, help_text="for less strong suggestions")
@@ -122,16 +124,17 @@ class Replacement(models.Model):
     explanations = models.ManyToManyField(ReplacementExplanation, blank=True)
     topics = models.ManyToManyField(Topic, blank=True)
 
-    searchpatterns = models.TextField(blank=True, null=True)
-    excludepatterns = models.TextField(blank=True, null=True)
-
+    # searchwords = models.TextField(blank=True, null=True)
+    # excludepatterns = models.TextField(blank=True, null=True)
+    searchwords = PickledObjectField(null=True)
+    excludepatterns = PickledObjectField(null=True)
 
     # TODO: change admin form to have checkboxes (like for topic)
 
 
     @property
     def searchwordlist(self) -> list:
-        wordlist = [w.strip() for w in self.searchwords.split('\r\n') if w.strip() != '']
+        wordlist = [w.strip() for w in self.searchstrings.split('\r\n') if w.strip() != '']
         return wordlist
 
     @property
@@ -272,15 +275,10 @@ class Replacement(models.Model):
             return s + ' (+ ' + str(len(wordlist) - 1) + ')'
 
     def createpatterns(self):
-        patterns = []
-        for word in self.searchwordlist:
-            searchword = searchwords.getwordpattern(word)
-            patterndata = [k for k in searchword.keys()]
-
-            patterndata.append(['pattern', searchword['pattern']])
-            s = searchword['pattern'] + r':::' + str(searchword['ignorecase']) + r':::' + str(len(word))
-            patterns.append(s)
-        self.searchpatterns = '%%%'.join(patterns)
+        self.searchwords = [] # reset field first
+        for searchwordstring in self.searchwordlist:
+            searchword = searchwords.getwordpattern(searchwordstring)
+            self.searchwords.append(searchword)
 
 
     def save(self, *args, **kwargs):

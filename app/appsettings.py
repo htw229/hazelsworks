@@ -4,7 +4,7 @@ DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE = 'informal'
 
 MAX_SEARCHPATTERNGENERATOR_ITERATIONS = 2000
 
-# used when inputting searchwords to disallow tenses and suffixes
+# used when inputting searchstrings to disallow tenses and suffixes
 PROTECTED_WORD_MARKER = '#'
 PROTECTED_PHRASE_MARKER = "###"
 

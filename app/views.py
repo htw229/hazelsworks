@@ -114,7 +114,7 @@ def searchview(request):
             s = form.cleaned_data['searchword']
 
             for o in Replacement.objects.all():
-                if s in o.searchwords:
+                if s in o.searchstrings:
                     searchwords.append(o)
                 if o.replacementwordshtml and s in o.replacementwordshtml:
                     replacementwords.append(o)
@@ -148,7 +148,7 @@ def searchview(request):
 
 def topicview(request, topicslug):
 
-    # responsedata is dict that contains topic (obj), topichtml (html), searchwords (object list), debug (as html)
+    # responsedata is dict that contains topic (obj), topichtml (html), searchstrings (object list), debug (as html)
     responsedata = {
         'pagetitle': 'Topic not found',
         'topic': None,

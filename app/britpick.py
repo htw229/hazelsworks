@@ -40,10 +40,11 @@ def britpick(formdata):
 
     searchwords = getsearchwords(formdata)
     debug.add('SEARCHWORDS', len(searchwords))
+    # debug.add(searchwords)
     debug.timer('create searchwords')
 
-    for word in searchwords:
-        word = getwordpattern(word)
+    # for word in searchwords:
+    #     word = getwordpattern(word)
         # word['pattern'] = getwordpattern(word['str'])
 
     debug.timer('create word patterns')
@@ -90,13 +91,21 @@ def getsearchwords(formdata) -> list:
 
         patternwrapper = patternsbycategory[r.category_id]
 
-        searchwords.extend([{
-            'str': s,
-            'obj': r,
-            'patternwrapper': patternwrapper,
-        } for s in r.searchwordlist])
+        # if r.searchwords:
+        #     debug.add(r.searchwords)
 
-    searchwords = sorted(searchwords, key=lambda w: len(w['str']), reverse=True)
+        if not r.searchwords:
+            debug.add('ERROR: no searchwords in', r)
+            continue
+
+        for w in r.searchwords:
+            # if 'pregnant' in w['pattern']:
+            #     debug.add(w)
+            w['patternwrapper'] = patternwrapper
+            w['obj'] = r
+            searchwords.append(w)
+
+    searchwords = sorted(searchwords, key=lambda w: w['length'], reverse=True)
 
     return searchwords
 
@@ -439,6 +448,11 @@ def searchpatterngenerator(searchwords, formdata) -> list:
         for i, word in enumerate(searchwords):
             if len(nextwords) == NUMBER_COMBINED_SEARCHES:
                 break
+
+            if 'is all' in word['pattern']:
+                debug.add('searchpatterngenerator- is all')
+                debug.add(word['obj'])
+
             if word['patternwrapper'] == nextwords[0]['patternwrapper'] \
                 and word['ignorecase'] == ignorecase \
                 and word['obj'] not in [w['obj'] for w in nextwords]: # cannot have multiple regex groups with same pk
@@ -458,7 +472,7 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 
 
 
-    # for searchword in searchwords:
+    # for searchword in searchstrings:
     #     yield searchword
 
 
@@ -468,8 +482,8 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
 
-    # if 'foot' in patternstring:
-        # debug.add(['foot:', patternstring])
+    if 'is all' in patternstring:
+        debug.add(['is all', patternstring])
 
     try:
         if ignorecase:

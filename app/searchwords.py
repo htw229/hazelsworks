@@ -14,6 +14,8 @@ def getwordpattern(searchstring) -> dict:
     # if there are no capital letters in searchstring, then allow ignorecase regex flag
     searchword['ignorecase'] = not any(x.isupper() for x in searchstring)
 
+    searchword['length'] = len(searchstring)
+
     # PROTECTED PHRASE
     if PROTECTED_PHRASE_MARKER in searchstring:
         searchword['pattern'] = re.escape(searchstring.replace(PROTECTED_PHRASE_MARKER, '').strip())

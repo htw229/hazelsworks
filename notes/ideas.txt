@@ -108,7 +108,9 @@ exclude:
 - markup in searchwords - ^^^ searchword
 - take match, take characters 100 before, 100 after match (exclude <> markers); if it matches exclude pattern then skip match
 
-
+CURRENTLY NEEDS FIXING:
+- multiple words in dialogue
+- end punctuation
 
 
 - go through gemma's article, chat transcripts
