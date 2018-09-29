@@ -4,6 +4,7 @@ from django.template.defaultfilters import slugify
 from .htmlutils import getlinkhtml
 import htmlutils
 from appsettings import *
+import searchwords
 # import appsettings as appsettingstest
 
 class Dialect(models.Model):
@@ -46,7 +47,7 @@ class Reference(models.Model):
         ordering = ['adminname']
 
 
-class ReplacementTopic(models.Model):
+class Topic(models.Model):
     active = models.BooleanField(default=True)
     maintopic = models.BooleanField(default=True)
 
@@ -119,10 +120,14 @@ class Replacement(models.Model):
     considerreplacements = models.TextField(blank=True, null=True, help_text="for less strong suggestions")
     clarification = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
     explanations = models.ManyToManyField(ReplacementExplanation, blank=True)
-    topics = models.ManyToManyField(ReplacementTopic, blank=True)
+    topics = models.ManyToManyField(Topic, blank=True)
+
+    searchpatterns = models.TextField(blank=True, null=True)
+    excludepatterns = models.TextField(blank=True, null=True)
+
 
     # TODO: change admin form to have checkboxes (like for topic)
-    # TODO: change search link BritpickFindReplace to Replacement so link to admin works
+
 
     @property
     def searchwordlist(self) -> list:
@@ -266,12 +271,25 @@ class Replacement(models.Model):
         else:
             return s + ' (+ ' + str(len(wordlist) - 1) + ')'
 
+    def createpatterns(self):
+        patterns = []
+        for word in self.searchwordlist:
+            searchword = searchwords.getwordpattern(word)
+            patterndata = [k for k in searchword.keys()]
+
+            patterndata.append(['pattern', searchword['pattern']])
+            s = searchword['pattern'] + r':::' + str(searchword['ignorecase']) + r':::' + str(len(word))
+            patterns.append(s)
+        self.searchpatterns = '%%%'.join(patterns)
+
 
     def save(self, *args, **kwargs):
         # if it's the non-default dialect, unless the words are manually marked as something different
         # assign them to 'informal'
         if self.dialect.name != DEFAULT_DIALECT and self.category.name == DEFAULT_REPLACEMENTTYPE:
             self.category = ReplacementCategory.objects.get(name=DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE)
+
+        self.createpatterns()
 
         super().save(*args, **kwargs)
 

@@ -10,7 +10,7 @@ from django.template import RequestContext, Template
 from .forms import BritpickForm, BritpickfindwordForm, DIALOGUE_OPTION_CHOICES
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import Replacement, ReplacementTopic, Reference, ReplacementCategory
+from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
 
 
@@ -158,7 +158,7 @@ def topicview(request, topicslug):
         'showdebug': True,
     }
 
-    for topic in ReplacementTopic.objects.all():
+    for topic in Topic.objects.all():
         if topicslug == topic.slug:
             responsedata = britpicktopic(topic)
             responsedata['pagetitle'] = topic.name
@@ -172,7 +172,7 @@ def topicview(request, topicslug):
 
 def topicslist(request):
 
-    topics = ReplacementTopic.objects.filter(maintopic=True).order_by('name')
+    topics = Topic.objects.filter(maintopic=True).order_by('name')
 
     responsedata = {
         'pagetitle': 'Topics',

@@ -2,7 +2,7 @@ from django.core.exceptions import ObjectDoesNotExist
 
 import re
 
-from .models import Replacement, ReplacementTopic, Reference
+from .models import Replacement, Topic, Reference
 from .debug import Debug
 from .htmlutils import addspan, linebreakstoparagraphs, getlinkhtml
 
