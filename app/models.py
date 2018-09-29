@@ -66,6 +66,11 @@ class ReplacementTopic(models.Model):
         s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
+    # @property
+    # def link(self) ->
+    #
+    #     return s
+
     @property
     def hascontent(self) -> bool:
         if len(self.text) > 0:
@@ -121,7 +126,7 @@ class Replacement(models.Model):
 
     @property
     def searchwordlist(self) -> list:
-        wordlist = [w for w in self.searchwords.split('\r\n') if w.strip() != '']
+        wordlist = [w.strip() for w in self.searchwords.split('\r\n') if w.strip() != '']
         return wordlist
 
     @property

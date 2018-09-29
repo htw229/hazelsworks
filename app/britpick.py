@@ -1,53 +1,36 @@
 from .models import Replacement, Dialect, ReplacementExplanation, ReplacementCategory
 from .debug import Debug
 from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
+from __init__ import *
 
-import app.appsettings as settings
-import grammar
-import markup
-import os
+import trie
+# import nltk
+
+# import appsettings as settings
+# import grammar
 
 import re
 
+import collections
+
 debug = ''
 
+# wordtags = nltk.ConditionalFreqDist((w.lower(), t)
+#         for w, t in nltk.corpus.brown.tagged_words(tagset="universal"))
 
-# matchoption
-matchoptions = {
-    'SEARCH_ALL': '1',
-    'SEARCH_DIALOGUE_ONLY': '2',
-    'SEARCH_DIALOGUE_IF_SPECIFIED': '3',
+
+# REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
+# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+
+
+# ReplacementCategory.object.dialogue == (False, True)
+searchpatterns = {
+    'DIALOGUEONLY':(REPLACE_FIND_QUOTES_ONLY, REPLACE_FIND_QUOTES_ONLY),
+    'ALLTEXT':(REPLACE_FIND_ANYWHERE, REPLACE_FIND_ANYWHERE),
+    'SMART':(REPLACE_FIND_ANYWHERE, REPLACE_FIND_QUOTES_ONLY),
 }
 
-matchoptionsstrings = {
-    '1': 'Smart search',
-    '2': 'Search dialogue only',
-    '3': 'Search all text',
-}
 
-
-findanywherepattern = r"""\b(%s)\b(?=[^>]*?<)"""
-findinquotespattern = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
-
-
-
-class britpicksearch():
-    regexpattern = ''
-    britpickobj = ''
-
-    def __init__(self, regexpattern, britpickobj):
-        self.regexpattern = regexpattern
-        self.britpickobj = britpickobj
-
-
-class ReplacementOptions:
-    replacement_categories = None  # ReplacementCategory obj list
-    informal_and_slang_in_dialogue_only = False
-
-
-    def __init__(self, formdata):
-        self.replacement_categories = list(ReplacementCategory.objects.filter(pk__in=formdata['replacement_categories']))
-        self.informal_and_slang_in_dialogue_only = formdata['informal_and_slang_in_dialogue_only']
 
 
 def britpick(formdata):
@@ -55,23 +38,481 @@ def britpick(formdata):
     debug = ''
     debug = Debug()
 
-    searches = createsearches(formdata)
-    debug.add(['number of searches:', len(searches)])
+    searchwords = getsearchwords(formdata)
+    debug.add('SEARCHWORDS', len(searchwords))
+    debug.timer('create searchwords')
 
-    text = createoutputtext(formdata['text'], searches)
-    # debug.add(outputtext)
+    for word in searchwords:
+        word = getwordpattern(word)
+        # word['pattern'] = getwordpattern(word['str'])
+
+    debug.timer('create word patterns')
+    debug.resetcounter()
+
+    text = formdata['text']
+
+    i = 0
+    for searchpattern, ignorecase in searchpatterngenerator(searchwords, formdata):
+        # debug.add(['searchpattern', searchpattern], max=10)
+        # debug.add(['searchpattern', searchpattern])
+        text = maketextreplacements(searchpattern, text, ignorecase)
+        i += 1
+        if i > 2000: # changing to 0 for debug
+            break
+
+    debug.add('ITERATIONS', i)
+    debug.timer('create text replacements')
+
 
     text = postprocesstext(text)
+
+    debug.timer('britpick()')
 
     britpickeddata = {
         'text': text,
         'debug': debug,
     }
 
-
-    debug.timer('britpick() finished')
     return britpickeddata
 
+
+
+def getsearchwords(formdata) -> list:
+    global debug
+
+    searchwords = []
+    patternsbycategory = getcategorypatternwrappers(formdata)
+
+    for r in Replacement.objects\
+        .filter(dialect=formdata['dialect'])\
+        .filter(active=True)\
+        .filter(category__in=formdata['replacement_categories']):
+
+        patternwrapper = patternsbycategory[r.category_id]
+
+        searchwords.extend([{
+            'str': s,
+            'obj': r,
+            'patternwrapper': patternwrapper,
+        } for s in r.searchwordlist])
+
+    searchwords = sorted(searchwords, key=lambda w: len(w['str']), reverse=True)
+
+    return searchwords
+
+
+def getcategorypatternwrappers(formdata) -> dict:
+    """
+    takes the submitted formdata dialogue_option
+    and returns a dict of patterns either in quotes or not
+    for each type of category (ie mandatory, suggested, informal, slang)
+    to use later when forming the pattern template for each word
+    :param formdata: dict
+    :return patternsbycategory: dict
+    """
+    global debug
+
+    patternsbycategory = collections.defaultdict()
+    for obj in ReplacementCategory.objects.all():
+        if str(obj.pk) in formdata['replacement_categories']:
+            pattern_template = ''
+            if formdata['dialogue_option'] == 'ALLTEXT':
+                pattern_template = REPLACE_FIND_ANYWHERE
+            elif formdata['dialogue_option'] == 'DIALOGUEONLY':
+                pattern_template = REPLACE_FIND_QUOTES_ONLY
+            elif formdata['dialogue_option'] == 'SMART':
+                if obj.dialogue:
+                    pattern_template = REPLACE_FIND_QUOTES_ONLY
+                else:
+                    pattern_template = REPLACE_FIND_ANYWHERE
+            patternsbycategory[obj.pk] = pattern_template
+
+
+    return patternsbycategory
+
+
+def getregexlistpattern(items) -> str:
+    s = r'(' + r'|'.join(items) + r')'
+    return s
+
+def getoptionalwordplaceholder(word) -> str:
+    s = SEARCH_OPTIONAL_PLACEHOLDER % word
+    return s
+
+def removewordboundary(oldpattern) -> str:
+    # for word patterns that contain trailing punctuation, remove word boundary
+    global debug
+
+    p = oldpattern[:oldpattern.rfind(r"\b")] + oldpattern[oldpattern.rfind(r"\b")+2:]
+    # debug.add('removing word boundary', oldpattern, '->', p)
+    return p
+
+
+
+def getwordpattern(searchword) -> dict:
+    global debug
+
+    # TODO:  add british/american variable word endings
+    # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
+    # TODO: make curly quotes and apostrophes regular?
+
+    searchstring = searchword['str']
+
+    # IGNORECASE
+    # if there are no capital letters in searchstring, then allow ignorecase regex flag
+    searchword['ignorecase'] = not any(x.isupper() for x in searchstring)
+
+    # PROTECTED PHRASE
+    if PROTECTED_PHRASE_MARKER in searchstring:
+        searchword['pattern'] = re.escape(searchstring.replace(PROTECTED_PHRASE_MARKER, '').strip())
+        return searchword
+    elif PROTECTED_WORD_MARKER in searchstring and not ' ' in searchstring.replace(PROTECTED_WORD_MARKER, '').strip():
+        # if there is only one word and there's a protected word marker, treat as protected phrase
+        searchword['pattern'] = re.escape(searchstring.replace(PROTECTED_WORD_MARKER, '').strip())
+        return searchword
+
+
+
+    pattern = re.compile(SEARCH_STRING_PATTERN, re.IGNORECASE)
+    matches = [m for m in re.finditer(pattern, searchstring)]
+    searchpattern = ''
+
+    for match in matches:
+        s = ''
+        replacedashes = True
+
+        matchgroups = match.groupdict()
+
+
+
+        # elif matchgroups[SEARCH_EXCLUDE]:
+        #     s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: working opposite of expected --> create custom capture group that if found during later parsing will not consider it found (what happens if is part of conjugation added? such as think<ing> -> reckon)
+        #     replacedashes = False
+
+        if matchgroups[SEARCH_PUNCTUATION]: # spaces are here
+            s = re.escape(match.group())
+
+        elif matchgroups[SEARCH_MARKUP]:
+            s = replacemarkup(matchgroups[SEARCH_MARKUP])
+
+        elif matchgroups[SEARCH_WORD_WITH_APOSTROPHE]:
+            s = matchgroups[SEARCH_WORD_WITH_APOSTROPHE]
+
+        elif matchgroups[SEARCH_WORD]:
+            word = matchgroups[SEARCH_WORD]
+            optional = False
+
+            if matchgroups[SEARCH_PROTECTED_WORD]:
+                s = word
+
+            elif word.lower() in PROTECTED_WORDS:
+                if word.lower() in OPTIONAL_WORDS_LIST:
+                    s = word
+                    optional = True
+                else:
+                    s = word
+
+            elif len(word) < MIN_WORD_LENGTH_FOR_SUFFIX:
+                s = word
+
+            else:
+                wordlist = [word]
+                irregularconjugates = getirregularconjugates(word)
+                if irregularconjugates:
+                    wordlist.extend(irregularconjugates)
+                    wordlist = casematchedwordlist(wordlist, word)
+                    wordlist = list(set(wordlist))
+                else:
+                    wordlist.append(getsuffixpattern(word))
+                # wordlist.extend(getsuffixes(word))
+
+                s = r"(?:%s)" % '|'.join(wordlist)
+                # BROKEN
+                # if wordlist:
+                #     s = r"(?>" + word + r"\b|(?:" + '|'.join(wordlist) + '))'
+                # else:
+                #     s = word
+
+            if optional:
+                s = getoptionalwordplaceholder(s)
+
+
+        if replacedashes:
+            if r'\-' in s:
+                s = s.replace(r'\-', DASH_REPLACEMENT_PATTERN)
+            elif '-' in s:
+                s = s.replace('-', DASH_REPLACEMENT_PATTERN)
+
+
+        searchpattern += s
+
+
+    # optimize by trying first search as atomic group
+
+    # broken
+    # if searchstring != searchpattern:
+    #     searchpattern = r'(?>' + searchstring + r'\b|' + searchpattern + ')'
+
+
+    # create OR pattern
+    # (if put the regex in earlier, cannot easily manage spaces before/after it)
+    searchpattern = re.sub(SEARCH_OPTIONAL_PLACEHOLDER_SEARCH, SEARCH_OPTIONAL_PATTERN % r'\1', searchpattern)
+
+
+    # remove trailing, leading and multiple spaces
+    # (spaces may be escaped, so easier to use regex)
+    searchpattern = re.sub(r'( +|(\\ )+)', ' ', searchpattern)
+    searchpattern = searchpattern.strip()
+
+    if searchpattern[-1] in r",.!?":
+        # debug.add('removing boundary for',word)
+        searchword['patternwrapper'] = removewordboundary(searchword['patternwrapper'])
+    # elif fullstop:
+    #     searchpattern += SEARCH_FULL_STOP_PATTERN
+
+
+    if '-' in searchpattern:
+        debug.add('final searchpattern:', searchpattern, max = 10)
+
+    searchword['pattern'] = searchpattern
+
+    return searchword
+
+
+def compressregexsearchlist(wordlist) -> str:
+    # returns regex pattern not a group
+
+    pattern = ''
+    # most likely to match first
+    # original word, then possessives, then verb tenses
+
+    # whole phrase first?
+
+    # atomic groups -> only processed one time; if code fails after that, does not go back and try to match again (ie \b(?>fir|first)\b, in case of first, will not match
+    # (?>first phrase|ins|
+
+    return pattern
+
+
+def getirregularconjugates(word) -> list:
+    global debug
+
+    conjugateslist = []
+    for irregularconjugateslist in IRREGULAR_CONJUGATES:
+        if word.lower() in irregularconjugateslist:
+            conjugateslist.extend(irregularconjugateslist)
+            # continue loop, may be a conjugate of multiple different verbs
+
+    # if word[0] == word[0].upper():
+    #     conjugateslist = [x[0].upper() + x[1:] for x in conjugateslist]
+    # else:
+    #     conjugateslist = conjugateslist
+
+    return conjugateslist
+
+def casematchedwordlist(wordlist, originalword) -> list:
+    if originalword[0] != originalword[0].upper():
+        return wordlist
+
+    capitalizedwordlist = [w[0].upper() + w[1:] for w in wordlist]
+
+    return capitalizedwordlist
+
+
+def replacemarkup(markupstring):
+    s = markupstring
+    for m in MARKUP_LIST:
+        if m['markup'] in s:
+            replacepattern = '(' + '|'.join(m['wordlist']) + ')'
+            s = s.replace(m['markup'], replacepattern)
+
+    return s
+
+
+def addexcludedword(word) -> str:
+    # add negative look-behind and look-ahead
+    s = r"(?<!%s)" % word
+    s += r"(?!%s)" % word
+    return s
+
+# def getalternatespellings(searchstring) -> list:
+#     return []
+#
+# def getverbtenses(searchstring) -> list:
+#     return []
+
+
+
+
+# trim end of string by num letters in ending; if matches then add suffixes to it (end up with list of full words)
+# return list of words
+
+
+def getsuffixes(searchstring) -> list:
+    word = searchstring.strip()
+    wordlist = []
+
+    for suffixformula in SUFFIXES_LIST:
+        for ending in suffixformula['ending']:
+            for suffix in suffixformula['suffix']:
+                if suffixformula['replace']:
+                    s = re.sub(ending + r'$', suffix, word)
+                else:
+                    s = re.sub(ending + r'$', ending + suffix, word)
+                wordlist.append(s)
+
+    wordlist = list(set(wordlist)) # remove duplicates
+
+    return wordlist
+# TODO: get possessives (separate function, run both irregular and regular words through it)
+
+def getsuffixpattern(searchstring) -> str:
+    global debug
+
+    word = searchstring.strip()
+    wordlist = []
+    s = ''
+
+    tag = ''
+
+
+    # global wordtags
+    # debug.add('wordtags', wordtags[word], max=20)
+
+
+    for suffixformula in SUFFIXES_LIST:
+        for ending in suffixformula['ending']:
+            for suffix in suffixformula['suffix']:
+                if suffixformula['replace']:
+                    s = re.sub(ending + r'$', suffix, word)
+                else:
+                    s = re.sub(ending + r'$', ending + suffix, word)
+                wordlist.append(s)
+
+    wordlist = list(set(wordlist)) # remove duplicates
+    wordtrie = trie.Trie()
+    for w in wordlist:
+        wordtrie.add(w)
+    pattern = wordtrie.pattern()
+
+    # if '-' in pattern:
+    #     debug.add('suffix pattern', pattern)
+
+    return pattern
+
+
+# def getregextrie(wordlist) -> str:
+#     p = ''
+#     wordlist = list(set(wordlist))
+#     wordlist = sorted(wordlist)
+#
+#     s = ''
+#     worddict = {}
+#     for i, word in enumerate(wordlist):
+#         worddict[word[0]] = word
+#         wordlist[i] = word[1:]
+#
+#     for character in worddict.keys():
+#         for word in worddict[character]:
+#             worddict[character][word[0]] = word
+#             worddict[character]
+#
+#     return p
+
+
+
+def searchpatterngenerator(searchwords, formdata) -> list:
+    global debug
+
+    # get pattern of next searchword
+    # then get patterns of next one, if matches include it
+    # until get NUMBER_COMBINED_SEARCHES of words
+    # then combine them with wrapper
+
+    iterations = 0
+    while len(searchwords) > 0 and iterations < MAX_SEARCHPATTERNGENERATOR_ITERATIONS:
+        iterations += 1
+
+        nextwords = [searchwords.pop(0)]
+        ignorecase = nextwords[0]['ignorecase']
+
+        for i, word in enumerate(searchwords):
+            if len(nextwords) == NUMBER_COMBINED_SEARCHES:
+                break
+            if word['patternwrapper'] == nextwords[0]['patternwrapper'] \
+                and word['ignorecase'] == ignorecase \
+                and word['obj'] not in [w['obj'] for w in nextwords]: # cannot have multiple regex groups with same pk
+                nextwords.append(searchwords.pop(i))
+
+        # debug.add(['nextwords', [w['obj'].pk for w in nextwords]])
+
+        wordspatterns = []
+        for word in nextwords:
+            wordspatterns.append(WORD_PATTERN_GROUP.format(pk=word['obj'].pk, wordpattern=word['pattern']))
+
+        patternwrapper = nextwords[0]['patternwrapper']
+        pattern = patternwrapper % '|'.join(wordspatterns)
+
+        yield (pattern, ignorecase)
+
+
+
+
+    # for searchword in searchwords:
+    #     yield searchword
+
+
+
+
+def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
+    global debug
+
+
+    # if 'foot' in patternstring:
+        # debug.add(['foot:', patternstring])
+
+    try:
+        if ignorecase:
+            pattern = re.compile(patternstring, re.IGNORECASE)
+        else:
+            pattern = re.compile(patternstring)
+    except:
+        debug.add("regex error")
+        debug.add(patternstring)
+        return inputtext + '| pattern error:  ' + patternstring + '  |'
+
+
+    text = inputtext + ' <'
+    # debug.add(['text', text])
+
+    addedtextlength = 0  # increment starting position after every replacement
+
+    for match in pattern.finditer(text):
+        # debug.add(['match group', match.groupdict()])
+        for groupname in match.groupdict().keys():
+            if match.groupdict()[groupname]:
+                # debug.add(['OBJECT PK FOUND=', groupname])
+                pk = groupname[2:] # trim first two characters ('pk456' -> '456')
+                replacementtext = r'<' + createreplacementhtml(match.group(), pk) + r'>'
+
+        # replacementtext = 'found'
+                text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
+                addedtextlength += len(replacementtext) - len(match.group())
+
+    outputtext = text[:-2] # remove added '<' from text
+
+
+    return outputtext
+
+
+
+def createreplacementhtml(inputtext, replacementpk):
+    global debug
+
+    html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
+
+    # debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
+    return html
 
 
 def postprocesstext(text):
@@ -82,221 +523,3 @@ def postprocesstext(text):
 
     return text
 
-
-def getcategorypatterns(formdata):
-    categorypatterns = {}
-    for obj in ReplacementCategory.objects.all():
-        if str(obj.pk) in formdata['replacement_categories']:
-            pattern_template = ''
-            if formdata['dialogue_option'] == 'ALLTEXT':
-                pattern_template = findanywherepattern
-            elif formdata['dialogue_option'] == 'DIALOGUEONLY':
-                pattern_template = findinquotespattern
-            elif formdata['dialogue_option'] == 'SMART':
-                if obj.dialogue:
-                    pattern_template = findinquotespattern
-                else:
-                    pattern_template = findanywherepattern
-            categorypatterns.update({obj.pk: pattern_template})
-
-    return categorypatterns
-
-
-
-def createsearches(formdata) -> list:
-    """
-    :param formdata:
-    :return: list of britpicksearch objects (1 per britpickfindreplace)
-    """
-
-    global debug
-
-    categorypatterns = getcategorypatterns(formdata)
-    searches = []
-
-    for replaceobject in Replacement.objects\
-        .filter(dialect=formdata['dialect'])\
-        .filter(active=True)\
-        .filter(category__in=categorypatterns.keys()):
-
-        # get all searchwords with markup and suffixes and join in one regex search pattern
-        objectpattern = '|'.join(['|'.join(createsearchwordpatterns(s, replaceobject)) for s in replaceobject.searchwordlist])
-        regexpattern = categorypatterns[replaceobject.category_id] % objectpattern
-        searches.append({'replaceobject': replaceobject, 'pattern': regexpattern})
-
-    # sort by longest searchword (a kludgy way of getting compound words to be found before single words)
-    searches.sort(key=lambda search: search['replaceobject'].longestsearchwordlength, reverse=True)
-
-    debug.timer('createsearches() finished')
-    return searches
-
-
-
-def createoutputtext(inputtext, searches):
-    '''
-
-    :param test:
-    :param searches:
-    :param dialectname:
-    :param matchoption:
-    :return: html formatted output text
-    '''
-    global debug
-
-    text = inputtext + '<'
-
-    for search in searches:
-        text = replacetext(text, search)
-
-
-    # debug.timer('createoutputtext() finished')
-    return text
-
-
-
-def createsearchwordpatterns(searchword, britpickobj) -> list:
-    '''
-
-    :param searchword: string of single (or compound) word
-    :param britpickobj:
-    :return: list of regex patterns for single searchword with substitutions made and suffixes added
-    '''
-
-    global debug
-
-    # REGEX ESCAPING: retain special characters in search
-    # (such as ?, which can help limit found words);
-    # escape prior to substituting markup (substitutes may contain regex)
-    # (errors occur if done earlier than try/except below)
-
-    # create generic regex pattern for with/without suffix
-    suffixpattern = r'(|' + '|'.join(grammar.SUFFIX_LIST) + r')'
-
-    # create patternlist with individual searchwords and suffixes
-    try:
-        # will fail if rsplit returns only 1 string (ie if single word)
-        word, preposition = searchword.rsplit(None, 1)
-        if preposition in grammar.PREPOSITION_LIST:
-            # debug.add([word, preposition], max=20)
-            wordsuffixpattern = re.escape(word) + suffixpattern + ' ' + preposition
-            # debug.add(searchword)
-        else:
-            raise ValueError('not a preposition')
-    except ValueError:
-        wordsuffixpattern = re.escape(searchword) + suffixpattern
-
-    # dash in word can be dash, space or no space (ie ice-cream matches ice cream, icecream and ice-cream)
-    wordsuffixpattern = wordsuffixpattern.replace(r'\-', r"[-\s]*")
-
-    patternlist = [wordsuffixpattern]
-
-    # markup always has '[', so skip objects that don't have character
-    if '[' not in searchword:
-        return patternlist
-
-    for m in markup.MARKUP_LIST:
-        for pattern in [p for p in patternlist]:
-            if m['markup'] in pattern:
-                # remove the string that has markup still in it
-                patternlist.remove(pattern)
-                # create a list of strings with words substituted for markup
-                newpatterns = [pattern.replace(m['markup'], w) for w in m['wordlist']]
-                patternlist.extend(newpatterns)
-
-    # debug.timer('createsearchwordpatterns() finished')
-    return patternlist
-
-
-def replacetext(inputtext, search):
-    global debug
-
-    text = inputtext
-    addedtextlength = 0     # increment starting position after every replacement
-    pattern = re.compile(search['pattern'], re.IGNORECASE)
-
-    for match in pattern.finditer(inputtext):
-        # replacementtext = createreplacetext(r'{' + match.group() + ' ', search['replaceobject']) + r'}'
-        replacementtext = r'<' + createreplacementhtml(match.group(), search['replaceobject'].pk) + r'>'
-        text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
-        addedtextlength += len(replacementtext) - len(match.group())
-
-    return text
-
-
-
-# ------------------------------------
-# CREATE AND FORMAT REPLACEMENT TEXTS
-# ------------------------------------
-
-def createreplacementhtml(inputtext, replacementpk):
-    global debug
-    # templatepath = os.path.dirname(os.path.dirname(__file__)) + r'/templates/inline_replacement_python.html'
-    # replacementhtml = open(templatepath, 'r').read()
-    #
-    # replacementdata = {
-    #     'inputtext': inputtext,
-    #     'suggestreplacement': replacement.suggestreplacement,
-    #     'considerreplacements': ', '.join(replacement.considerreplacementlist),
-    #     'clarification': replacement.clarifyreplacementstring,
-    #     'category': replacement.category.name,
-    #     'explanation': str(replacement.explanations),
-    #     'topic': str(replacement.topics),
-    # }
-    #
-    # html = replacementhtml.format(**replacementdata)
-
-
-    html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
-
-    debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
-    return html
-
-def createreplacetext(textstring, britpickobj):
-    '''
-    :param textstring: string from the input text
-    :param britpickobj: britpickfindreplace object
-    :return: span with css formatting
-    '''
-
-    global debug
-    # debug.timer('createreplacetext() start')
-
-    # format original string
-    textstring = addspan(textstring, 'found word')
-
-    # create replacement text that will be in []
-    stringlist = []
-
-    if britpickobj.suggestreplacement:
-        if britpickobj.category.name == 'mandatory':
-            stringlist.append(addspan(britpickobj.suggestreplacement, 'mandatory'))
-        else:
-            stringlist.append(addspan(britpickobj.suggestreplacement, 'suggestreplacement'))
-    if britpickobj.category.name == 'suggested':
-        c = ', '.join(w for w in britpickobj.considerreplacementlist)
-        stringlist.append(addspan(c, 'considerreplacements'))
-
-    # add explanations
-    if britpickobj.clarifyexplanationspan:
-        if len(stringlist) == 0:
-            # if no other text, then don't add parenthesis
-            stringlist.append(addspan(britpickobj.clarifyexplanationspan, 'clarification'))
-        else:
-            stringlist.append(addspan(britpickobj.clarifyexplanationspan, 'clarification', '(', ')'))
-
-    # add topic
-    for topic in britpickobj.topics.all():
-        stringlist.append(addspan(topic.linkhtml, 'topiclink'))
-
-    # if it's mandatory and there's no replacement/explanation, then add generic explanation
-    if britpickobj.category.name == 'mandatory' and len(stringlist) == 0:
-        stringlist.append(addspan(ReplacementExplanation.objects.get(name='not used').text, 'clarification'))
-
-    s = ' '.join(stringlist)
-    s = addspan(s, 'replacement', '[', ']')
-
-    # combine texts
-    text = addspan(textstring, 'foundword') + ' ' + s
-
-    # debug.timer('createreplacetext()')
-    return text
