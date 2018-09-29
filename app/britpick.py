@@ -522,4 +522,3 @@ def postprocesstext(text):
     text = linebreakstoparagraphs(text)
 
     return text
-

@@ -16,15 +16,16 @@ from .models import ReplacementTopic
 
 class TopicAdmin(admin.ModelAdmin):
     formfield_overrides = {
-        models.TextField: {'widget': Textarea(attrs={'rows':35, 'cols': 75})},
+        models.TextField: {'widget': Textarea(attrs={'rows':75, 'cols': 75})},
         models.ManyToManyField: {'widget': CheckboxSelectMultiple(attrs={'size': '10'})},
     }
 
-    # def get_form(self, request, obj=None, **kwargs):
-    #     form = super(TopicAdmin, self).get_form(request, obj, **kwargs)
-    #     form.base_fields['citations'].widget.attrs['style'] = 'height: 600px;'
-    #     form.base_fields['relatedtopics'].widget.attrs['style'] = 'height: 400px;'
-    #     return form
+    def get_form(self, request, obj=None, **kwargs):
+        form = super(TopicAdmin, self).get_form(request, obj, **kwargs)
+        form.base_fields['text'].widget.attrs['style'] = 'height: 600px'
+        # form.base_fields['citations'].widget.attrs['style'] = 'height: 600px;'
+        # form.base_fields['relatedtopics'].widget.attrs['style'] = 'height: 400px;'
+        return form
 
 admin.site.register(ReplacementTopic, TopicAdmin)
 
