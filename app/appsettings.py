@@ -28,9 +28,10 @@ WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
 
 # TODO: having trouble with positive lookahead and multiple matches in quotes
-REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 # REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=(\<[^\<\>]*?\>|[^\<\>]*?)*?[^\s\w>]["”])(?=[^>]*?<)"""
 # REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=(\<[^\<\>\"]*?\>|[^\<\>\"]*?)*?[\,\.\!\?]")""" # creates loop?
+REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^\>"]*?(\<[^"]*?\>)*?[^\>"]*?[\,\.\!\?]")"""
 
 
 OPTIONAL_WORD_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"

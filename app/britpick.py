@@ -5,6 +5,7 @@ from __init__ import *
 
 
 import re
+import html
 
 import collections
 
@@ -173,8 +174,9 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-    if '927' in patternstring:
+    if '255' in patternstring:
         debug.add(patternstring)
+        debug.add(inputtext)
 
     # if 'is all' in patternstring:
     #     debug.add(['is all', patternstring])
@@ -217,10 +219,10 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 def createreplacementhtml(inputtext, replacementpk):
     global debug
 
-    html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
+    s = r"{% include 'inline_replacement.html' with replacement=replacements." + str(replacementpk) + r" inputtext='" + html.escape(inputtext) + r"' %}"
 
     # debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
-    return html
+    return s
 
 
 def postprocesstext(text):
