@@ -174,7 +174,7 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-    # if '255' in patternstring:
+    # if '950' in patternstring:
     #     debug.add(patternstring)
     #     debug.add(inputtext)
 
@@ -210,11 +210,12 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 
                 if r.excludepatterns:
                     for excludepattern in r.excludepatterns:
-                        debug.add('match.start()', match.start())
+                        # debug.sectionbreak()
+                        # debug.add('match.start()', match.start())
 
                         matchstartpos = match.start() + addedtextlength
                         minstartpos = matchstartpos - EXCLUDE_TEXT_MARGIN
-                        startpositions = [minstartpos]
+                        startpositions = [0, minstartpos]
 
                         matchendpos = match.end() + addedtextlength
                         maxendpos = matchendpos + EXCLUDE_TEXT_MARGIN
@@ -234,10 +235,10 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
                         endpos = sorted(endpositions)[0]
 
                         textchunk = text[startpos:endpos]
-                        debug.add(match.group(), sectionbreakbefore=True)
-                        debug.add(excludepattern, loop='excludepatterns')
-                        debug.add('startpos', startpos, 'endpos', endpos)
-                        debug.add(textchunk)
+                        # debug.add(match.group())
+                        # debug.add(excludepattern, loop='excludepatterns')
+                        # debug.add('startpos', startpos, 'endpos', endpos)
+                        # debug.add(textchunk)
                         if re.search(str(excludepattern), textchunk, re.IGNORECASE):
                             debug.add('invalidated')
                             valid = False

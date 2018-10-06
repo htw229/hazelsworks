@@ -285,9 +285,10 @@ class Replacement(models.Model):
             self.searchwords.append(searchword)
 
         self.excludepatterns = []
-        for excludewordstring in [w for w in self.excludedstrings.split('\r\n') if w.strip() != '']:
-            excludepattern = searchwords.getwordpattern(excludewordstring)['pattern']
-            self.excludepatterns.append(excludepattern)
+        if self.excludedstrings:
+            for excludewordstring in [w for w in self.excludedstrings.split('\r\n') if w.strip() != '']:
+                excludepattern = searchwords.getwordpattern(excludewordstring)['pattern']
+                self.excludepatterns.append(excludepattern)
 
     def save(self, *args, **kwargs):
         # if it's the non-default dialect, unless the words are manually marked as something different

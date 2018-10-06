@@ -26,7 +26,7 @@ REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
 REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^\>"]*?(\<[^"]*?\>)*?[^\>"]*?[\,\.\!\?]")"""
 
 EXCLUDE_TEXT_MARGIN = 25
-PHRASE_BOUNDARY_MARKERS = [r'.', r'\r\n', r'"', r'<', r'>', r' ', r',']
+PHRASE_BOUNDARY_MARKERS = [r'.', '\r\n', r'"', r'<', r'>', r' ', r',']
 
 
 #SEARCHWORDS

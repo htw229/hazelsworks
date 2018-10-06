@@ -11,7 +11,7 @@ class Debug:
     timers = {}
     addloops = {}
 
-    def add(self, *args, max = 50, loop='', showloopname=False, sectionbreakbefore=False, sectionbreakafter=False, blanklineafter=True):
+    def add(self, *args, max = 500, loop='', showloopname=False, sectionbreakbefore=False, sectionbreakafter=False, blanklineafter=True):
         if self.paused:
             return
 
