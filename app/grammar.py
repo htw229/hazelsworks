@@ -106,35 +106,24 @@ OPTIONAL_WORDS_LIST = [
     'the',
 ]
 
-MARKUP_LIST = [
-    {'markup': 'number',
-     'wordlist': ['\d+', '\d+st', '\d+nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+#TODO: add possessive markup [possessive]=his, hers, my, your, our, [word]'s
+
+MARKUP = {
+    'number': ['\d{1,2}', '\d{1,2}st', '\d{1,2}nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
                  'nine', 'ten', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth',
                  'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth',
                  'eighteenth', 'nineteenth', 'twentieth', 'thirtieth', 'fourtieth', 'fiftieth', 'hundredth',
-                 'thousandth', 'millionth']},
-
-    {'markup': 'month',
-     'wordlist': ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
+                 'thousandth', 'millionth'],
+    'month': ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
                 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
-                'december']},
+                'december']
+}
 
-    # [word] matches between 1-3 words, including apostrophes
-    {'markup': 'word',
-     'wordlist': [r"([\w\']+ ?){1,3}"]},
-
-    # # TODO: doesn't work
-    # # [p] end phrase/sentence punctuation
-    # {'markup': 'p',
-    #  'wordlist': ['\!', '\?', '\.', '\,']},
-
-    # [opt] matches between 0-3 words, including apostrophes # TODO: optional markup not working
-    {'markup': 'opt',
-     'wordlist': [r"", r"([\w\']+ ?){1,3}"]},
-
-]
 
 #TODO: add british spellings
+# TODO:  add british/american variable word endings
+    # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
+    # TODO: make curly quotes and apostrophes regular?
 
 
 # british transformations

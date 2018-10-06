@@ -4,129 +4,139 @@ import trie
 
 def getwordpattern(searchstring) -> dict:
 
-    # TODO:  add british/american variable word endings
-    # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
-    # TODO: make curly quotes and apostrophes regular?
-
     searchword = {}
 
     # IGNORECASE
     # if there are no capital letters in searchstring, then allow ignorecase regex flag
     searchword['ignorecase'] = not any(x.isupper() for x in searchstring)
 
+    # LENGTH
+    # allows sorting for prioritizing longer/multiple word searches
     searchword['length'] = len(searchstring)
 
-    # PROTECTED PHRASE
-    if PROTECTED_PHRASE_MARKER in searchstring:
-        searchword['pattern'] = re.escape(searchstring.replace(PROTECTED_PHRASE_MARKER, '').strip())
-        return searchword
-    elif PROTECTED_WORD_MARKER in searchstring and not ' ' in searchstring.replace(PROTECTED_WORD_MARKER, '').strip():
-        # if there is only one word and there's a protected word marker, treat as protected phrase
-        searchword['pattern'] = re.escape(searchstring.replace(PROTECTED_WORD_MARKER, '').strip())
-        return searchword
 
     pattern = re.compile(SEARCH_STRING_PATTERN, re.IGNORECASE)
     matches = [m for m in re.finditer(pattern, searchstring)]
-    searchpattern = ''
 
+    constructors = []
+    protectedphrase = False
+    phraseending = r'\b'
+
+    # create pattern constructors
+    # (adds end, which is either word marker or punctuation, but does not add beginning word marker)
     for match in matches:
-        s = ''
-        replacedashes = True
-
         matchgroups = match.groupdict()
+        if matchgroups['protected_phrase']:
+            protectedphrase = True
+        elif matchgroups['question']:
+            phraseending = r'\?'
+        elif matchgroups['end_punctuation']:
+            phraseending = r'[\.\,\?\!]'
+        elif matchgroups['optional_words_marker']:
+            constructors.append({
+                'needs_processing': False,
+                'string': OPTIONAL_WORD_PLACEHOLDER % r"([\w\'\-]+ ?){1,3}",
+            })
+        elif matchgroups['words_marker']:
+            constructors.append({
+                'needs_processing': False,
+                'string': r"([\w\'\-]+ ?){1,3}",
+            })
+        elif matchgroups['markup']:
+            try:
+                constructors.append({
+                    'needs_processing': False,
+                    'string': '(?:' + '|'.join(MARKUP[matchgroups['markup']]) + ')',
+                })
+            except KeyError:
+                print('markup key error: ' + searchstring)
+        elif matchgroups['punctuation']:
+            constructors.append({
+                'needs_processing': False,
+                'string': re.escape(matchgroups['punctuation']),
+            })
+        elif matchgroups['protected_word']:
+            constructors.append({
+                'needs_processing': False,
+                'string': re.escape(matchgroups['protected_word'])
+            })
+        elif matchgroups['plural_protected_word']:
+            constructors.append({
+                'needs_processing': False,
+                'string': re.escape(matchgroups['plural_protected_word']) + r"(?:|s|es)"
+            })
+        elif matchgroups['word']:
+            constructors.append({
+                'needs_processing': True,
+                'string': matchgroups['word'],
+            })
+    constructors.append({
+        'needs_processing': False,
+        'string': phraseending,
+    })
 
-
-
-        # elif matchgroups[SEARCH_EXCLUDE]:
-        #     s = addexcludedword(matchgroups[SEARCH_EXCLUDE]) #TODO: working opposite of expected --> create custom capture group that if found during later parsing will not consider it found (what happens if is part of conjugation added? such as think<ing> -> reckon)
-        #     replacedashes = False
-
-        if matchgroups[SEARCH_PUNCTUATION]: # spaces are here
-            s = re.escape(match.group())
-
-        elif matchgroups[SEARCH_MARKUP]:
-            s = replacemarkup(matchgroups[SEARCH_MARKUP])
-
-        elif matchgroups[SEARCH_WORD_WITH_APOSTROPHE]:
-            s = matchgroups[SEARCH_WORD_WITH_APOSTROPHE]
-
-        elif matchgroups[SEARCH_WORD]:
-            word = matchgroups[SEARCH_WORD]
-            optional = False
-
-            if matchgroups[SEARCH_PROTECTED_WORD]:
-                s = word
-
-            elif word.lower() in PROTECTED_WORDS:
-                if word.lower() in OPTIONAL_WORDS_LIST:
-                    s = word
-                    optional = True
-                else:
-                    s = word
-
-            elif len(word) < MIN_WORD_LENGTH_FOR_SUFFIX:
-                s = word
-
+    for i, c in enumerate(constructors):
+        if not c['needs_processing']:
+            continue
+        elif protectedphrase:
+            constructors[i]['string'] = re.escape(constructors[i]['string'])
+        else:
+            s = c['string']
+            if s.lower() in OPTIONAL_WORDS_LIST:
+                constructors[i]['string'] = OPTIONAL_WORD_PLACEHOLDER % s
+            elif s.lower() in PROTECTED_WORDS:
+                constructors[i]['string'] = re.escape(s)
+            elif len(s) < MIN_WORD_LENGTH_FOR_SUFFIX:
+                constructors[i]['string'] = re.escape(s)
             else:
-                wordlist = [word]
-                irregularconjugates = getirregularconjugates(word)
+                wordlist = [s]
+                irregularconjugates = getirregularconjugates(s)
                 if irregularconjugates:
                     wordlist.extend(irregularconjugates)
-                    wordlist = casematchedwordlist(wordlist, word)
-                    wordlist = list(set(wordlist))
                 else:
-                    wordlist.append(getsuffixpattern(word))
+                    regularconjugates = getsuffixwordlist(s)
+                    wordlist.extend(regularconjugates)
+                wordlist = casematchedwordlist(wordlist, s)
+                wordlist = list(set(wordlist))
 
-                s = r"(?:%s)" % '|'.join(wordlist)
+                wordtrie = trie.Trie()
+                for w in wordlist:
+                    wordtrie.add(w)
+                wordpattern = wordtrie.pattern()
 
-            if optional:
-                s = getoptionalwordplaceholder(s)
+                if r'\-' in wordpattern:
+                    wordpattern = wordpattern.replace(r'\-', DASH_REPLACEMENT_PATTERN)
+                elif '-' in s:
+                    wordpattern = wordpattern.replace('-', DASH_REPLACEMENT_PATTERN)
 
+                constructors[i]['string'] = wordpattern
 
-        if replacedashes:
-            if r'\-' in s:
-                s = s.replace(r'\-', DASH_REPLACEMENT_PATTERN)
-            elif '-' in s:
-                s = s.replace('-', DASH_REPLACEMENT_PATTERN)
+    pattern = ''.join([c['string'] for c in constructors])
 
-
-        searchpattern += s
-
-
-    # create OR pattern
+    # create optional pattern
     # (if put the regex in earlier, cannot easily manage spaces before/after it)
-    searchpattern = re.sub(SEARCH_OPTIONAL_PLACEHOLDER_SEARCH, SEARCH_OPTIONAL_PATTERN % r'\1', searchpattern)
-
+    pattern = re.sub(OPTIONAL_WORD_PLACEHOLDER_PATTERN, OPTIONAL_WORD_PATTERN % r'\1', pattern)
 
     # remove trailing, leading and multiple spaces
     # (spaces may be escaped, so easier to use regex)
-    searchpattern = re.sub(r'( +|(\\ )+)', ' ', searchpattern)
-    searchpattern = searchpattern.strip()
+    pattern = re.sub(r'( +|(\\ )+)', ' ', pattern)
+    pattern = pattern.strip()
 
-    # if searchpattern[-1] in r",.!?": # TODO: will need to be more specific if multiple punctuation possible
-    #     # debug.add('removing boundary for',word)
-    #     searchword['patternwrapper'] = removewordboundary(searchword['patternwrapper'])
-    # # elif fullstop:
-    # #     searchpattern += SEARCH_FULL_STOP_PATTERN
-
-    #TODO: add punctuation markup [end]=\!\.\?
-    #TODO: add possessive markup [possessive]=his, hers, my, your, our, [word]'s
-
-    searchword['pattern'] = searchpattern
+    searchword['pattern'] = pattern
 
     return searchword
 
 
-def replacemarkup(markupstring):
-    s = markupstring
-
-    # create while loop so that can repeat until no markup is in there
-    for m in MARKUP_LIST:
-        if m['markup'] in s:
-            replacepattern = '(' + '|'.join(m['wordlist']) + ')'
-            s = s.replace(m['markup'], replacepattern)
-
-    return s
+# def replacemarkup(markupstring):
+#     s = markupstring
+#
+#     # create while loop so that can repeat until no markup is in there
+#     for m in MARKUP_LIST:
+#         if m['markup'] in s:
+#             replacepattern = '(' + '|'.join(m['wordlist']) + ')'
+#             s = s.replace(m['markup'], replacepattern)
+#
+#     return s
 
 
 def getirregularconjugates(word) -> list:
@@ -154,9 +164,9 @@ def removewordboundary(oldpattern) -> str:
     p = oldpattern[:oldpattern.rfind(r"\b")] + oldpattern[oldpattern.rfind(r"\b")+2:]
     return p
 
-def getoptionalwordplaceholder(word) -> str:
-    s = SEARCH_OPTIONAL_PLACEHOLDER % word
-    return s
+# def getoptionalwordplaceholder(word) -> str:
+#     s = SEARCH_OPTIONAL_PLACEHOLDER % word
+#     return s
 
 def getsuffixpattern(searchstring) -> str:
 

@@ -7,11 +7,18 @@ debug = DebugClass()
 
 
 def saveall():
+    i = 0
     for obj in Replacement.objects.all():
         obj.save()
+        if i%10 == 0:
+            print(obj)
+        i += 1
     print('done')
 
 
+#find errors
+# incorrect markup
+# words with
 
 
 

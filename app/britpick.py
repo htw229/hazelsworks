@@ -173,6 +173,8 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
+    if '927' in patternstring:
+        debug.add(patternstring)
 
     # if 'is all' in patternstring:
     #     debug.add(['is all', patternstring])

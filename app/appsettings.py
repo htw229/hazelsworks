@@ -11,7 +11,7 @@ PROTECTED_PHRASE_MARKER = "###"
 MIN_WORD_LENGTH_FOR_SUFFIX = 3
 
 # number of search word patterns to combine for each regex finditer()
-NUMBER_COMBINED_SEARCHES =5
+NUMBER_COMBINED_SEARCHES =1
 # 10000 -> 34s
 # 1 -> 4s
 # 5 -> 3.2s
@@ -22,34 +22,42 @@ NUMBER_COMBINED_SEARCHES =5
 
 WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 
-REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
-REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+# REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
+# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+
+REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
+
+# TODO: having trouble with positive lookahead and multiple matches in quotes
+REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
 
 
 
-
-
-SEARCH_OPTIONAL_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"
-SEARCH_OPTIONAL_PLACEHOLDER_SEARCH = r"[ \\]*\<OPTIONAL\>(.*)\<\/OPTIONAL\>[ \\]*"
-SEARCH_OPTIONAL_PATTERN = "(?: %s | )"
+OPTIONAL_WORD_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"
+OPTIONAL_WORD_PLACEHOLDER_PATTERN = r"[ \\]*\<OPTIONAL\>(.*)\<\/OPTIONAL\>[ \\]*"
+OPTIONAL_WORD_PATTERN = "(?: %s | )"
 
 SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
 # SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
 # note protected phrase ### must have preceding space
 
-SEARCH_STRING_PATTERN = r"^(?P<protectedphrase>\#)|(?P<question>\?)$|(?P<endphrase>[\.\,\!])$|(?P<optional_words>\(\_\))|(?P<words>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+?)|(?P<apostropheword>[\w\-]+\'[\w\-]+)|(?:(?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)"
+# SEARCH_STRING_PATTERN = r"^(?P<protectedphrase>\#)|(?P<question>\?)$|(?P<endphrase>[\.\,\!])$|(?P<optional_words>\(\_\))|(?P<words>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+?)|(?P<apostropheword>[\w\-]+\'[\w\-]+)|(?:(?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)"
+
+# SEARCH_STRING_PATTERN = r"^(?P<protectedphrase>\#)|(?P<question>\?)$|(?P<endphrase>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<word_contraction>[\w\-]+\'[\w\-]+)|(?:(?P<protectedword>[\w\-]+)\#)|(?:(?P<word>[\w\-]+))"
+
+# SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<word>[\w\-]+)"
+
+SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<plural_protected_word>[\w\-]+)\(s\)|(?P<word>[\w\-]+)"
 
 
-
-SEARCH_MARKUP = 'markup'
-SEARCH_PUNCTUATION = 'punctuation'
-SEARCH_WORD = 'word'
-# SEARCH_WORD_MAIN = 'mainword'
-SEARCH_WORD_WITH_APOSTROPHE = 'apostropheword'
-SEARCH_PROTECTED_WORD = 'protectedword'
-SEARCH_PROTECTED_PHRASE = 'protectedphrase'
-SEARCH_EXCLUDE = 'exclude'
+# SEARCH_MARKUP = 'markup'
+# SEARCH_PUNCTUATION = 'punctuation'
+# SEARCH_WORD = 'word'
+# # SEARCH_WORD_MAIN = 'mainword'
+# SEARCH_WORD_WITH_APOSTROPHE = 'apostropheword'
+# SEARCH_PROTECTED_WORD = 'protectedword'
+# SEARCH_PROTECTED_PHRASE = 'protectedphrase'
+# SEARCH_EXCLUDE = 'exclude'
 
 
 
