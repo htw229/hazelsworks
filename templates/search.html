@@ -40,6 +40,16 @@
         {% else %}
             <p>No replacement word results</p>
         {%  endif %}
+        {% if results.dialectreplacements %}
+            <p><b>Dialect Replacement Words</b></p>
+            <ul>
+            {% for r in results.dialectreplacements %}
+                <li>{% include "inline_replacement.html" with replacement=r %}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No dialect replacement word results</p>
+        {%  endif %}
     {% endif %}
 {% endif %}
 {#<p>Input:</p>#}

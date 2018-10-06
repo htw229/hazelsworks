@@ -1,6 +1,6 @@
 import re
 
-from app.models import Topic, Replacement
+from app.models import Topic, Replacement, Dialect
 from debug import Debug
 import searchwords
 import htmlutils
@@ -13,7 +13,7 @@ def search(formdata) -> dict:
     debug = None
     debug = Debug()
 
-    searchstring = formdata['searchword'].lower()
+    searchstring = formdata['searchword'].lower().strip()
 
     results = {
         'search': searchstring,
@@ -21,6 +21,7 @@ def search(formdata) -> dict:
         'topicsbyname': [],
         'topicsbytext': [],
         'replacements': [],
+        'dialectreplacements': [],
         'references': [],
     }
 
@@ -89,7 +90,7 @@ def search(formdata) -> dict:
             #     # debug.add('found topicsbytext')
             #     continue
 
-    # check dialects
+
 
     # check searchwords
     for r in Replacement.objects.all():
@@ -103,6 +104,16 @@ def search(formdata) -> dict:
         if match:
             results['replacements'].append(r)
 
+    # check dialects
+    if searchstring != DEFAULT_DIALECT.lower():
+        for dialect in Dialect.objects.all():
+            if searchstring == dialect.name.lower():
+                for r in Replacement.objects.filter(dialect=dialect.name)[:SEARCH_MAX_DIALECT_RESULTS]:
+                    results['dialectreplacements'].append(r)
+
+
+
+    debug.timer('search finished')
     results['debug'] = debug
 
     return results
