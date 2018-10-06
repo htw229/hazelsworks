@@ -22,15 +22,7 @@ NUMBER_COMBINED_SEARCHES =5
 
 WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 
-# REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
-# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
-
 REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
-
-# TODO: having trouble with positive lookahead and multiple matches in quotes
-# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
-# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=(\<[^\<\>]*?\>|[^\<\>]*?)*?[^\s\w>]["”])(?=[^>]*?<)"""
-# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=(\<[^\<\>\"]*?\>|[^\<\>\"]*?)*?[\,\.\!\?]")""" # creates loop?
 REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^\>"]*?(\<[^"]*?\>)*?[^\>"]*?[\,\.\!\?]")"""
 
 
@@ -40,46 +32,10 @@ OPTIONAL_WORD_PATTERN = "(?: %s | )"
 
 SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
-# SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
-# note protected phrase ### must have preceding space
-
-# SEARCH_STRING_PATTERN = r"^(?P<protectedphrase>\#)|(?P<question>\?)$|(?P<endphrase>[\.\,\!])$|(?P<optional_words>\(\_\))|(?P<words>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+?)|(?P<apostropheword>[\w\-]+\'[\w\-]+)|(?:(?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)"
-
-# SEARCH_STRING_PATTERN = r"^(?P<protectedphrase>\#)|(?P<question>\?)$|(?P<endphrase>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<word_contraction>[\w\-]+\'[\w\-]+)|(?:(?P<protectedword>[\w\-]+)\#)|(?:(?P<word>[\w\-]+))"
-
-# SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<word>[\w\-]+)"
-
 SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<plural_protected_word>[\w\-]+)\(s\)|(?P<word>[\w\-]+)"
 
 
-# SEARCH_MARKUP = 'markup'
-# SEARCH_PUNCTUATION = 'punctuation'
-# SEARCH_WORD = 'word'
-# # SEARCH_WORD_MAIN = 'mainword'
-# SEARCH_WORD_WITH_APOSTROPHE = 'apostropheword'
-# SEARCH_PROTECTED_WORD = 'protectedword'
-# SEARCH_PROTECTED_PHRASE = 'protectedphrase'
-# SEARCH_EXCLUDE = 'exclude'
-
-
-
-# NOTE: don't think this is doing anything? since not marking words as dict in string (would be hard to test regex)
-# SEARCH_STRING_PATTERN = SEARCH_STRING_PATTERN_UNFORMATTED.format(
-#     # nonmutable=SEARCH_NONMUTABLE,
-#     punctuation=SEARCH_PUNCTUATION,
-#     word=SEARCH_WORD,
-#     protectedword=SEARCH_PROTECTED_WORD,
-#     flags=SEARCH_FLAGS,
-#     protectedphrase=SEARCH_PROTECTED_PHRASE,
-#     preservecase=SEARCH_PRESERVE_CASE,
-#     exclude=SEARCH_EXCLUDE,
-#     optional=SEARCH_OPTIONAL,
-#     markup=SEARCH_MARKUP,
-# )
-
 DASH_REPLACEMENT_PATTERN = r"(?:|\-|\s)"
-
-
 
 
 # SEARCH
