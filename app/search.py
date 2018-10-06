@@ -1,6 +1,6 @@
 import re
 
-from app.models import Topic
+from app.models import Topic, Replacement
 from debug import Debug
 import searchwords
 import htmlutils
@@ -92,7 +92,16 @@ def search(formdata) -> dict:
     # check dialects
 
     # check searchwords
+    for r in Replacement.objects.all():
+        texts = [r.searchstrings, r.suggestreplacement, r.considerreplacements, r.clarification]
+        text = r'\r\n'.join([t for t in texts if t])
+        match = re.search(pattern, text, re.IGNORECASE)
 
+        if searchstring in text:
+            debug.add(text)
+
+        if match:
+            results['replacements'].append(r)
 
     results['debug'] = debug
 
