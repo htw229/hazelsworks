@@ -35,28 +35,10 @@ SEARCH_OPTIONAL_PATTERN = "(?: %s | )"
 
 SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
-
-# SEARCH_STRING_PATTERN = r"(?P<nonmutable>\w\W|\w+'s|(?P<punctuation>[^\w\s\$\|])|\s)+|((?P<word>(\w+-?)+)(?P<protected>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-# - nonmutable (includes punctuation, spaces, words of single letter, words that end in possessive)
-# - word, (opt) protected
-# - flags, protectedphrase or preservecase
-
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"(?P<markup>\[\w+\])|(?P<punctuation>[^\w\s\$\|-])|(?P<nonmutable>\w\W|\w+'s|\s)|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"(?P<markup>\[\w+\])|(?P<punctuation>[^\w\s\$\|-])|(?P<nonmutable>\w[^\w-]|\w+'s|\s)|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"\<(?P<exclude>(\w+-))\>|(?P<optional>\(\w+\))|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\s\$\|\-\<\>\(\)\[\]])|(?P<nonmutable>\w[^\w-]|\w+'s|\s)|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"\<(?P<exclude>(\w+-))\>|(?P<optional>\(\w+\))|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\s\$\|\-\<\>\(\)\[\]])|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"""\<(?P<exclude>(\w+-))\>|\((?P<optional>\w+)\]|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]])|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"""
-
-# SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|((?P<word>(?P<mainword>\w+-?)+)(?P<protectedword>(\#)?)?)|(\s)+"
-
-SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
+# SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
 # note protected phrase ### must have preceding space
 
+SEARCH_STRING_PATTERN = r"^(?P<protectedphrase>\#)|(?P<question>\?)$|(?P<endphrase>[\.\,\!])$|(?P<optional_words>\(\_\))|(?P<words>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+?)|(?P<apostropheword>[\w\-]+\'[\w\-]+)|(?:(?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)"
 
 
 

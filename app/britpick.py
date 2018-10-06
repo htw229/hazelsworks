@@ -26,12 +26,11 @@ def britpick(formdata):
 
     searchwords = getsearchwords(formdata)
     debug.add('SEARCHWORDS', len(searchwords))
-    debug.timer('create searchwords')
-
-    debug.timer('create word patterns')
-    debug.resetcounter()
+    debug.timer('getsearchwords()')
 
     text = formdata['text']
+
+    debug.sectionbreak()
 
     i = 0
     for searchpattern, ignorecase in searchpatterngenerator(searchwords, formdata):
@@ -40,12 +39,13 @@ def britpick(formdata):
         if i > 5000: # prevent infinite loop if something goes wrong (generator has while loop)
             break
 
-    debug.add('ITERATIONS', i)
-    debug.timer('create text replacements')
+    debug.add('REGEX ITERATIONS', i)
+    debug.timer('maketextreplacements()')
+
 
     text = postprocesstext(text)
 
-    debug.timer('britpick()')
+    # debug.timer('britpick()')
 
     britpickeddata = {
         'text': text,
@@ -148,9 +148,9 @@ def searchpatterngenerator(searchwords, formdata) -> list:
             if len(nextwords) == NUMBER_COMBINED_SEARCHES:
                 break
 
-            if 'is all' in word['pattern']:
-                debug.add('searchpatterngenerator- is all')
-                debug.add(word['obj'])
+            # if 'is all' in word['pattern']:
+            #     debug.add('searchpatterngenerator- is all')
+            #     debug.add(word['obj'])
 
             if word['patternwrapper'] == nextwords[0]['patternwrapper'] \
                 and word['ignorecase'] == ignorecase \
@@ -174,8 +174,8 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
 
-    if 'is all' in patternstring:
-        debug.add(['is all', patternstring])
+    # if 'is all' in patternstring:
+    #     debug.add(['is all', patternstring])
 
     try:
         if ignorecase:

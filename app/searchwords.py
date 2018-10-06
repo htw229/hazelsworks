@@ -76,14 +76,8 @@ def getwordpattern(searchstring) -> dict:
                     wordlist = list(set(wordlist))
                 else:
                     wordlist.append(getsuffixpattern(word))
-                # wordlist.extend(getsuffixes(word))
 
                 s = r"(?:%s)" % '|'.join(wordlist)
-                # BROKEN
-                # if wordlist:
-                #     s = r"(?>" + word + r"\b|(?:" + '|'.join(wordlist) + '))'
-                # else:
-                #     s = word
 
             if optional:
                 s = getoptionalwordplaceholder(s)
@@ -97,13 +91,6 @@ def getwordpattern(searchstring) -> dict:
 
 
         searchpattern += s
-
-
-    # optimize by trying first search as atomic group
-
-    # broken
-    # if searchstring != searchpattern:
-    #     searchpattern = r'(?>' + searchstring + r'\b|' + searchpattern + ')'
 
 
     # create OR pattern

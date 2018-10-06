@@ -114,3 +114,13 @@ CURRENTLY NEEDS FIXING:
 
 
 - go through gemma's article, chat transcripts
+
+
+INSTRUCTIONS
+# - at beginning protects whole phrase
+word# - after word, protects word
+. - at end, makes end of phrase
+? - at end, makes question
+(s) - protected except for +/- what it contains
+___ - placeholder for word(s)
+(_) - opt placeholder for word(s)
