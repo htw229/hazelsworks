@@ -11,7 +11,7 @@ PROTECTED_PHRASE_MARKER = "###"
 MIN_WORD_LENGTH_FOR_SUFFIX = 3
 
 # number of search word patterns to combine for each regex finditer()
-NUMBER_COMBINED_SEARCHES =1
+NUMBER_COMBINED_SEARCHES =5
 # 10000 -> 34s
 # 1 -> 4s
 # 5 -> 3.2s
@@ -29,7 +29,8 @@ REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
 
 # TODO: having trouble with positive lookahead and multiple matches in quotes
 REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
-
+# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=(\<[^\<\>]*?\>|[^\<\>]*?)*?[^\s\w>]["”])(?=[^>]*?<)"""
+# REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=(\<[^\<\>\"]*?\>|[^\<\>\"]*?)*?[\,\.\!\?]")""" # creates loop?
 
 
 OPTIONAL_WORD_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"

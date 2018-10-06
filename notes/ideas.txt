@@ -108,6 +108,9 @@ exclude:
 - markup in searchwords - ^^^ searchword
 - take match, take characters 100 before, 100 after match (exclude <> markers); if it matches exclude pattern then skip match
 
+- words to add exclude to: 950, 109, 887, 355
+
+
 CURRENTLY NEEDS FIXING:
 - multiple words in dialogue
 - end punctuation
@@ -121,6 +124,6 @@ INSTRUCTIONS
 word# - after word, protects word
 . - at end, makes end of phrase
 ? - at end, makes question
-(s) - protected except for +/- what it contains
+(s) - protected except for plural
 ___ - placeholder for word(s)
 (_) - opt placeholder for word(s)

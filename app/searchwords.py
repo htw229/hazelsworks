@@ -209,3 +209,13 @@ def getsuffixwordlist(searchstring) -> list:
     wordlist = list(set(wordlist)) # remove duplicates
 
     return wordlist
+
+
+# def validsearch(searchstring) -> bool:
+#     # invalid things
+#
+#
+#     if '###' in searchstring:
+#
+#
+#     return True

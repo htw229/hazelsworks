@@ -36,7 +36,7 @@ def britpick(formdata):
     for searchpattern, ignorecase in searchpatterngenerator(searchwords, formdata):
         text = maketextreplacements(searchpattern, text, ignorecase)
         i += 1
-        if i > 5000: # prevent infinite loop if something goes wrong (generator has while loop)
+        if i > 10000: # prevent infinite loop if something goes wrong (generator has while loop)
             break
 
     debug.add('REGEX ITERATIONS', i)

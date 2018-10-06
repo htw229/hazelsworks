@@ -96,7 +96,6 @@ PREPOSITION_LIST = [
     'an',
     'the',
     'this',
-    'that',
     'the',
 ]
 
@@ -116,7 +115,10 @@ MARKUP = {
                  'thousandth', 'millionth'],
     'month': ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
                 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
-                'december']
+                'december'],
+    'me': ['him', 'her', 'them', 'me', 'us'],
+    'mine': ['his', 'hers', 'theirs', 'mine', 'ours'],
+    'my': ['his', 'her', 'their', 'my', 'our',],
 }
 
 
@@ -143,7 +145,7 @@ IRREGULAR_CONJUGATES =[
     ['alighting', 'alit', 'alights', 'alight'],
     ['arise', 'arisen', 'arose', 'arises', 'arising'],
     ['awaking', 'awakes', 'awoken', 'awake', 'awoke'],
-    ['is', 'been', 'are', 'am', 'be', 'being', 'was', 'were'],
+    ['is', 'been', 'are', 'am', 'be', 'being', 'was', 'were', "aren't", "isn't", "I'm", "I'm not"],
     ['bears', 'bore', 'bearing', 'bear', 'born', 'borne'],
     ['beating', 'beat', 'beaten', 'beats'],
     ['become', 'becoming', 'became', 'becomes'],
@@ -182,7 +184,7 @@ IRREGULAR_CONJUGATES =[
     ['cutting', 'cut', 'cuts'],
     ['dealt', 'deals', 'deal', 'dealing'],
     ['digging', 'digs', 'dig', 'dug'],
-    ['do', 'did', 'doing', 'does', 'done'],
+    ['do', 'did', 'doing', 'does', 'done', 'do not', 'will not', "don't", "doesn't", "won't", "didn't"],
     ['draw', 'drawn', 'draws', 'drawing', 'drew'],
     ['dreamt', 'dreams', 'dream', 'dreaming'],
     ['drunk', 'drinks', 'drank', 'drink', 'drinking'],
@@ -338,6 +340,9 @@ IRREGULAR_CONJUGATES =[
     ['withdraws', 'withdrawn', 'withdrawing', 'withdraw', 'withdrew'],
     ['wring', 'wrings', 'wringing', 'wrung'],
     ['wrote', 'writes', 'write', 'written', 'writing'],
+
+
+
 
 # IRREGULAR NOUNS
     ["addendum", "addenda", "addendums"],
