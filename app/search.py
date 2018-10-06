@@ -60,7 +60,9 @@ def search(formdata) -> dict:
     # check topics
     for topic in Topic.objects.all():
         # debug.add('searching', topic.name)
-        if searchstring in topic.name.lower() or (searchstringnoplural and searchstringnoplural in topic.name.lower()):
+
+        if re.search(pattern, topic.name, re.IGNORECASE): # this rather than python below adds about 0.2s to search
+        # if searchstring in topic.name.lower() or (searchstringnoplural and searchstringnoplural in topic.name.lower()):
             results['topicsbyname'].append(topic)
             # debug.add('found topicsbyname')
             continue
@@ -94,15 +96,27 @@ def search(formdata) -> dict:
 
     # check searchwords
     for r in Replacement.objects.all():
+
+        # forward search
         texts = [r.searchstrings, r.suggestreplacement, r.considerreplacements, r.clarification]
         text = r'\r\n'.join([t for t in texts if t])
         match = re.search(pattern, text, re.IGNORECASE)
 
-        if searchstring in text:
-            debug.add(text)
-
+        # add related topics
         if match:
             results['replacements'].append(r)
+            for topic in r.topics.all():
+                if topic not in results['topicsbyname'] and (topic not in [t['topic'] for t in results['topicsbytext']]):
+                    results['topicsbyname'].append(topic)
+
+        # backward search
+        # NOTE: this adds about 0.7 seconds to search; if adding this back in, add 'else' clause to above
+        # reversepattern = SEARCH_PATTERN_WRAPPER_REVERSE % '|'.join([p['pattern'] for p in r.searchwords])
+        # match = re.search(reversepattern, searchstring, re.IGNORECASE)
+        #
+        # if match:
+        #     results['replacements'].append(r)
+
 
     # check dialects
     if searchstring != DEFAULT_DIALECT.lower():

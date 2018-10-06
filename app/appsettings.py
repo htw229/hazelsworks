@@ -92,4 +92,5 @@ DASH_REPLACEMENT_PATTERN = r"(?:|\-|\s)"
 
 # SEARCH
 SEARCH_PATTERN_WRAPPER = r"(?P<excerpt_start>(?:(?:\w{0,15})\b[ \"\'\,]{1,2}){0,10})\b(?P<found_string>%s)\b(?P<excerpt_end>(?:(?:\w{0,15})\b[ \"\'\,]{0,3}){0,10})"
+SEARCH_PATTERN_WRAPPER_REVERSE = r"\b%s\b"
 SEARCH_MAX_DIALECT_RESULTS = 100
