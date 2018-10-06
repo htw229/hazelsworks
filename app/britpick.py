@@ -174,9 +174,9 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-    if '255' in patternstring:
-        debug.add(patternstring)
-        debug.add(inputtext)
+    # if '255' in patternstring:
+    #     debug.add(patternstring)
+    #     debug.add(inputtext)
 
     # if 'is all' in patternstring:
     #     debug.add(['is all', patternstring])
@@ -205,9 +205,47 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
                 pk = groupname[2:] # trim first two characters ('pk456' -> '456')
                 replacementtext = r'<' + createreplacementhtml(match.group(), pk) + r'>'
 
-        # replacementtext = 'found'
-                text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
-                addedtextlength += len(replacementtext) - len(match.group())
+                valid = True
+                r = Replacement.objects.get(pk=pk)
+
+                if r.excludepatterns:
+                    for excludepattern in r.excludepatterns:
+                        debug.add('match.start()', match.start())
+
+                        matchstartpos = match.start() + addedtextlength
+                        minstartpos = matchstartpos - EXCLUDE_TEXT_MARGIN
+                        startpositions = [minstartpos]
+
+                        matchendpos = match.end() + addedtextlength
+                        maxendpos = matchendpos + EXCLUDE_TEXT_MARGIN
+                        endpositions = [maxendpos]
+
+                        for marker in PHRASE_BOUNDARY_MARKERS:
+                            if marker not in excludepattern:
+                                p = text.rfind(marker, minstartpos, matchstartpos)
+                                if p > -1:
+                                    startpositions.append(p)
+
+                                p = text.find(marker, matchendpos, maxendpos)
+                                if p > -1:
+                                    endpositions.append(p)
+
+                        startpos = sorted(startpositions)[-1]
+                        endpos = sorted(endpositions)[0]
+
+                        textchunk = text[startpos:endpos]
+                        debug.add(match.group(), sectionbreakbefore=True)
+                        debug.add(excludepattern, loop='excludepatterns')
+                        debug.add('startpos', startpos, 'endpos', endpos)
+                        debug.add(textchunk)
+                        if re.search(str(excludepattern), textchunk, re.IGNORECASE):
+                            debug.add('invalidated')
+                            valid = False
+                            break
+
+                if valid:
+                    text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
+                    addedtextlength += len(replacementtext) - len(match.group())
 
     outputtext = text[:-2] # remove added '<' from text
 

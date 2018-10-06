@@ -116,7 +116,11 @@ class Replacement(models.Model):
 
     category = models.ForeignKey(ReplacementCategory, default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk, on_delete=models.CASCADE)
 
-    searchstrings = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
+    searchstrings = models.TextField(blank=True, null=True,
+                                     help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
+
+    excludedstrings = models.TextField(blank=True, null=True,
+                                     help_text="Add phrases to exclude (example - searchstring 'shirt', excludedstring 't-shirt')")
 
     suggestreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for the strongest suggestion")
     considerreplacements = models.TextField(blank=True, null=True, help_text="for less strong suggestions")
@@ -280,6 +284,10 @@ class Replacement(models.Model):
             searchword = searchwords.getwordpattern(searchwordstring)
             self.searchwords.append(searchword)
 
+        self.excludepatterns = []
+        for excludewordstring in [w for w in self.excludedstrings.split('\r\n') if w.strip() != '']:
+            excludepattern = searchwords.getwordpattern(excludewordstring)['pattern']
+            self.excludepatterns.append(excludepattern)
 
     def save(self, *args, **kwargs):
         # if it's the non-default dialect, unless the words are manually marked as something different

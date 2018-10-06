@@ -25,6 +25,11 @@ WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
 REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^\>"]*?(\<[^"]*?\>)*?[^\>"]*?[\,\.\!\?]")"""
 
+EXCLUDE_TEXT_MARGIN = 25
+PHRASE_BOUNDARY_MARKERS = [r'.', r'\r\n', r'"', r'<', r'>', r' ', r',']
+
+
+#SEARCHWORDS
 
 OPTIONAL_WORD_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"
 OPTIONAL_WORD_PLACEHOLDER_PATTERN = r"[ \\]*\<OPTIONAL\>(.*)\<\/OPTIONAL\>[ \\]*"
