@@ -4,7 +4,7 @@ DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE = 'informal'
 
 MAX_SEARCHPATTERNGENERATOR_ITERATIONS = 2000
 
-# used when inputting searchwords to disallow tenses and suffixes
+# used when inputting searchstrings to disallow tenses and suffixes
 PROTECTED_WORD_MARKER = '#'
 PROTECTED_PHRASE_MARKER = "###"
 
@@ -86,3 +86,11 @@ SEARCH_EXCLUDE = 'exclude'
 # )
 
 DASH_REPLACEMENT_PATTERN = r"(?:|\-|\s)"
+
+
+
+
+# SEARCH
+SEARCH_PATTERN_WRAPPER = r"(?P<excerpt_start>(?:(?:\w{0,15})\b[ \"\'\,]{1,2}){0,10})\b(?P<found_string>%s)\b(?P<excerpt_end>(?:(?:\w{0,15})\b[ \"\'\,]{0,3}){0,10})"
+SEARCH_PATTERN_WRAPPER_REVERSE = r"\b%s\b"
+SEARCH_MAX_DIALECT_RESULTS = 100

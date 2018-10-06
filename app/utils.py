@@ -6,6 +6,15 @@ from .debug import Debug as DebugClass
 debug = DebugClass()
 
 
+def saveall():
+    for obj in Replacement.objects.all():
+        obj.save()
+    print('done')
+
+
+
+
+
 def addreplacementtype():
     for obj in Replacement.objects.all():
         if obj.mandatory:

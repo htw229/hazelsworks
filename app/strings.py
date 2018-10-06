@@ -14,3 +14,5 @@ BRITPICKFORM_DIALOGUE_LABEL = 'Suggest replacements in'
 BRITPICKFORM_DIALOGUE_SMART = 'All text, informal and slang only in dialogue'
 BRITPICKFORM_DIALOGUE_ALL_TEXT = 'All text'
 BRITPICKFORM_DIALOGUE_DIALOGUE_ONLY = 'Dialogue only'
+
+SEARCH_ERROR_EXCLUDEDWORD = "Not a valid search term"

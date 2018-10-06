@@ -366,3 +366,13 @@ span.categorystring:hover {
 .topiclistitem.main {
     font-weight: bold;
 }
+
+
+
+/*--------------------------------------------*/
+/*  SEARCH  */
+/*--------------------------------------------*/
+
+.searchtopicfoundstring {
+    font-weight: bold;
+}

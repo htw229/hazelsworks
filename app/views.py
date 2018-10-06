@@ -10,8 +10,9 @@ from django.template import RequestContext, Template
 from .forms import BritpickForm, BritpickfindwordForm, DIALOGUE_OPTION_CHOICES
 from .britpick import britpick
 from .britpicktopic import britpicktopic
-from .models import Replacement, ReplacementTopic, Reference, ReplacementCategory
+from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
+import search
 
 
 def robotstxt(request):
@@ -107,28 +108,29 @@ def searchview(request):
     s = ''
     searchwords = []
     replacementwords = []
+    searchresults = {}
+    debug = Debug()
+
+    form = BritpickfindwordForm()
 
     if request.method == 'POST':
         form = BritpickfindwordForm(request.POST)
         if form.is_valid():
-            s = form.cleaned_data['searchword']
-
-            for o in Replacement.objects.all():
-                if s in o.searchwords:
-                    searchwords.append(o)
-                if o.replacementwordshtml and s in o.replacementwordshtml:
-                    replacementwords.append(o)
-                # if o.directreplacement and s in o.directreplacement:
-                #     replacementwords.append(o)
-                # if o.considerreplacement and s in o.considerreplacement:
-                #     replacementwords.append(o)
+            searchresults = search.search(form.cleaned_data)
+            debug = searchresults['debug']
+        else:
+            form = BritpickfindwordForm()
 
     responsedata = {
-        'form': BritpickfindwordForm,
+        'pagetitle': 'Search',
+        'form': form,
         'template': 'search.html',
         'search': s,
         'searchwordobjects': searchwords,
         'replacementwordobjects': replacementwords,
+        'results': searchresults,
+        'showdebug': True,
+        'debug': debug.html,
     }
 
     return render(request, 'britpicktemplate.html', responsedata)
@@ -148,7 +150,7 @@ def searchview(request):
 
 def topicview(request, topicslug):
 
-    # responsedata is dict that contains topic (obj), topichtml (html), searchwords (object list), debug (as html)
+    # responsedata is dict that contains topic (obj), topichtml (html), searchstrings (object list), debug (as html)
     responsedata = {
         'pagetitle': 'Topic not found',
         'topic': None,
@@ -158,7 +160,7 @@ def topicview(request, topicslug):
         'showdebug': True,
     }
 
-    for topic in ReplacementTopic.objects.all():
+    for topic in Topic.objects.all():
         if topicslug == topic.slug:
             responsedata = britpicktopic(topic)
             responsedata['pagetitle'] = topic.name
@@ -172,7 +174,7 @@ def topicview(request, topicslug):
 
 def topicslist(request):
 
-    topics = ReplacementTopic.objects.filter(maintopic=True).order_by('name')
+    topics = Topic.objects.filter(maintopic=True).order_by('name')
 
     responsedata = {
         'pagetitle': 'Topics',

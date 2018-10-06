@@ -1,10 +1,12 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from picklefield.fields import PickledObjectField
 
-from .htmlutils import getlinkhtml
 import htmlutils
-from appsettings import *
-# import appsettings as appsettingstest
+import searchwords
+from __init__ import *
+
+
 
 class Dialect(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -46,7 +48,7 @@ class Reference(models.Model):
         ordering = ['adminname']
 
 
-class ReplacementTopic(models.Model):
+class Topic(models.Model):
     active = models.BooleanField(default=True)
     maintopic = models.BooleanField(default=True)
 
@@ -63,7 +65,7 @@ class ReplacementTopic(models.Model):
 
     @property
     def linkhtml(self) -> str:
-        s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
+        s = htmlutils.getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
     # @property
@@ -110,23 +112,29 @@ class ReplacementCategory(models.Model):
 class Replacement(models.Model):
     dialect = models.ForeignKey(Dialect, default=DEFAULT_DIALECT, on_delete=models.CASCADE)
     active = models.BooleanField(default=True)
+    verified = models.BooleanField(default=True)
 
     category = models.ForeignKey(ReplacementCategory, default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk, on_delete=models.CASCADE)
 
-    searchwords = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
+    searchstrings = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
 
     suggestreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for the strongest suggestion")
     considerreplacements = models.TextField(blank=True, null=True, help_text="for less strong suggestions")
     clarification = models.TextField(blank=True, null=True, help_text="can be used alone to clarify meaning (such as 1st floor -> ground floor) or along with the above to explain replacement")
     explanations = models.ManyToManyField(ReplacementExplanation, blank=True)
-    topics = models.ManyToManyField(ReplacementTopic, blank=True)
+    topics = models.ManyToManyField(Topic, blank=True)
+
+    # searchwords = models.TextField(blank=True, null=True)
+    # excludepatterns = models.TextField(blank=True, null=True)
+    searchwords = PickledObjectField(null=True)
+    excludepatterns = PickledObjectField(null=True)
 
     # TODO: change admin form to have checkboxes (like for topic)
-    # TODO: change search link BritpickFindReplace to Replacement so link to admin works
+
 
     @property
     def searchwordlist(self) -> list:
-        wordlist = [w.strip() for w in self.searchwords.split('\r\n') if w.strip() != '']
+        wordlist = [w.strip() for w in self.searchstrings.split('\r\n') if w.strip() != '']
         return wordlist
 
     @property
@@ -266,12 +274,20 @@ class Replacement(models.Model):
         else:
             return s + ' (+ ' + str(len(wordlist) - 1) + ')'
 
+    def createpatterns(self):
+        self.searchwords = [] # reset field first
+        for searchwordstring in self.searchwordlist:
+            searchword = searchwords.getwordpattern(searchwordstring)
+            self.searchwords.append(searchword)
+
 
     def save(self, *args, **kwargs):
         # if it's the non-default dialect, unless the words are manually marked as something different
         # assign them to 'informal'
         if self.dialect.name != DEFAULT_DIALECT and self.category.name == DEFAULT_REPLACEMENTTYPE:
             self.category = ReplacementCategory.objects.get(name=DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE)
+
+        self.createpatterns()
 
         super().save(*args, **kwargs)
 

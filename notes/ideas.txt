@@ -86,65 +86,31 @@ x for each N words of same match type (quotes, no quotes) - maybe make generator
     x group N of them together that have same wrapping pattern
     x create full regex search with wrapper quote/no quote wrapper and inner pattern (?P<pk456>wordsubpattern)|<?P<pk567>wordsubpattern)|etc
 
-- compile pattern, find matches with finditer and loop through them
-    - find out which group matched with m.lastgroup
-    - make replacementtext
+x compile pattern, find matches with finditer and loop through them
+    x find out which group matched with m.lastgroup
+    x make replacementtext
 
 
 
 
 
+Replacement obj
+- searchpatterns - to be used by britpick and by search
+    - separate by %%%
+    - do not include word boundary or wrapper
+    - with data for: number of letters, end punctuation, ignorecase
+        - separate by :::
+- excludepatterns
+    - separate by %%%
 
+exclude:
+- by object
+- markup in searchwords - ^^^ searchword
+- take match, take characters 100 before, 100 after match (exclude <> markers); if it matches exclude pattern then skip match
 
-
-markup:
-# do not add suffix
-^ add suffix here
-[markup] markup substitution
-
-
-
-
-
-
-
-
-
-remove duplicates
-
-then sort so that:
-
-take the first one (will be shortest): abc
-get everything that begins with that:
-abc
-abcd
-abcdef
-abcghy
-cut off beginning:
-d
-def
-ghy
-add |
-
-so that:
-(abc(|d|def|ghy)|xyz...)
-
-
-
+CURRENTLY NEEDS FIXING:
+- multiple words in dialogue
+- end punctuation
 
 
 - go through gemma's article, chat transcripts
-
-
-
-
-MORE EFFICIENT:
-atomic group
-- make search term + \b the first to match
-- full search term first
-- then each individually (will need word boundary anyways)
-
-
-
-
-- make search term the first to match, followed by word marker - make it atomic group (this will not affect punctuation since \b is before the punctuation)

@@ -12,7 +12,7 @@ admin.site.register(ReplacementExplanation)
 from .models import Replacement
 admin.site.register(Replacement)
 
-from .models import ReplacementTopic
+from .models import Topic
 
 class TopicAdmin(admin.ModelAdmin):
     formfield_overrides = {
@@ -27,7 +27,7 @@ class TopicAdmin(admin.ModelAdmin):
         # form.base_fields['relatedtopics'].widget.attrs['style'] = 'height: 400px;'
         return form
 
-admin.site.register(ReplacementTopic, TopicAdmin)
+admin.site.register(Topic, TopicAdmin)
 
 from .models import Reference
 admin.site.register(Reference)
