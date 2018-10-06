@@ -111,15 +111,19 @@ def searchview(request):
     searchresults = {}
     debug = Debug()
 
+    form = BritpickfindwordForm()
+
     if request.method == 'POST':
         form = BritpickfindwordForm(request.POST)
         if form.is_valid():
             searchresults = search.search(form.cleaned_data)
             debug = searchresults['debug']
+        else:
+            form = BritpickfindwordForm()
 
     responsedata = {
         'pagetitle': 'Search',
-        'form': BritpickfindwordForm,
+        'form': form,
         'template': 'search.html',
         'search': s,
         'searchwordobjects': searchwords,

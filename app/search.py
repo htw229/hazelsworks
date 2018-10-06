@@ -8,12 +8,15 @@ from __init__ import *
 
 debug = None
 
+# TODO: add option to search all references (keep version catalogued on current site? or google search references?): https://support.google.com/customsearch/answer/4513886?hl=en&ref_topic=4513742
+
 def search(formdata) -> dict:
     global debug
     debug = None
     debug = Debug()
 
     searchstring = formdata['searchword'].lower().strip()
+
 
     results = {
         'search': searchstring,
@@ -24,6 +27,8 @@ def search(formdata) -> dict:
         'dialectreplacements': [],
         'references': [],
     }
+
+    searchstring = searchstring.replace(' ', '-')
 
     # ensure not excluded word
     # TODO: create excluded words list (for now using prepositions)
