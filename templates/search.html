@@ -4,30 +4,67 @@
     {{  form }}
     <input type="submit" value="Submit">
 </form>
-<p><b>{{ search }}</b></p>
-<p>Input:</p>
-{% if searchwordobjects %}
-    <ul>
-    {% for o in searchwordobjects %}
-        <li>{% include "replacement_list.html" with replacement=o showtopics=True  %}</li>
-    {% endfor %}
-    </ul>
-{% else %}
-    Word not found in searchwords
-{%  endif %}
-
-<p>Output:</p>
-{% if replacementwordobjects %}
-    <ul>
-    {% for o in replacementwordobjects %}
-        <li>
-            {% include "replacement_list.html" with replacement=o showtopics=True %}
-        </li>
-    {% endfor %}
-    </ul>
-{% else %}
-    Word not found in directreplacement or considerreplacement
-{%  endif %}
+{% if results.search %}
+<p><b>{{ results.search }}</b></p>
+    {% if results.error %}
+    <p><b>{{ results.error }}</b></p>
+    {% else %}
+        {% if results.topicsbyname or results.topicsbytext %}
+            <p><b>Topics</b></p>
+        {% endif %}
+        {% if results.topicsbyname %}
+            <ul>
+            {% for t in results.topicsbyname %}
+                <li>{{ t.linkhtml|safe }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No topic name results</p>
+        {%  endif %}
+        {% if results.topicsbytext %}
+            <ul>
+            {% for t in results.topicsbytext %}
+                <li>{{ t.topic.linkhtml|safe }}: {{ t.excerpt|safe }}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No topic text results</p>
+        {%  endif %}
+        {% if results.replacements %}
+            <p><b>Replacement Words</b></p>
+            <ul>
+            {% for r in results.replacements %}
+                <li>{% include "inline_replacement.html" with replacement=r %}</li>
+            {% endfor %}
+            </ul>
+        {% else %}
+            <p>No replacement word results</p>
+        {%  endif %}
+    {% endif %}
+{% endif %}
+{#<p>Input:</p>#}
+{#{% if searchwordobjects %}#}
+{#    <ul>#}
+{#    {% for o in searchwordobjects %}#}
+{#        <li>{% include "replacement_list.html" with replacement=o showtopics=True  %}</li>#}
+{#    {% endfor %}#}
+{#    </ul>#}
+{#{% else %}#}
+{#    Word not found in searchwords#}
+{#{%  endif %}#}
+{##}
+{#<p>Output:</p>#}
+{#{% if replacementwordobjects %}#}
+{#    <ul>#}
+{#    {% for o in replacementwordobjects %}#}
+{#        <li>#}
+{#            {% include "replacement_list.html" with replacement=o showtopics=True %}#}
+{#        </li>#}
+{#    {% endfor %}#}
+{#    </ul>#}
+{#{% else %}#}
+{#    Word not found in directreplacement or considerreplacement#}
+{#{%  endif %}#}
 
 <p>
     <a href="/admin/app/replacement/add/" target="_blank">Add new word</a>

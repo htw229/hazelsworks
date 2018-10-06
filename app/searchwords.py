@@ -173,6 +173,30 @@ def getoptionalwordplaceholder(word) -> str:
 
 def getsuffixpattern(searchstring) -> str:
 
+    # word = searchstring.strip()
+    # wordlist = []
+    #
+    # for suffixformula in SUFFIXES_LIST:
+    #     for ending in suffixformula['ending']:
+    #         for suffix in suffixformula['suffix']:
+    #             if suffixformula['replace']:
+    #                 s = re.sub(ending + r'$', suffix, word)
+    #             else:
+    #                 s = re.sub(ending + r'$', ending + suffix, word)
+    #             wordlist.append(s)
+    #
+    # wordlist = list(set(wordlist)) # remove duplicates
+
+    wordlist = getsuffixwordlist(searchstring)
+
+    wordtrie = trie.Trie()
+    for w in wordlist:
+        wordtrie.add(w)
+    pattern = wordtrie.pattern()
+
+    return pattern
+
+def getsuffixwordlist(searchstring) -> list:
     word = searchstring.strip()
     wordlist = []
 
@@ -186,9 +210,5 @@ def getsuffixpattern(searchstring) -> str:
                 wordlist.append(s)
 
     wordlist = list(set(wordlist)) # remove duplicates
-    wordtrie = trie.Trie()
-    for w in wordlist:
-        wordtrie.add(w)
-    pattern = wordtrie.pattern()
 
-    return pattern
+    return wordlist

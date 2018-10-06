@@ -12,6 +12,7 @@ from .britpick import britpick
 from .britpicktopic import britpicktopic
 from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
+import search
 
 
 def robotstxt(request):
@@ -107,28 +108,25 @@ def searchview(request):
     s = ''
     searchwords = []
     replacementwords = []
+    searchresults = {}
+    debug = Debug()
 
     if request.method == 'POST':
         form = BritpickfindwordForm(request.POST)
         if form.is_valid():
-            s = form.cleaned_data['searchword']
-
-            for o in Replacement.objects.all():
-                if s in o.searchstrings:
-                    searchwords.append(o)
-                if o.replacementwordshtml and s in o.replacementwordshtml:
-                    replacementwords.append(o)
-                # if o.directreplacement and s in o.directreplacement:
-                #     replacementwords.append(o)
-                # if o.considerreplacement and s in o.considerreplacement:
-                #     replacementwords.append(o)
+            searchresults = search.search(form.cleaned_data)
+            debug = searchresults['debug']
 
     responsedata = {
+        'pagetitle': 'Search',
         'form': BritpickfindwordForm,
         'template': 'search.html',
         'search': s,
         'searchwordobjects': searchwords,
         'replacementwordobjects': replacementwords,
+        'results': searchresults,
+        'showdebug': True,
+        'debug': debug.html,
     }
 
     return render(request, 'britpicktemplate.html', responsedata)

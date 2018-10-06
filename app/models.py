@@ -2,11 +2,11 @@ from django.db import models
 from django.template.defaultfilters import slugify
 from picklefield.fields import PickledObjectField
 
-from .htmlutils import getlinkhtml
 import htmlutils
-from appsettings import *
 import searchwords
-# import appsettings as appsettingstest
+from __init__ import *
+
+
 
 class Dialect(models.Model):
     name = models.CharField(max_length=100, primary_key=True)
@@ -65,7 +65,7 @@ class Topic(models.Model):
 
     @property
     def linkhtml(self) -> str:
-        s = getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
+        s = htmlutils.getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
     # @property

@@ -93,6 +93,7 @@ PREPOSITION_LIST = [
     'that',
     'from',
     'a',
+    'an',
     'the',
     'this',
     'that',
@@ -121,6 +122,11 @@ MARKUP_LIST = [
     # [word] matches between 1-3 words, including apostrophes
     {'markup': 'word',
      'wordlist': [r"([\w\']+ ?){1,3}"]},
+
+    # # TODO: doesn't work
+    # # [p] end phrase/sentence punctuation
+    # {'markup': 'p',
+    #  'wordlist': ['\!', '\?', '\.', '\,']},
 
     # [opt] matches between 0-3 words, including apostrophes # TODO: optional markup not working
     {'markup': 'opt',
