@@ -99,10 +99,13 @@ def getwordpattern(searchstring) -> dict:
                 wordlist = casematchedwordlist(wordlist, s)
                 wordlist = list(set(wordlist))
 
-                wordtrie = trie.Trie()
-                for w in wordlist:
-                    wordtrie.add(w)
-                wordpattern = wordtrie.pattern()
+                # wordtrie = trie.Trie()
+                # for w in wordlist:
+                #     wordtrie.add(w)
+                # wordpattern = wordtrie.pattern()
+
+                wordpattern = r"(?:%s)" % '|'.join(wordlist)
+                # TODO: any word can end in 's, s, es
 
                 if r'\-' in wordpattern:
                     wordpattern = wordpattern.replace(r'\-', DASH_REPLACEMENT_PATTERN)
@@ -194,21 +197,49 @@ def getsuffixpattern(searchstring) -> str:
     return pattern
 
 def getsuffixwordlist(searchstring) -> list:
-    word = searchstring.strip()
+    word = searchstring.strip().lower()
     wordlist = []
 
     for suffixformula in SUFFIXES_LIST:
         for ending in suffixformula['ending']:
             for suffix in suffixformula['suffix']:
-                if suffixformula['replace']:
-                    s = re.sub(ending + r'$', suffix, word)
-                else:
-                    s = re.sub(ending + r'$', ending + suffix, word)
-                wordlist.append(s)
+                if re.search(ending + r'$', word):
+
+                    # exclude if contains the negated ending
+                    valid = True
+                    try:
+                        for negativeending in suffixformula['negativeending']:
+                            if re.search(negativeending + r'$', word):
+                                valid = False
+                    except KeyError:
+                        pass
+
+                    # do not allow words to end in twice of substituted suffixes (or the related ones in list)
+                    suffixespattern = r"(%s)$" % '|'.join(
+                        [s for s in suffixformula['suffix'] if "\\" not in s])
+                    if re.search(suffixespattern, word):
+                        valid = False
+
+                    if valid:
+                        if suffixformula['replace']:
+                            s = re.sub(ending + r'$', suffix, word)
+                        else:
+                            s = word + suffix
+                        wordlist.append(s)
 
     wordlist = list(set(wordlist)) # remove duplicates
 
+    for i, w in enumerate(wordlist):
+        for ending in DISALLOWED_ENDINGS:
+            if re.search(ending + r'$', w):
+                wordlist.pop(i)
+
     return wordlist
+
+
+
+
+
 
 
 # def validsearch(searchstring) -> bool:

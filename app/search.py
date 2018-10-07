@@ -17,7 +17,6 @@ def search(formdata) -> dict:
 
     searchstring = formdata['searchword'].lower().strip()
 
-
     results = {
         'search': searchstring,
         'error': None,
@@ -37,28 +36,16 @@ def search(formdata) -> dict:
         results['debug'] = debug
         return results
 
-    # create list of searchwords
-    # searchwordconjugates = searchwords.getirregularconjugates(searchstring)
-    # searchwordlist = [searchstring]
-    # if searchwordconjugates:
-    #     searchwordlist = searchwordconjugates
-    # else:
-    #     searchwordlist = searchwords.getsuffixwordlist(searchstring)
-
     searchwordpattern = searchwords.getwordpattern(searchstring)['pattern']
-    searchstringnoplural = ''
+    debug.add('searchwordpattern', searchwordpattern)
 
     if searchstring.endswith('s'):
         searchstringnoplural = searchstring[:len(searchstring)-1]
-        debug.add(searchstringnoplural)
+        debug.add('searchstringnoplural', searchstringnoplural)
         searchwordpattern = r'(?:' + searchwordpattern + '|' + searchwords.getwordpattern(searchstringnoplural)['pattern'] + ')'
 
-
-
-
-    debug.add(searchwordpattern)
     pattern = SEARCH_PATTERN_WRAPPER % searchwordpattern
-    debug.add(pattern)
+    debug.add('pattern', pattern)
 
     # TODO: remove curly quotes on save topic
 
@@ -66,25 +53,17 @@ def search(formdata) -> dict:
     for topic in Topic.objects.all():
         # debug.add('searching', topic.name)
 
+        # search titles
         if re.search(pattern, topic.name, re.IGNORECASE): # this rather than python below adds about 0.2s to search
         # if searchstring in topic.name.lower() or (searchstringnoplural and searchstringnoplural in topic.name.lower()):
             results['topicsbyname'].append(topic)
             # debug.add('found topicsbyname')
             continue
+
+        # search content
         match = re.search(pattern, topic.text, re.IGNORECASE)
         if match:
-            # excerptstartpos = match.start() - SEARCH_TOPIC_CHARS_BEFORE_AND_AFTER
-            # if excerptstartpos < 0:
-            #     excerptstartpos = 0
-            #
-            # excerptendpos = match.end() + SEARCH_TOPIC_CHARS_BEFORE_AND_AFTER
-            # if excerptendpos > (len(topic.text) - 1):
-            #     excerptendpos = len(topic.text) - 1
-
             excerpt = '...' + match.group('excerpt_start') + htmlutils.addspan(match.group('found_string'), cssclass='searchtopicfoundstring') + match.group('excerpt_end') + '...'
-
-
-            # excerpt = topic.text[excerptstartpos:excerptendpos]
 
             results['topicsbytext'].append({
                 'topic': topic,
@@ -92,19 +71,13 @@ def search(formdata) -> dict:
             })
             continue
 
-            # elif s in topic.text.lower():
-            #     results['topicsbytext'].append(topic)
-            #     # debug.add('found topicsbytext')
-            #     continue
-
-
 
     # check searchwords
     for r in Replacement.objects.all():
 
         # forward search
         texts = [r.searchstrings, r.suggestreplacement, r.considerreplacements, r.clarification]
-        text = r'\r\n'.join([t for t in texts if t])
+        text = r' '.join([t for t in texts if t]).replace('\r\n', ' ')
         match = re.search(pattern, text, re.IGNORECASE)
 
         # add related topics
@@ -129,7 +102,6 @@ def search(formdata) -> dict:
             if searchstring == dialect.name.lower():
                 for r in Replacement.objects.filter(dialect=dialect.name)[:SEARCH_MAX_DIALECT_RESULTS]:
                     results['dialectreplacements'].append(r)
-
 
 
     debug.timer('search finished')
