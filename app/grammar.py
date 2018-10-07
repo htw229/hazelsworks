@@ -1,6 +1,6 @@
 
 
-# SUFFIXES_LIST = [
+# REGULAR_CONJUGATES = [
 #     {'ending': [''], 'suffix': ['s'], 'replace': False}, # for purals and verbs, always try just adding s
 #
 #     # PLURALS
@@ -40,23 +40,31 @@
 #     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True}, # double ending consonant if vowel-consonant
 # ]
 
+# necessary if more than one word only
+POSSESSIVES = [
+    # POSSESSIVE
+    {'ending': [''], 'suffix': [r"'s"], 'replace': False, },
+    {'ending': ['s'], 'suffix': [r"'"], 'replace': False, },
+]
+
+PLURALS = [
+    # PLURALS
+    {'ending': ['[^s]'], 'negativeending': ['(s|[^aeiou]y)'], 'suffix': ['s'], 'replace': False,},
+    {'ending': ['(?<=[aeiou])s', '(?<=[aeiou])sh', '(?<=[aeiou])ch', '(?<=[aeiou])x'], 'suffix': ['es'],
+     'replace': False, },
+    {'ending': ['z'], 'suffix': ['zzes'], 'replace': True, },
+    {'ending': ['s'], 'suffix': ['sses'], 'replace': True, },
+    {'ending': ['y'], 'suffix': ['ies'], 'replace': True, },
+    {'ending': ['f', 'fe'], 'suffix': ['ves'], 'replace': True, },
+    {'ending': ['o'], 'suffix': ['oes'], 'replace': True, },
+    {'ending': ['is'], 'suffix': ['es'], 'replace': True, },
+    {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True, },
+]
+
 
 # test deleting uncommon ones
-SUFFIXES_LIST = [
-    {'ending': ['[^s]'], 'suffix': ['s'], 'replace': False,}, # for purals and verbs, always try just adding s
-    # POSSESSIVE
-    {'ending': [''], 'suffix': [r"'s"], 'replace': False,},
-    {'ending': ['s'], 'suffix': [r"'"], 'replace': False,},
-
-    # PLURALS
-    {'ending': ['(?<=[aeiou])s', '(?<=[aeiou])sh', '(?<=[aeiou])ch', '(?<=[aeiou])x'], 'suffix': ['es'], 'replace': False,},
-    {'ending': ['z'], 'suffix': ['zzes'], 'replace': True,},
-    {'ending': ['s'], 'suffix': ['sses'], 'replace': True,},
-    {'ending': ['y'], 'suffix': ['ies'], 'replace': True,},
-    {'ending': ['f', 'fe'], 'suffix': ['ves'], 'replace': True,},
-    {'ending': ['o'], 'suffix': ['oes'], 'replace': True,},
-    {'ending': ['is'], 'suffix': ['es'], 'replace': True,},
-    {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True,},
+REGULAR_CONJUGATES = [
+     # for purals and verbs, always try just adding s
 
     # NOUNS
     {'ending': ['[^y]'], 'suffix': ["ness"], 'replace': False,},
@@ -65,12 +73,13 @@ SUFFIXES_LIST = [
 
     # ADJECTIVES
     {'ending': ['[^aiouy]'], 'suffix': ['y'], 'replace': False,},
-    {'ending': ['e'], 'suffix': ['y'], 'replace': True,},
+    # {'ending': ['e'], 'suffix': ['y'], 'replace': True,},
     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2y'], 'replace': True,}, # double ending consonant if vowel-consonant
-    {'ending': [''], 'suffix': ['al', 'y', 'ful', 'ous', 'ious', 'ic'], 'replace': False,},
-    {'ending': ['e'], 'suffix': ['al', 'y'], 'replace': True,},
+    {'ending': ['[^ey]'], 'suffix': ['ful', 'ious', 'ic'], 'replace': False,},
+    {'ending': ['[^e]'], 'suffix': ['ous'], 'replace': False,},
+    {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': True,},
     {'ending': ['ion'], 'suffix': ['ious',], 'replace': True,},
-    {'ending': ['(?<=[^aeiou])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
+    {'ending': ['(?<=[ct])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
 
     # ADVERBS
     {'ending': ['[^y]'], 'suffix': ['ly'], 'replace': False,},
@@ -79,6 +88,7 @@ SUFFIXES_LIST = [
     {'ending': ['ic'], 'suffix': ['ally'], 'replace': False,},
 
     # VERBS
+    {'ending': ['[^s]'], 'suffix': ['s'], 'replace': False,},
     {'ending': [''],
      'negativeending': ['([ey]|[aeiou][^aeioul]|[aeiou]{2,})'], # losing too many by overgeneralizing with vowel-non-vowel here?
      'suffix': ['ed', 'ing'], 'replace': False,
@@ -88,9 +98,12 @@ SUFFIXES_LIST = [
     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True,}, # double ending consonant if vowel-consonant
 ]
 
-# delete words with these after creating conjugates
+
+# only apply to created conjugates
+# (many of these can be valid in some circumstances)
 DISALLOWED_ENDINGS = [
-    r'(\w)\1+',
+    r'(\w)\1+', #2 or more of the same letter
+    r'[^aeiou]ys',
 ]
 
 

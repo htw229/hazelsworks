@@ -22,6 +22,7 @@ def getwordpattern(searchstring) -> dict:
     protectedphrase = False
     phraseending = r'\b'
 
+
     # create pattern constructors
     # (adds end, which is either word marker or punctuation, but does not add beginning word marker)
     for match in matches:
@@ -31,23 +32,26 @@ def getwordpattern(searchstring) -> dict:
         elif matchgroups['question']:
             phraseending = r'\?'
         elif matchgroups['end_punctuation']:
-            phraseending = r'[\.\,\?\!]'
+            phraseending = r'[.,?!]'
         elif matchgroups['optional_words_marker']:
             constructors.append({
                 'needs_processing': False,
                 'string': OPTIONAL_WORD_PLACEHOLDER % r"([\w\'\-]+ ?){1,3}",
             })
+            
         elif matchgroups['words_marker']:
             constructors.append({
                 'needs_processing': False,
                 'string': r"([\w\'\-]+ ?){1,3}",
             })
+            
         elif matchgroups['markup']:
             try:
                 constructors.append({
                     'needs_processing': False,
                     'string': '(?:' + '|'.join(MARKUP[matchgroups['markup']]) + ')',
                 })
+                
             except KeyError:
                 print('markup key error: ' + searchstring)
         elif matchgroups['punctuation']:
@@ -60,20 +64,35 @@ def getwordpattern(searchstring) -> dict:
                 'needs_processing': False,
                 'string': re.escape(matchgroups['protected_word'])
             })
+            
         elif matchgroups['plural_protected_word']:
             constructors.append({
-                'needs_processing': False,
-                'string': re.escape(matchgroups['plural_protected_word']) + r"(?:|s|es)"
+                'needs_processing': True,
+                'string': matchgroups['plural_protected_word'],
+                'plural_possessive_only': True,
+                # 'string': re.escape(matchgroups['plural_protected_word']) + r"(?:|s|es)"
             })
+            
         elif matchgroups['word']:
             constructors.append({
                 'needs_processing': True,
                 'string': matchgroups['word'],
             })
+
+    for i, c in reversed(list(enumerate(constructors))):
+        if re.search(r'[.,?!]', phraseending):
+            break
+        elif re.search(r'[a-z]', c['string'], re.IGNORECASE):
+            constructors[i]['possessive_exempt'] = True
+            # constructors[i]['string'] = 'lastword'
+            break
+
     constructors.append({
         'needs_processing': False,
         'string': phraseending,
     })
+    
+
 
     for i, c in enumerate(constructors):
         if not c['needs_processing']:
@@ -85,28 +104,35 @@ def getwordpattern(searchstring) -> dict:
             if s.lower() in OPTIONAL_WORDS_LIST:
                 constructors[i]['string'] = OPTIONAL_WORD_PLACEHOLDER % s
             elif s.lower() in PROTECTED_WORDS:
-                constructors[i]['string'] = re.escape(s)
+                constructors[i]['string'] = s
             elif len(s) < MIN_WORD_LENGTH_FOR_SUFFIX:
-                constructors[i]['string'] = re.escape(s)
+                constructors[i]['string'] = s
+            # TODO: protected conjugates (no plural or possessive), create list
+
             else:
                 wordlist = [s]
-                irregularconjugates = getirregularconjugates(s)
-                if irregularconjugates:
-                    wordlist.extend(irregularconjugates)
+
+                # get PLURALS
+                wordlist.extend(getsuffixwordlist(s, PLURALS))
+
+                # get POSSESSIVES of original word and plural words
+                # only if they're not last word or phrase ends on punctuation
+                # (otherwise \b will stop at apostrophe anyways)
+                if ('possessive_exempt' not in c.keys()) or (not c['possessive_exempt']):
+                    wordlist.extend(getsuffixwordlist(wordlist, POSSESSIVES))
+
+                # get CONJUGATES
+                if ('plural_possessive_only' in c.keys()) and c['plural_possessive_only']:
+                    pass
+                elif getirregularconjugates(s):
+                    wordlist.extend(getirregularconjugates(s))
                 else:
-                    regularconjugates = getsuffixwordlist(s)
-                    wordlist.extend(regularconjugates)
-                wordlist = casematchedwordlist(wordlist, s)
-                wordlist = list(set(wordlist))
+                    wordlist.extend(getsuffixwordlist(s, REGULAR_CONJUGATES)) # do not make conjugates plural or possessive, or conjugate plural or possessive words
 
-                # wordtrie = trie.Trie()
-                # for w in wordlist:
-                #     wordtrie.add(w)
-                # wordpattern = wordtrie.pattern()
+                wordpattern = patternfromlist(wordlist, s)
 
-                wordpattern = r"(?:%s)" % '|'.join(wordlist)
-                # TODO: any word can end in 's, s, es
-
+                # replace DASHES with nothing/dash/space options
+                # does not replace dashes in protected words or phrases
                 if r'\-' in wordpattern:
                     wordpattern = wordpattern.replace(r'\-', DASH_REPLACEMENT_PATTERN)
                 elif '-' in s:
@@ -116,7 +142,7 @@ def getwordpattern(searchstring) -> dict:
 
     pattern = ''.join([c['string'] for c in constructors])
 
-    # create optional pattern
+    # create OPTIONAL pattern
     # (if put the regex in earlier, cannot easily manage spaces before/after it)
     pattern = re.sub(OPTIONAL_WORD_PLACEHOLDER_PATTERN, OPTIONAL_WORD_PATTERN % r'\1', pattern)
 
@@ -130,16 +156,23 @@ def getwordpattern(searchstring) -> dict:
     return searchword
 
 
-# def replacemarkup(markupstring):
-#     s = markupstring
-#
-#     # create while loop so that can repeat until no markup is in there
-#     for m in MARKUP_LIST:
-#         if m['markup'] in s:
-#             replacepattern = '(' + '|'.join(m['wordlist']) + ')'
-#             s = s.replace(m['markup'], replacepattern)
-#
-#     return s
+
+def patternfromlist(wordlist, word = '') -> str:
+    wordlist = list(set(wordlist))
+
+    if word:
+        wordlist = casematchedwordlist(wordlist, word)
+
+    if TRIE_SEARCHWORD_PATTERN:
+        wordtrie = trie.Trie()
+        for w in wordlist:
+            wordtrie.add(w)
+        wordpattern = wordtrie.pattern()
+    else:
+        wordpattern = r"(?:%s)" % '|'.join(wordlist)
+
+    return wordpattern
+
 
 
 def getirregularconjugates(word) -> list:
@@ -162,91 +195,57 @@ def casematchedwordlist(wordlist, originalword) -> list:
     return capitalizedwordlist
 
 
-def removewordboundary(oldpattern) -> str:
-    # for word patterns that contain trailing punctuation, remove word boundary
-    p = oldpattern[:oldpattern.rfind(r"\b")] + oldpattern[oldpattern.rfind(r"\b")+2:]
-    return p
 
-# def getoptionalwordplaceholder(word) -> str:
-#     s = SEARCH_OPTIONAL_PLACEHOLDER % word
-#     return s
+def getsuffixwordlist(search, suffixlist, include_original=False) -> list:
+    searchwordlist = []
+    suffixwordlist = []
 
-def getsuffixpattern(searchstring) -> str:
+    if type(search) is list:
+        searchwordlist = [w for w in search]
+    elif type(search) is str:
+        searchwordlist = [search]
 
-    # word = searchstring.strip()
-    # wordlist = []
-    #
-    # for suffixformula in SUFFIXES_LIST:
-    #     for ending in suffixformula['ending']:
-    #         for suffix in suffixformula['suffix']:
-    #             if suffixformula['replace']:
-    #                 s = re.sub(ending + r'$', suffix, word)
-    #             else:
-    #                 s = re.sub(ending + r'$', ending + suffix, word)
-    #             wordlist.append(s)
-    #
-    # wordlist = list(set(wordlist)) # remove duplicates
+    for searchstring in searchwordlist:
+        word = searchstring.strip().lower()
 
-    wordlist = getsuffixwordlist(searchstring)
+        if include_original:
+            wordlist = [word]
+        else:
+            wordlist = []
 
-    wordtrie = trie.Trie()
-    for w in wordlist:
-        wordtrie.add(w)
-    pattern = wordtrie.pattern()
+        for suffixformula in suffixlist:
+            for ending in suffixformula['ending']:
+                for suffix in suffixformula['suffix']:
+                    if re.search(ending + r'$', word):
 
-    return pattern
+                        # exclude if contains the negated ending
+                        valid = True
+                        try:
+                            for negativeending in suffixformula['negativeending']:
+                                if re.search(negativeending + r'$', word):
+                                    valid = False
+                        except KeyError:
+                            pass
 
-def getsuffixwordlist(searchstring) -> list:
-    word = searchstring.strip().lower()
-    wordlist = []
+                        # do not allow words to end in twice of substituted suffixes (or the related ones in list)
+                        suffixespattern = r"(%s)$" % '|'.join(
+                            [s for s in suffixformula['suffix'] if "\\" not in s])
+                        if re.search(suffixespattern, word):
+                            valid = False
 
-    for suffixformula in SUFFIXES_LIST:
-        for ending in suffixformula['ending']:
-            for suffix in suffixformula['suffix']:
-                if re.search(ending + r'$', word):
+                        if valid:
+                            if suffixformula['replace']:
+                                s = re.sub(ending + r'$', suffix, word)
+                            else:
+                                s = word + suffix
+                            wordlist.append(s)
+        suffixwordlist.extend(wordlist)
 
-                    # exclude if contains the negated ending
-                    valid = True
-                    try:
-                        for negativeending in suffixformula['negativeending']:
-                            if re.search(negativeending + r'$', word):
-                                valid = False
-                    except KeyError:
-                        pass
+    suffixwordlist = list(set(suffixwordlist)) # remove duplicates
 
-                    # do not allow words to end in twice of substituted suffixes (or the related ones in list)
-                    suffixespattern = r"(%s)$" % '|'.join(
-                        [s for s in suffixformula['suffix'] if "\\" not in s])
-                    if re.search(suffixespattern, word):
-                        valid = False
-
-                    if valid:
-                        if suffixformula['replace']:
-                            s = re.sub(ending + r'$', suffix, word)
-                        else:
-                            s = word + suffix
-                        wordlist.append(s)
-
-    wordlist = list(set(wordlist)) # remove duplicates
-
-    for i, w in enumerate(wordlist):
+    for i, w in enumerate(suffixwordlist):
         for ending in DISALLOWED_ENDINGS:
             if re.search(ending + r'$', w):
-                wordlist.pop(i)
+                suffixwordlist.pop(i)
 
-    return wordlist
-
-
-
-
-
-
-
-# def validsearch(searchstring) -> bool:
-#     # invalid things
-#
-#
-#     if '###' in searchstring:
-#
-#
-#     return True
+    return suffixwordlist
