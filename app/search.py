@@ -15,7 +15,10 @@ def search(formdata) -> dict:
     debug = None
     debug = Debug()
 
-    searchstring = formdata['searchword'].lower().strip()
+    searchstring = formdata['searchword'].strip()
+
+    if MAKE_LOWERCASE:
+        searchstring = searchstring.lower()
 
     results = {
         'search': searchstring,
@@ -27,7 +30,8 @@ def search(formdata) -> dict:
         'references': [],
     }
 
-    searchstring = searchstring.replace(' ', '-')
+    # creates problems with conjugates and plurals later on
+    # searchstring = searchstring.replace(' ', '-')
 
     # ensure not excluded word
     # TODO: create excluded words list (for now using prepositions)

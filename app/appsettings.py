@@ -26,7 +26,7 @@ REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
 REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^\>"]*?(\<[^"]*?\>)*?[^\>"]*?[\,\.\!\?]")"""
 
 EXCLUDE_TEXT_MARGIN = 25
-PHRASE_BOUNDARY_MARKERS = [r'.', '\r\n', r'"', r'<', r'>', r' ', r',']
+PHRASE_BOUNDARY_MARKERS = [r'.', '\r\n', r'"', r'<', r'>', r',']
 
 
 #SEARCHWORDS
@@ -38,13 +38,16 @@ OPTIONAL_WORD_PATTERN = "(?: %s | )"
 
 SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
-SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<plural_protected_word>[\w\-]+)\(s\)|(?P<word>[\w\-]+)"
+# TODO: do we still need pural protected word if we have noun protected word?
+SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<plural_protected_word>[\w\-]+)\(s\)|(?P<noun_protected_word>[\w\-]+)\(n\)|(?P<word>[\w\-]+)"
 
 
 DASH_REPLACEMENT_PATTERN = r"(?:|\-|\s)"
 
 
 # SEARCH
+MAKE_LOWERCASE = False
+
 SEARCH_PATTERN_WRAPPER = r"(?P<excerpt_start>(?:(?:\w{0,15})\b[ \"\'\,]{1,2}){0,10})\b(?P<found_string>%s)\b(?P<excerpt_end>(?:(?:\w{0,15})\b[ \"\'\,]{0,3}){0,10})"
 SEARCH_PATTERN_WRAPPER_REVERSE = r"\b%s\b"
 SEARCH_MAX_DIALECT_RESULTS = 100

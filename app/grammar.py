@@ -74,10 +74,12 @@ REGULAR_CONJUGATES = [
     # ADJECTIVES
     {'ending': ['[^aiouy]'], 'suffix': ['y'], 'replace': False,},
     # {'ending': ['e'], 'suffix': ['y'], 'replace': True,},
-    {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2y'], 'replace': True,}, # double ending consonant if vowel-consonant
+
+    # TODO: this and one below aren't working; why?
+    {'ending': [r'(?P<v>[aeiou])(?P<c>[^aeiou])'], 'suffix': [r'\g<v>\g<c>\g<c>y'], 'replace': True,}, # double ending consonant if vowel-consonant
     {'ending': ['[^ey]'], 'suffix': ['ful', 'ious', 'ic'], 'replace': False,},
     {'ending': ['[^e]'], 'suffix': ['ous'], 'replace': False,},
-    {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': True,},
+    {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': False,},
     {'ending': ['ion'], 'suffix': ['ious',], 'replace': True,},
     {'ending': ['(?<=[ct])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
 
@@ -135,6 +137,7 @@ OPTIONAL_WORDS_LIST = [
 ]
 
 #TODO: add possessive markup [possessive]=his, hers, my, your, our, [word]'s
+# TODO: don't make a and the optional
 
 MARKUP = {
     'number': ['\d{1,2}', '\d{1,2}st', '\d{1,2}nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
@@ -148,6 +151,10 @@ MARKUP = {
     'me': ['him', 'her', 'them', 'me', 'us'],
     'mine': ['his', 'hers', 'theirs', 'mine', 'ours'],
     'my': ['his', 'her', 'their', 'my', 'our',],
+    'I': ['he', 'she', 'they', 'I', 'we',], # TODO: not working - see 100
+    'possessive': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)"],
+    'the': ['the', 'a', 'an', 'that', 'this', 'what', 'which',],
+    'noun_preceding': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)", 'the', 'a', 'an', 'that', 'this', 'what', 'which',],
 }
 
 
@@ -155,7 +162,7 @@ MARKUP = {
 # TODO:  add british/american variable word endings
     # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
     # TODO: make curly quotes and apostrophes regular?
-
+# TODO: add a 'must have x word nearby' - for example "back up" needs to have some kind of car term nearby
 
 # british transformations
 VARIABLE_WORD_ENDINGS=[("ence", "ense"),("ogue", "og"),("yse", "yze"),("ize", "ise"),("our", "or"),("er", "re")]
@@ -167,6 +174,14 @@ VARIABLE_WORD_ENDINGS=[("ence", "ense"),("ogue", "og"),("yse", "yze"),("ize", "i
 #     ['my', 'your', '']
 # ]
 
+PROTECTED_CONJUGATES =[
+    ['do', 'did', 'doing', 'does', 'done', 'do not', 'will not', "don't", "doesn't", "won't", "didn't"],
+    ['is', 'been', 'are', 'am', 'be', 'being', 'was', 'were', "aren't", "isn't", "I'm", "I'm not"],
+    ['comes', 'came', 'come', 'coming'],
+    ['give', 'given', 'gave', 'giving', 'gives'],
+    ['having', 'had', 'have', 'has'],
+]
+
 
 IRREGULAR_CONJUGATES =[
 # irregular verbs
@@ -174,7 +189,6 @@ IRREGULAR_CONJUGATES =[
     ['alighting', 'alit', 'alights', 'alight'],
     ['arise', 'arisen', 'arose', 'arises', 'arising'],
     ['awaking', 'awakes', 'awoken', 'awake', 'awoke'],
-    ['is', 'been', 'are', 'am', 'be', 'being', 'was', 'were', "aren't", "isn't", "I'm", "I'm not"],
     ['bears', 'bore', 'bearing', 'bear', 'born', 'borne'],
     ['beating', 'beat', 'beaten', 'beats'],
     ['become', 'becoming', 'became', 'becomes'],
@@ -207,13 +221,11 @@ IRREGULAR_CONJUGATES =[
     ['cleave', 'clove', 'cleft', 'cleaving', 'cleaves', 'cloven', 'cleft'],
     ['clung', 'clings', 'cling', 'clinging'],
     ['clothes', 'clothe', 'clad', 'clothing'],
-    ['comes', 'came', 'come', 'coming'],
     ['costs', 'costing', 'cost'],
     ['creeping', 'creeps', 'creep', 'crept'],
     ['cutting', 'cut', 'cuts'],
     ['dealt', 'deals', 'deal', 'dealing'],
     ['digging', 'digs', 'dig', 'dug'],
-    ['do', 'did', 'doing', 'does', 'done', 'do not', 'will not', "don't", "doesn't", "won't", "didn't"],
     ['draw', 'drawn', 'draws', 'drawing', 'drew'],
     ['dreamt', 'dreams', 'dream', 'dreaming'],
     ['drunk', 'drinks', 'drank', 'drink', 'drinking'],
@@ -239,12 +251,11 @@ IRREGULAR_CONJUGATES =[
     ['gainsay', 'gainsaid', 'gainsaying', 'gainsays'],
     ['get', 'gets', 'getting', 'got'],
     ['girt', 'gird', 'girds', 'girding'],
-    ['give', 'given', 'gave', 'giving', 'gives'],
     ['gone', 'went', 'goes', 'go', 'going'],
     ['graves', 'graven', 'grove', 'graving', 'grave'],
     ['grows', 'grow', 'grew', 'grown', 'growing'],
     ['hanging', 'hung', 'hangs', 'hang'],
-    ['having', 'had', 'have', 'has'],
+
     ['hearing', 'hear', 'hears', 'heard'],
     ['heave', 'heaves', 'hove', 'heaving'],
     ['hew', 'hews', 'hewing', 'hewn', 'hewed'],
@@ -371,8 +382,6 @@ IRREGULAR_CONJUGATES =[
     ['wrote', 'writes', 'write', 'written', 'writing'],
 
 
-
-
 # IRREGULAR NOUNS
     ["addendum", "addenda", "addendums"],
     ["aircraft", "aircraft"],
@@ -491,4 +500,4 @@ IRREGULAR_CONJUGATES =[
 
 # words to ignore when transforming
 # includes determiners, pronouns, prepositions, postpositions, particles
-PROTECTED_WORDS = ["'gainst", "'long", "'mong, mong, 'mongst", "'neath", "'nough", "a", "a few", "a good few", "a good many", "a little", "a whole 'nother", "a whole nother", "aboard", "about", "above", "absent", "according to", "across", "across from", "adjacent to", "after", "again", "against", "ahead of", "ahind", "all", "all y'all", "alls", "almost all", "along", "along with", "alongside", "alotta", "amid", "amidst", "among", "amongst", "an", "anny", "anoda", "anotha", "anotha'", "another", "any", "any and all", "any ol'", "any old", "any ole", "any-and-all", "anybody", "anyone", "anything", "apart", "apart from", "apropos", "apud", "around", "ary", "as", "as for", "as of", "as per", "as regards", "aside", "aside from", "ask out", "astride", "at", "atop, ontop", "atta", "atween", "aught", "away", "ayond", "back", "back to", "bar", "beaucoup", "because of", "before", "behind", "below", "beneath", "beside", "besides", "best part of", "between", "beyond", "bofe", "boku", "bolth", "bookoo", "both", "bothe", "buku", "but", "by", "ca", "certain", "cha", "chez", "circa", "close to", "co's", "come", "concerning", "counter to", "couple", "cross", "da", "dat", "de", "dehors", "dem", "dese", "despite", "dis", "down", "down on", "doze", "due to", "during", "e'ry", "each", "each and every", "each other", "ebery", "either", "em", "enny", "enough", "enuf", "enuff", "eny", "euerie", "euery", "ever", "everie", "everwhat", "every", "everybody", "everyone", "everything", "except", "except for", "eyther", "far from", "few", "fewer", "fewest", "fewscore", "fiew", "following", "for", "forward", "from", "fuck all", "gainst", "he", "hecka", "hella", "her", "hers", "herself", "hes", "hevery", "him", "himself", "his", "hits", "hoi", "how many", "how much", "hundredsome", "hys", "idem", "illness)", "in", "including", "inside", "inside of", "instead of", "into", "it", "it's", "its", "itself", "last", "le", "least", "left of", "less", "less and less", "like", "little", "ma", "mah", "mai", "many", "many a", "many another", "manye", "me", "mickle", "mid", "midst", "mine", "minus", "more", "more and more", "mos'", "most", "much", "muchee", "muchell", "muh", "my", "myself", "nantee", "nanti", "nanty", "nary a", "naught", "near", "near to", "nearer", "nearest", "neath", "neither", "next", "next to", "nil", "no", "no one", "nobody", "nobody's", "none", "nope", "not a little", "not even one", "nothing", "notwithstanding", "nought", "nuntee", "nunty", "o'", "o'er", "of", "off", "on", "one", "one and the same", "one another", "one or two", "onto", "opposite", "opposite of", "opposite to", "other", "other than", "others", "ought", "our", "ours", "ourself", "ourselves", "out", "out from", "out of", "outside", "outside of", "over", "overmuch", "owing to", "owne", "pace", "past", "per", "plenty", "plus", "post", "pre", "prior to", "pro", "pursuant to", "q", "quite a few", "quodque", "rather than", "re", "regardless of", "right of", "said", "sans", "sauf", "save", "sech", "several", "severall", "she", "short", "since", "sithence", "som", "some", "some few", "some kind of", "some kinda", "some ol'", "some old", "some ole", "somebody", "someone", "something", "somewhat", "sorra", "spite", "subsequent to", "such", "such as", "such-and-such", "suchlike", "sufficient", "t'", "teh", "than", "thanks to", "that", "that there", "thatt", "thay", "the", "thee", "their", "theirs", "theirself", "theirselves", "them", "themself", "themselves", "there", "these", "thet", "they", "they're", "they's", "thilk", "thine", "thir", "this", "this here", "tho", "those", "thou", "thousandsome", "through", "throughout", "thru", "thy", "Thy", "thyself", "til", "till", "to", "together", "too many", "too much", "toward, towards", "towards", "tree)", "umpteen", "under", "underneath", "unlike", "until", "unto", "up", "up to", "upon", "upside", "us", "various", "versus", "via", "vice", "vich", "vis-à-vis", "vs", "wat", "we", "what", "whate'er", "whatevah", "whatever", "whatevuh", "whath", "whatnot", "whatsoever", "whence", "where", "whereby", "wherefrom", "wherein", "whereinto", "whereof", "whereon", "wheresoever", "whereto", "whereunto", "wherever", "wherewith", "wherewithal", "whether", "which", "whichever", "whichsoever", "who", "whoever", "whom", "whomever", "whomso", "whomsoever", "whose", "whosesoever", "whosever", "whoso", "whosoever", "whoze", "with", "within", "without", "wor", "worth", "xyr", "y'all", "ya", "ye", "yer", "yes", "yisser", "yizzer", "yo", "yo'", "yon", "yonder", "yonders", "you", "your", "yours", "yourself", "yourselves", "yous", "youse", "yousser", "yr", "yup", "yure", "zis", "and", "or", "if",]
+PROTECTED_WORDS = ["'gainst", "'long", "'mong, mong, 'mongst", "'neath", "'nough", "a", "a few", "a good few", "a good many", "a little", "a whole 'nother", "a whole nother", "aboard", "about", "above", "absent", "according to", "across", "across from", "adjacent to", "after", "again", "against", "ahead of", "ahind", "all", "all y'all", "alls", "almost all", "along", "along with", "alongside", "alotta", "amid", "amidst", "among", "amongst", "an", "anny", "anoda", "anotha", "anotha'", "another", "any", "any and all", "any ol'", "any old", "any ole", "any-and-all", "anybody", "anyone", "anything", "apart", "apart from", "apropos", "apud", "around", "ary", "as", "as for", "as of", "as per", "as regards", "aside", "aside from", "ask out", "astride", "at", "atop, ontop", "atta", "atween", "aught", "away", "ayond", "back", "back to", "bar", "beaucoup", "because of", "before", "behind", "below", "beneath", "beside", "besides", "best part of", "between", "beyond", "bofe", "boku", "bolth", "bookoo", "both", "bothe", "buku", "but", "by", "ca", "certain", "cha", "chez", "circa", "close to", "co's", "come", "concerning", "counter to", "couple", "cross", "da", "dat", "de", "dehors", "dem", "dese", "despite", "dis", "down", "down on", "doze", "due to", "during", "e'ry", "each", "each and every", "each other", "ebery", "either", "em", "enny", "enough", "enuf", "enuff", "eny", "euerie", "euery", "ever", "everie", "everwhat", "every", "everybody", "everyone", "everything", "except", "except for", "eyther", "far from", "few", "fewer", "fewest", "fewscore", "fiew", "following", "for", "forward", "from", "fuck all", "gainst", "he", "hecka", "hella", "her", "hers", "herself", "hes", "hevery", "him", "himself", "his", "hits", "hoi", "how many", "how much", "hundredsome", "hys", "idem", "illness)", "in", "including", "inside", "inside of", "instead of", "into", "it", "it's", "its", "itself", "last", "le", "least", "left of", "less", "less and less", "like", "little", "ma", "mah", "mai", "many", "many a", "many another", "manye", "me", "mickle", "mid", "midst", "mine", "minus", "more", "more and more", "mos'", "most", "much", "muchee", "muchell", "muh", "my", "myself", "nantee", "nanti", "nanty", "nary a", "naught", "near", "near to", "nearer", "nearest", "neath", "neither", "next", "next to", "nil", "no", "no one", "nobody", "nobody's", "none", "nope", "not a little", "not even one", "nothing", "notwithstanding", "nought", "nuntee", "nunty", "o'", "o'er", "of", "off", "on", "one", "one and the same", "one another", "one or two", "onto", "opposite", "opposite of", "opposite to", "other", "other than", "others", "ought", "our", "ours", "ourself", "ourselves", "out", "out from", "out of", "outside", "outside of", "over", "overmuch", "owing to", "owne", "pace", "past", "per", "plenty", "plus", "post", "pre", "prior to", "pro", "pursuant to", "q", "quite a few", "quodque", "rather than", "re", "regardless of", "right of", "said", "sans", "sauf", "save", "sech", "several", "severall", "she", "short", "since", "sithence", "som", "some", "some few", "some kind of", "some kinda", "some ol'", "some old", "some ole", "somebody", "someone", "something", "somewhat", "sorra", "spite", "subsequent to", "such", "such as", "such-and-such", "suchlike", "sufficient", "t'", "teh", "than", "thanks to", "that", "that there", "thatt", "thay", "the", "thee", "their", "theirs", "theirself", "theirselves", "them", "themself", "themselves", "there", "these", "thet", "they", "they're", "they's", "thilk", "thine", "thir", "this", "this here", "tho", "those", "thou", "thousandsome", "through", "throughout", "thru", "thy", "Thy", "thyself", "til", "till", "to", "together", "too many", "too much", "toward, towards", "towards", "tree)", "umpteen", "under", "underneath", "unlike", "until", "unto", "up", "up to", "upon", "upside", "us", "various", "versus", "via", "vice", "vich", "vis-à-vis", "vs", "wat", "we", "what", "whate'er", "whatevah", "whatever", "whatevuh", "whath", "whatnot", "whatsoever", "whence", "where", "whereby", "wherefrom", "wherein", "whereinto", "whereof", "whereon", "wheresoever", "whereto", "whereunto", "wherever", "wherewith", "wherewithal", "whether", "which", "whichever", "whichsoever", "who", "whoever", "whom", "whomever", "whomso", "whomsoever", "whose", "whosesoever", "whosever", "whoso", "whosoever", "whoze", "with", "within", "without", "wor", "worth", "xyr", "y'all", "ya", "ye", "yer", "yes", "yisser", "yizzer", "yo", "yo'", "yon", "yonder", "yonders", "you", "your", "yours", "yourself", "yourselves", "yous", "youse", "yousser", "yr", "yup", "yure", "zis", "and", "or", "if", 'best', 'worst', 'really', 'quite',]

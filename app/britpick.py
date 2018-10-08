@@ -181,6 +181,11 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     # if 'is all' in patternstring:
     #     debug.add(['is all', patternstring])
 
+    if '688' in patternstring:
+        debug.sectionbreak()
+        debug.add(patternstring)
+        debug.sectionbreak()
+
     try:
         if ignorecase:
             pattern = re.compile(patternstring, re.IGNORECASE)
@@ -199,6 +204,9 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 
     for match in pattern.finditer(text):
         # debug.add(['match group', match.groupdict()])
+
+
+
         for groupname in match.groupdict().keys():
             if match.groupdict()[groupname]:
                 # debug.add(['OBJECT PK FOUND=', groupname])
@@ -235,11 +243,20 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
                         endpos = sorted(endpositions)[0]
 
                         textchunk = text[startpos:endpos]
-                        # debug.add(match.group())
-                        # debug.add(excludepattern, loop='excludepatterns')
-                        # debug.add('startpos', startpos, 'endpos', endpos)
-                        # debug.add(textchunk)
-                        if re.search(str(excludepattern), textchunk, re.IGNORECASE):
+
+                        debug.sectionbreak()
+                        debug.add(match.group())
+                        debug.add(excludepattern, loop='excludepatterns')
+                        debug.add('startpos', startpos, 'endpos', endpos)
+                        debug.add(textchunk)
+                        debug.sectionbreak()
+
+                        if re.search("[A-Z]", excludepattern):
+                            compiledexcludepattern = re.compile(excludepattern)
+                        else:
+                            compiledexcludepattern = re.compile(excludepattern, re.IGNORECASE)
+
+                        if compiledexcludepattern.search(textchunk):
                             debug.add('invalidated')
                             valid = False
                             break

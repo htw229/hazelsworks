@@ -51,7 +51,6 @@ def getwordpattern(searchstring) -> dict:
                     'needs_processing': False,
                     'string': '(?:' + '|'.join(MARKUP[matchgroups['markup']]) + ')',
                 })
-                
             except KeyError:
                 print('markup key error: ' + searchstring)
         elif matchgroups['punctuation']:
@@ -72,8 +71,30 @@ def getwordpattern(searchstring) -> dict:
                 'plural_possessive_only': True,
                 # 'string': re.escape(matchgroups['plural_protected_word']) + r"(?:|s|es)"
             })
+
+        elif matchgroups['noun_protected_word']:
+            # creates [possessive or article] + [optional words] + [word](s)
+
+            constructors.append({
+                'needs_processing': False,
+                'string': '(?:' + '|'.join(MARKUP['noun_preceding']) + ')',
+            })
+
+            # allow one optional word (adjectives) -- too many doesn't limit sufficiency, having any does allow for over-finding such as 'she really loves'
+            constructors.append({
+                'needs_processing': False,
+                'string': OPTIONAL_WORD_PLACEHOLDER % r"([\w\'\-]+ ?)",
+            })
+
+            constructors.append({
+                'needs_processing': True,
+                'string': matchgroups['noun_protected_word'],
+                'plural_possessive_only': True,
+                # 'string': re.escape(matchgroups['plural_protected_word']) + r"(?:|s|es)"
+            })
             
         elif matchgroups['word']:
+
             constructors.append({
                 'needs_processing': True,
                 'string': matchgroups['word'],
@@ -102,13 +123,15 @@ def getwordpattern(searchstring) -> dict:
         else:
             s = c['string']
             if s.lower() in OPTIONAL_WORDS_LIST:
-                constructors[i]['string'] = OPTIONAL_WORD_PLACEHOLDER % s
+                # constructors[i]['string'] = OPTIONAL_WORD_PLACEHOLDER % s
+                constructors[i]['string'] = s
             elif s.lower() in PROTECTED_WORDS:
                 constructors[i]['string'] = s
             elif len(s) < MIN_WORD_LENGTH_FOR_SUFFIX:
                 constructors[i]['string'] = s
-            # TODO: protected conjugates (no plural or possessive), create list
-
+            elif getconjugates(s, PROTECTED_CONJUGATES):
+                wordlist = getconjugates(s, PROTECTED_CONJUGATES)
+                constructors[i]['string'] = patternfromlist(wordlist, s)
             else:
                 wordlist = [s]
 
@@ -124,8 +147,8 @@ def getwordpattern(searchstring) -> dict:
                 # get CONJUGATES
                 if ('plural_possessive_only' in c.keys()) and c['plural_possessive_only']:
                     pass
-                elif getirregularconjugates(s):
-                    wordlist.extend(getirregularconjugates(s))
+                elif getconjugates(s, IRREGULAR_CONJUGATES):
+                    wordlist.extend(getconjugates(s, IRREGULAR_CONJUGATES))
                 else:
                     wordlist.extend(getsuffixwordlist(s, REGULAR_CONJUGATES)) # do not make conjugates plural or possessive, or conjugate plural or possessive words
 
@@ -158,10 +181,11 @@ def getwordpattern(searchstring) -> dict:
 
 
 def patternfromlist(wordlist, word = '') -> str:
-    wordlist = list(set(wordlist))
-
     if word:
         wordlist = casematchedwordlist(wordlist, word)
+
+    wordlist.append(word) # just in case
+    wordlist = list(set(wordlist))
 
     if TRIE_SEARCHWORD_PATTERN:
         wordtrie = trie.Trie()
@@ -175,15 +199,15 @@ def patternfromlist(wordlist, word = '') -> str:
 
 
 
-def getirregularconjugates(word) -> list:
+def getconjugates(word, conjugateslist) -> list:
 
-    conjugateslist = []
-    for irregularconjugateslist in IRREGULAR_CONJUGATES:
-        if word.lower() in irregularconjugateslist:
-            conjugateslist.extend(irregularconjugateslist)
+    wordlist = []
+    for conjugate in conjugateslist:
+        if word.lower() in conjugate:
+            wordlist.extend(conjugate)
             # continue loop, may be a conjugate of multiple different verbs
 
-    return conjugateslist
+    return wordlist
 
 
 def casematchedwordlist(wordlist, originalword) -> list:
@@ -236,6 +260,7 @@ def getsuffixwordlist(search, suffixlist, include_original=False) -> list:
                         if valid:
                             if suffixformula['replace']:
                                 s = re.sub(ending + r'$', suffix, word)
+                                # s = ('[ending]' + ending + ' [suffix]' + suffix + ' word:' + word + ' s:' + s)
                             else:
                                 s = word + suffix
                             wordlist.append(s)
