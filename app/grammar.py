@@ -1,44 +1,20 @@
-
-
-# REGULAR_CONJUGATES = [
-#     {'ending': [''], 'suffix': ['s'], 'replace': False}, # for purals and verbs, always try just adding s
-#
-#     # PLURALS
-#     {'ending': ['s', 'sh', 'ch', 'x'], 'suffix': ['es'], 'replace': False},
-#     {'ending': ['z'], 'suffix': ['zzes'], 'replace': True},
-#     {'ending': ['s'], 'suffix': ['sses'], 'replace': True},
-#     {'ending': ['y'], 'suffix': ['ies'], 'replace': True},
-#     {'ending': ['f', 'fe'], 'suffix': ['ves'], 'replace': True},
-#     {'ending': ['o'], 'suffix': ['oes'], 'replace': True},
-#     {'ending': ['us'], 'suffix': ['i'], 'replace': True},
-#     {'ending': ['is'], 'suffix': ['es'], 'replace': True},
-#     {'ending': ['on'], 'suffix': ['a'], 'replace': True},
-#     {'ending': ['um'], 'suffix': ['a'], 'replace': True},
-#     {'ending': ['ix', 'ex'], 'suffix': ['ices', 'ixes', 'exes'], 'replace': True},
-#
-#     # POSSESSIVE
-#     {'ending': [''], 'suffix':[r"'s"], 'replace': False},
-#     {'ending': ['s'], 'suffix':[r"'"], 'replace': False},
-#
-#     # ADJECTIVES
-#     {'ending': [''], 'suffix': ['al', 'y', 'ful', 'ous', 'ious', 'ic'], 'replace': False},
-#     {'ending': ['e'], 'suffix': ['al', 'y'], 'replace': True},
-#     {'ending': ['y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True},
-#     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2al', r'\1\2\2y', r'\1\2\2ous', r'\1\2\2ious', r'\1\2\2ic'], 'replace': True}, # double ending consonant if vowel-consonant
-#
-#     # ADVERBS
-#     {'ending': [''], 'suffix': ['ly'], 'replace': False},
-#     {'ending': ['y'], 'suffix': ['ily'], 'replace': True},
-#     {'ending': ['le'], 'suffix': ['ly'], 'replace': True},
-#     {'ending': ['ic'], 'suffix': ['ally'], 'replace': False},
-#     {'ending': [''], 'suffix': ['edly', 'ingly'], 'replace': False},
-#     {'ending': ['e'], 'suffix': ['edly', 'ingly'], 'replace': True},
-#
-#     # VERBS
-#     {'ending': [''], 'suffix': ['ed', 'ing'], 'replace': False},
-#     {'ending': ['e'], 'suffix': ['ed', 'ing'], 'replace': True},
-#     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True}, # double ending consonant if vowel-consonant
-# ]
+MARKUP = {
+    'number': ['\d{1,2}', '\d{1,2}st', '\d{1,2}nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+                 'nine', 'ten', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth',
+                 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth',
+                 'eighteenth', 'nineteenth', 'twentieth', 'thirtieth', 'fourtieth', 'fiftieth', 'hundredth',
+                 'thousandth', 'millionth'],
+    'month': ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
+                'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
+                'december'],
+    'me': ['him', 'her', 'them', 'me', 'us'],
+    'mine': ['his', 'hers', 'theirs', 'mine', 'ours'],
+    'my': ['his', 'her', 'their', 'my', 'our',],
+    'I': ['he', 'she', 'they', 'I', 'we',], # TODO: not working - see 100
+    'possessive': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)"],
+    'the': ['the', 'a', 'an', 'that', 'this', 'what', 'which',],
+    'noun_preceding': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)", 'the', 'a', 'an', 'that', 'this', 'what', 'which',],
+}
 
 # necessary if more than one word only
 POSSESSIVES = [
@@ -75,12 +51,12 @@ REGULAR_CONJUGATES = [
     {'ending': ['[^aiouy]'], 'suffix': ['y'], 'replace': False,},
     # {'ending': ['e'], 'suffix': ['y'], 'replace': True,},
 
-    # TODO: this and one below aren't working; why?
     {'ending': [r'(?P<v>[aeiou])(?P<c>[^aeiou])'], 'suffix': [r'\g<v>\g<c>\g<c>y'], 'replace': True,}, # double ending consonant if vowel-consonant
+    # {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1SUFFIX'], 'replace': True,},
     {'ending': ['[^ey]'], 'suffix': ['ful', 'ious', 'ic'], 'replace': False,},
-    {'ending': ['[^e]'], 'suffix': ['ous'], 'replace': False,},
+    # {'ending': ['[^e]'], 'suffix': ['ous'], 'replace': False,},
     {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': False,},
-    {'ending': ['ion'], 'suffix': ['ious',], 'replace': True,},
+    # {'ending': ['ion'], 'suffix': ['ious',], 'replace': True,},
     {'ending': ['(?<=[ct])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
 
     # ADVERBS
@@ -139,23 +115,7 @@ OPTIONAL_WORDS_LIST = [
 #TODO: add possessive markup [possessive]=his, hers, my, your, our, [word]'s
 # TODO: don't make a and the optional
 
-MARKUP = {
-    'number': ['\d{1,2}', '\d{1,2}st', '\d{1,2}nd', '\d+th', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
-                 'nine', 'ten', 'first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh', 'eighth', 'ninth',
-                 'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth',
-                 'eighteenth', 'nineteenth', 'twentieth', 'thirtieth', 'fourtieth', 'fiftieth', 'hundredth',
-                 'thousandth', 'millionth'],
-    'month': ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
-                'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
-                'december'],
-    'me': ['him', 'her', 'them', 'me', 'us'],
-    'mine': ['his', 'hers', 'theirs', 'mine', 'ours'],
-    'my': ['his', 'her', 'their', 'my', 'our',],
-    'I': ['he', 'she', 'they', 'I', 'we',], # TODO: not working - see 100
-    'possessive': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)"],
-    'the': ['the', 'a', 'an', 'that', 'this', 'what', 'which',],
-    'noun_preceding': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)", 'the', 'a', 'an', 'that', 'this', 'what', 'which',],
-}
+
 
 
 #TODO: add british spellings

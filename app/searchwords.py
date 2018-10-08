@@ -265,10 +265,12 @@ def getsuffixwordlist(search, suffixlist, include_original=False) -> list:
                             pass
 
                         # do not allow words to end in twice of substituted suffixes (or the related ones in list)
-                        suffixespattern = r"(%s)$" % '|'.join(
-                            [s for s in suffixformula['suffix'] if "\\" not in s])
-                        if re.search(suffixespattern, word):
-                            valid = False
+                        suffixes = [s for s in suffixformula['suffix'] if '1' not in s]
+                        if suffixes:
+                            suffixespattern = r"(%s)$" % '|'.join(suffixes)
+                            # wordlist.append('SUFFIXPATTERN: ' + str(suffixespattern))
+                            if re.search(suffixespattern, word):
+                                valid = False
 
                         if valid:
                             if suffixformula['replace']:
