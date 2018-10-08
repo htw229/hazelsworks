@@ -2,6 +2,9 @@ from __init__ import *
 import re
 import trie
 
+sortedspellinglist = [sorted(p, key=lambda x: len(x), reverse=True) for p in BRITISH_SPELLINGS]
+spellingvariantlist = [w[0] for w in BRITISH_SPELLINGS] + [w[1] for w in sortedspellinglist]
+
 def getwordpattern(searchstring) -> dict:
 
     searchword = {}
@@ -152,6 +155,16 @@ def getwordpattern(searchstring) -> dict:
                 else:
                     wordlist.extend(getsuffixwordlist(s, REGULAR_CONJUGATES)) # do not make conjugates plural or possessive, or conjugate plural or possessive words
 
+                # get BRITISH SPELLING VARIANTS
+                spellingvariants = []
+                for w in wordlist:
+                    for spellingpair in sortedspellinglist:
+                        if w.startswith(spellingpair[0]):
+                            spellingvariants.append(w.replace(spellingpair[0], spellingpair[1]))
+                        elif w.startswith(spellingpair[1]):
+                            spellingvariants.append(w.replace(spellingpair[1], spellingpair[0]))
+
+                wordlist.extend(spellingvariants)
                 wordpattern = patternfromlist(wordlist, s)
 
                 # replace DASHES with nothing/dash/space options
