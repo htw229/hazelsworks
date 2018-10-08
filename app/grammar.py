@@ -10,7 +10,7 @@ MARKUP = {
     'me': ['him', 'her', 'them', 'me', 'us'],
     'mine': ['his', 'hers', 'theirs', 'mine', 'ours'],
     'my': ['his', 'her', 'their', 'my', 'our',],
-    'I': ['he', 'she', 'they', 'I', 'we',], # TODO: not working - see 100
+    'I': ['he', 'she', 'they', 'I', 'we', 'it',], # TODO: not working - see 100
     'possessive': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)"],
     'the': ['the', 'a', 'an', 'that', 'this', 'what', 'which',],
     'noun_preceding': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)", 'the', 'a', 'an', 'that', 'this', 'what', 'which',],
@@ -38,6 +38,7 @@ PLURALS = [
 ]
 
 
+
 # test deleting uncommon ones
 REGULAR_CONJUGATES = [
      # for purals and verbs, always try just adding s
@@ -45,7 +46,7 @@ REGULAR_CONJUGATES = [
     # NOUNS
     {'ending': ['[^y]'], 'suffix': ["ness"], 'replace': False,},
     {'ending': ['(?<=[^aeiou])y'], 'suffix': ["iness"], 'replace': True,},
-    {'ending': ['ent'], 'suffix': [r"ence"], 'replace': True,},
+    # {'ending': ['ent'], 'suffix': [r"ence"], 'replace': True,},
 
     # ADJECTIVES
     {'ending': ['[^aiouy]'], 'suffix': ['y'], 'replace': False,},
@@ -53,14 +54,19 @@ REGULAR_CONJUGATES = [
 
     {'ending': [r'(?P<v>[aeiou])(?P<c>[^aeiou])'], 'suffix': [r'\g<v>\g<c>\g<c>y'], 'replace': True,}, # double ending consonant if vowel-consonant
     # {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1SUFFIX'], 'replace': True,},
-    {'ending': ['[^ey]'], 'suffix': ['ful', 'ious', 'ic'], 'replace': False,},
+    # {'ending': ['[^ey]'], 'suffix': ['ful', 'ious', 'ic'], 'replace': False,},
+    {'ending': ['[^ey]'], 'suffix': ['ful',], 'replace': False,},
     # {'ending': ['[^e]'], 'suffix': ['ous'], 'replace': False,},
-    {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': False,},
+    # {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': False,},
+    {'ending': ['[^e]'], 'suffix': ['y'], 'replace': False,},
     # {'ending': ['ion'], 'suffix': ['ious',], 'replace': True,},
-    {'ending': ['(?<=[ct])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
+    # {'ending': ['(?<=[ct])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
+    {'ending': ['(?<=[ct])y'], 'suffix': ['iful'], 'replace': True,},
 
     # ADVERBS
-    {'ending': ['[^y]'], 'suffix': ['ly'], 'replace': False,},
+    {'ending': [''], 'suffix': ['ly'], 'replace': False,
+        'negativeending': ['(y|le|ic|[aiou])'],
+     },
     {'ending': ['y'], 'suffix': ['ily'], 'replace': True,},
     {'ending': ['le'], 'suffix': ['ly'], 'replace': True,},
     {'ending': ['ic'], 'suffix': ['ally'], 'replace': False,},
@@ -68,7 +74,7 @@ REGULAR_CONJUGATES = [
     # VERBS
     {'ending': ['[^s]'], 'suffix': ['s'], 'replace': False,},
     {'ending': [''],
-     'negativeending': ['([ey]|[aeiou][^aeioul]|[aeiou]{2,})'], # losing too many by overgeneralizing with vowel-non-vowel here?
+     'negativeending': ['([ey]|[aeiou]{2,})'],
      'suffix': ['ed', 'ing'], 'replace': False,
      },
     {'ending': ['[aeou]y'], 'suffix': ['ed', 'ing'], 'replace': False,},
@@ -76,6 +82,14 @@ REGULAR_CONJUGATES = [
     {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1\2\2ed', r'\1\2\2ing'], 'replace': True,}, # double ending consonant if vowel-consonant
 ]
 
+EXCLUDED_ENDINGS = [
+    'ing',
+    'ed',
+    'ly',
+    'ent',
+    'ness',
+    'ic',
+]
 
 # only apply to created conjugates
 # (many of these can be valid in some circumstances)

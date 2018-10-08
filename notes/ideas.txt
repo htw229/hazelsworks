@@ -118,6 +118,7 @@ CURRENTLY NEEDS FIXING:
 
 - go through gemma's article, chat transcripts
 
+- find words that have no match (ie 'of course')
 
 INSTRUCTIONS
 # - at beginning protects whole phrase

@@ -29,6 +29,7 @@ class BritpickForm(forms.Form):
     text = forms.CharField(
         label=STRINGS.BRITPICKFORM_TEXT_LABEL,
         widget=forms.Textarea,
+        max_length=100000,
     )
 
     # TODO: add search type (all, dialogue only) OR add option for each category to search dialogue or all

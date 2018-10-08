@@ -250,6 +250,9 @@ def getsuffixwordlist(search, suffixlist, include_original=False) -> list:
         else:
             wordlist = []
 
+        if re.search(r"(%s)$" % '|'.join(EXCLUDED_ENDINGS), word):
+            break
+
         for suffixformula in suffixlist:
             for ending in suffixformula['ending']:
                 for suffix in suffixformula['suffix']:
@@ -284,6 +287,8 @@ def getsuffixwordlist(search, suffixlist, include_original=False) -> list:
     suffixwordlist = list(set(suffixwordlist)) # remove duplicates
 
     for i, w in enumerate(suffixwordlist):
+        if w in searchwordlist:
+            continue
         for ending in DISALLOWED_ENDINGS:
             if re.search(ending + r'$', w):
                 suffixwordlist.pop(i)
