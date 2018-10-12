@@ -51,8 +51,6 @@ def search(formdata) -> dict:
     pattern = SEARCH_PATTERN_WRAPPER % searchwordpattern
     debug.add('pattern', pattern)
 
-    # TODO: remove curly quotes on save topic
-
     # check topics
     for topic in Topic.objects.all():
         # debug.add('searching', topic.name)

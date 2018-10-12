@@ -50,14 +50,14 @@ REGULAR_CONJUGATES = [
 
     # ADJECTIVES
     {'ending': ['[^aiouy]'], 'suffix': ['y'], 'replace': False,},
-    # {'ending': ['e'], 'suffix': ['y'], 'replace': True,},
+    {'ending': ['e'], 'suffix': ['y'], 'replace': True,},
 
     {'ending': [r'(?P<v>[aeiou])(?P<c>[^aeiou])'], 'suffix': [r'\g<v>\g<c>\g<c>y'], 'replace': True,}, # double ending consonant if vowel-consonant
     # {'ending': [r'([aeiou])([^aeiou])'], 'suffix': [r'\1SUFFIX'], 'replace': True,},
     # {'ending': ['[^ey]'], 'suffix': ['ful', 'ious', 'ic'], 'replace': False,},
     {'ending': ['[^ey]'], 'suffix': ['ful',], 'replace': False,},
     # {'ending': ['[^e]'], 'suffix': ['ous'], 'replace': False,},
-    # {'ending': ['[^e]'], 'suffix': ['al', 'y'], 'replace': False,},
+    # {'ending': ['[^e]'], 'suffix': ['al'], 'replace': False,},
     {'ending': ['[^e]'], 'suffix': ['y'], 'replace': False,},
     # {'ending': ['ion'], 'suffix': ['ious',], 'replace': True,},
     # {'ending': ['(?<=[ct])y'], 'suffix': ['iful', 'ous', 'ious', 'ic'], 'replace': True,},
@@ -69,6 +69,7 @@ REGULAR_CONJUGATES = [
      },
     {'ending': ['y'], 'suffix': ['ily'], 'replace': True,},
     {'ending': ['le'], 'suffix': ['ly'], 'replace': True,},
+    {'ending': ['ue'], 'suffix': ['uly'], 'replace': True,},
     {'ending': ['ic'], 'suffix': ['ally'], 'replace': False,},
 
     # VERBS
@@ -126,34 +127,21 @@ OPTIONAL_WORDS_LIST = [
     'the',
 ]
 
-#TODO: add possessive markup [possessive]=his, hers, my, your, our, [word]'s
-# TODO: don't make a and the optional
 
 
-
-
-#TODO: add british spellings
-# TODO:  add british/american variable word endings
-    # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
-    # TODO: make curly quotes and apostrophes regular?
 # TODO: add a 'must have x word nearby' - for example "back up" needs to have some kind of car term nearby
 
 # british transformations
 VARIABLE_WORD_ENDINGS=[("ence", "ense"),("ogue", "og"),("yse", "yze"),("ize", "ise"),("our", "or"),("er", "re")]
 
-# too much work for very little use? add replacing pronouns in if needed
-#
-# PRONOUNS = [
-#     ['i', 'we', 'you', 'you all', 'she', 'he', 'they'],
-#     ['my', 'your', '']
-# ]
-
 PROTECTED_CONJUGATES =[
-    ['do', 'did', 'doing', 'does', 'done', 'do not', 'will not', "don't", "doesn't", "won't", "didn't"],
-    ['is', 'been', 'are', 'am', 'be', 'being', 'was', 'were', "aren't", "isn't", "I'm", "I'm not"],
+    ['do', 'did', 'doing', 'does', 'done', 'do not', "don't", "doesn't", "didn't", 'would', 'will', 'will not',  "won't",],
+    ['is', 'been', 'are', 'am', 'be', 'being', 'was', 'were', "aren't", "isn't", "weren't", "I'm", "I'm not"],
     ['comes', 'came', 'come', 'coming'],
     ['give', 'given', 'gave', 'giving', 'gives'],
     ['having', 'had', 'have', 'has'],
+    ['can', 'could', "can't", "cannot", "couldn't",],
+    ['should', 'shall', "shouldn't", "shan't", "couldn't",],
 ]
 
 

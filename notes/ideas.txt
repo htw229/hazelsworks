@@ -94,14 +94,7 @@ x compile pattern, find matches with finditer and loop through them
 
 
 
-Replacement obj
-- searchpatterns - to be used by britpick and by search
-    - separate by %%%
-    - do not include word boundary or wrapper
-    - with data for: number of letters, end punctuation, ignorecase
-        - separate by :::
-- excludepatterns
-    - separate by %%%
+
 
 exclude:
 - by object
@@ -111,14 +104,15 @@ exclude:
 - words to add exclude to: 950, 109, 887, 355
 
 
-CURRENTLY NEEDS FIXING:
-- multiple words in dialogue
-- end punctuation
+
 
 
 - go through gemma's article, chat transcripts
 
 - find words that have no match (ie 'of course')
+- add nearby words (call, hood)
+- (miss) - next word has to start uppercase
+# for nouns - exclude 'is' in front of them
 
 INSTRUCTIONS
 # - at beginning protects whole phrase
@@ -128,3 +122,29 @@ word# - after word, protects word
 (s) - protected except for plural
 ___ - placeholder for word(s)
 (_) - opt placeholder for word(s)
+(n) - has to be noun
+
+
+
+WORD PAGE:
+
+first american word / first british word
+
+dialect, category
+
+american words (exclude: ___)
+british words
+explanation
+clarification
+topics
+
+
+
+
+
+
+
+
+
+
+

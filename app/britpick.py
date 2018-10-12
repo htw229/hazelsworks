@@ -1,6 +1,7 @@
 from .models import Replacement, Dialect, ReplacementExplanation, ReplacementCategory
 from .debug import Debug
-from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
+# from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
+import htmlutils
 from __init__ import *
 
 
@@ -29,7 +30,7 @@ def britpick(formdata):
     debug.add('SEARCHWORDS', len(searchwords))
     debug.timer('getsearchwords()')
 
-    text = formdata['text']
+    text = formatinputtext(formdata['text'])
 
     debug.sectionbreak()
 
@@ -54,6 +55,12 @@ def britpick(formdata):
     }
 
     return britpickeddata
+
+
+def formatinputtext(inputtext) -> str:
+    text = htmlutils.replacecurlyquotes(inputtext)
+
+    return text
 
 
 
@@ -120,16 +127,6 @@ def getcategorypatternwrappers(formdata) -> dict:
 
 
 
-
-#     # TODO:  add british/american variable word endings
-#     # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
-#     # TODO: make curly quotes and apostrophes regular?
-#TODO: excluded working opposite of expected --> create custom capture group that if found during later parsing will not consider it found (what happens if is part of conjugation added? such as think<ing> -> reckon)
-# TODO: get possessives (separate function, run both irregular and regular words through it)
-
-
-
-
 def searchpatterngenerator(searchwords, formdata) -> list:
     global debug
 
@@ -174,17 +171,10 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-    # if '950' in patternstring:
+    # if '688' in patternstring:
+    #     debug.sectionbreak()
     #     debug.add(patternstring)
-    #     debug.add(inputtext)
-
-    # if 'is all' in patternstring:
-    #     debug.add(['is all', patternstring])
-
-    if '688' in patternstring:
-        debug.sectionbreak()
-        debug.add(patternstring)
-        debug.sectionbreak()
+    #     debug.sectionbreak()
 
     try:
         if ignorecase:
@@ -285,6 +275,6 @@ def postprocesstext(text):
     # remove created {}
     text = text.replace('<', '').replace('>', '')
     # create line breaks
-    text = linebreakstoparagraphs(text)
+    text = htmlutils.linebreakstoparagraphs(text)
 
     return text

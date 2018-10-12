@@ -77,18 +77,15 @@ def getwordpattern(searchstring) -> dict:
 
         elif matchgroups['noun_protected_word']:
             # creates [possessive or article] + [optional words] + [word](s)
-
             constructors.append({
                 'needs_processing': False,
                 'string': '(?:' + '|'.join(MARKUP['noun_preceding']) + ')',
             })
-
             # allow one optional word (adjectives) -- too many doesn't limit sufficiency, having any does allow for over-finding such as 'she really loves'
             constructors.append({
                 'needs_processing': False,
                 'string': OPTIONAL_WORD_PLACEHOLDER % r"([\w\'\-]+ ?)",
             })
-
             constructors.append({
                 'needs_processing': True,
                 'string': matchgroups['noun_protected_word'],
@@ -97,7 +94,6 @@ def getwordpattern(searchstring) -> dict:
             })
             
         elif matchgroups['word']:
-
             constructors.append({
                 'needs_processing': True,
                 'string': matchgroups['word'],
@@ -125,7 +121,7 @@ def getwordpattern(searchstring) -> dict:
             constructors[i]['string'] = re.escape(constructors[i]['string'])
         else:
             s = c['string']
-            if s.lower() in OPTIONAL_WORDS_LIST:
+            if s.lower() in OPTIONAL_WORDS_LIST: # not making 'a' and 'the' optional
                 # constructors[i]['string'] = OPTIONAL_WORD_PLACEHOLDER % s
                 constructors[i]['string'] = s
             elif s.lower() in PROTECTED_WORDS:

@@ -68,10 +68,6 @@ class Topic(models.Model):
         s = htmlutils.getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
-    # @property
-    # def link(self) ->
-    #
-    #     return s
 
     @property
     def hascontent(self) -> bool:
@@ -80,8 +76,6 @@ class Topic(models.Model):
         if self.citations.count() > 0:
             return True
         return False
-
-    # TODO: maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
         s = self.name
@@ -93,9 +87,16 @@ class Topic(models.Model):
             s += ' (INACTIVE)'
         return s
 
+    def save(self, *args, **kwargs):
+        self.text = htmlutils.replacecurlyquotes(self.text)
+
+        super().save(*args, **kwargs)
+
+
     class Meta:
         ordering = ['name']
 
+#TODO: inline replacement, explanation before clarification; add link if only has topic
 
 class ReplacementCategory(models.Model):
     name = models.CharField(max_length=100)
@@ -135,6 +136,14 @@ class Replacement(models.Model):
 
     # TODO: change admin form to have checkboxes (like for topic)
 
+    @property
+    def title(self) -> str:
+        s = self.searchwordlist[0].replace('-', '').capitalize()
+        if self.replacementslist:
+            s += ' 🡆 '
+            s += self.replacementslist[0].capitalize()
+
+        return s
 
     @property
     def searchwordlist(self) -> list:
@@ -143,21 +152,28 @@ class Replacement(models.Model):
 
     @property
     def searchwordstring(self) -> str:
-        s = ', '.join(self.searchwordlist)
-        return s
+        wordlist = self.searchwordlist
+        wordstring = ', '.join(wordlist)
+        return wordstring
 
     @property
-    def longestsearchwordlength(self) -> int:
-        return len(max(self.searchwordlist, key=lambda l: len(l)))
+    def replacementslist(self) -> list:
+        wordlist = []
+        if self.suggestreplacement:
+            wordlist.append(self.suggestreplacement)
+        wordlist.extend([w for w in self.considerreplacements.split('\r\n') if w.strip() != ''])
+        return wordlist
 
     @property
-    def multiplereplacements(self) -> bool:
-        if (self.suggestreplacement == '') or (len(self.considerreplacementlist) == 0):
-            return False
-        else:
-            return True
+    def replacementsstring(self) -> str:
+        wordlist = self.replacementslist
+        wordstring = ', '.join(wordlist)
+        return wordstring
 
-
+    @property
+    def considerreplacementlist(self) -> list:
+        wordlist = [w for w in self.considerreplacements.split('\r\n') if w.strip() != '']
+        return wordlist
 
     @property
     def replacementwordshtml(self) -> str or bool:
@@ -182,15 +198,15 @@ class Replacement(models.Model):
         return s
 
 
-#TODO: not treating dialogue correctly
-
     @property
     def clarifyexplanationhtml(self) -> str or bool:
         # get strings from clarification and explanations
         # s = ''
 
-        w = [w for w in self.clarification.split('\r\n') if w.strip() != '']
+        w = []
         w.extend([o.text for o in self.explanations.all()])
+        w.extend([w for w in self.clarification.split('\r\n') if w.strip() != ''])
+
 
         if len(w) == 0:
             return False
@@ -227,10 +243,7 @@ class Replacement(models.Model):
 
 
 
-    @property
-    def considerreplacementlist(self) -> list:
-        wordlist = [w for w in self.considerreplacements.split('\r\n') if w.strip() != '']
-        return wordlist
+
 
     @property
     def replacementwordsstring(self) -> str:

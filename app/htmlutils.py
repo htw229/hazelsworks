@@ -67,3 +67,12 @@ def getlinkhtml(url = '', text = 'link', mouseovertext ='', newbrowsertab = Fals
 
     return s
 
+
+def replacecurlyquotes(text) -> str:
+    text = text. \
+        replace('“', '"'). \
+        replace('”', '"'). \
+        replace("’", "'").\
+        replace("’", "'")
+
+    return text

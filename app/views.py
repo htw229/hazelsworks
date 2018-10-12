@@ -14,6 +14,7 @@ from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
 import search
 
+from django.core.exceptions import ObjectDoesNotExist
 
 def robotstxt(request):
     """
@@ -74,7 +75,6 @@ def britpickapp(request):
 
     return render(request, 'britpicktemplate.html', responsedata)
 
-# TODO: give form's suggest replacements a default
 
 def britpickfindduplicates(request):
     objects = Replacement.objects.all()
@@ -183,6 +183,25 @@ def topicslist(request):
         'debug': '',
         'showdebug': True,
     }
+
+    return render(request, 'britpicktemplate.html', responsedata)
+
+
+def wordview(request, replacementpk):
+    responsedata = {
+        'pagetitle': 'Word not found',
+        'topic': None,
+        # 'topichtml': 'Word not found',
+        'template': 'word.html',
+        'debug': '',
+        'showdebug': True,
+    }
+
+    try:
+        responsedata['replacement'] = Replacement.objects.get(pk=replacementpk)
+        responsedata['pagetitle'] = responsedata['replacement'].title
+    except ObjectDoesNotExist:
+        responsedata['replacement'] = None
 
     return render(request, 'britpicktemplate.html', responsedata)
 
