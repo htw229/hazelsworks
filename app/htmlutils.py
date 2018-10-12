@@ -109,6 +109,7 @@ def searchwordformat(inputstring, title=False, markup=Explain_Markup, replacedas
         (r'#', r''),
         (r'___', r''),
         (r'\(_\)', r''),
+        (r'\(s\)', r'(s)')
     ]
 
     markup_explanations_optional = [

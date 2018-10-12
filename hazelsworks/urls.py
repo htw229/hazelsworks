@@ -28,5 +28,6 @@ urlpatterns = [
     path(r'britpick/words/<int:replacementpk>', views.wordview, name='word'),
     url(r'^britpick/topics', views.topicslist, name='topicslist'),
     url(r'^britpick/references', views.referenceslist, name='references'),
-    url(r'^britpick/', views.britpickapp, name='britpick'),
+    url(r'^britpick/references', views.referenceslist, name='references'),
+    url(r'^britpick/$', views.britpickapp, name='britpick'),
 ]

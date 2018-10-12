@@ -14,6 +14,9 @@ from .britpicktopic import britpicktopic
 from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
 import search
+import htmlutils
+import searchwords
+import testwords
 
 from django.core.exceptions import ObjectDoesNotExist
 
@@ -46,6 +49,38 @@ def britpickapp(request):
             }
         else:
             outputtext = 'Form is not valid'
+
+
+    elif request.method == 'GET':
+        # for testing words
+        replacementpk = None
+        try:
+            replacementpk = int(request.GET.get('id'))
+            text = testwords.gettestingtext(replacementpk)
+            r = Replacement.objects.get(pk=replacementpk)
+            # testword = testwords.TestWord(r)
+            #
+            # text = '\r\n'.join(testword.variants)
+
+            # text = str(replacementpk) + ": \r\n"
+            # for w in r.searchwordlist:
+            #     text += searchwords.getwordpattern(w, usetrie=False)['pattern'] + '\r\n\r\n\r\n'
+            #     s = htmlutils.searchwordformat(w, markup=htmlutils.Delete_Markup, replacedashes=True)
+            #     text += testwords.text.replace('@', s)
+
+            form = BritpickForm(initial={
+                'text': text,
+                'dialect': r.dialect.name,
+            })
+
+        except ObjectDoesNotExist as e:
+            form = BritpickForm()
+            debug.add(replacementpk,'is not valid', e)
+
+        # except TypeError as e:
+        #     form = BritpickForm()
+        #     debug.add('no initial arguments', e)
+
     else:
         form = BritpickForm()
 
@@ -65,15 +100,6 @@ def britpickapp(request):
         'debug': debug.html,
         'csspage': 'textreplacepage',
     }
-
-    # template = get_template('britpicktemplate.html')
-    # html = template.render(responsedata)
-
-    # template = get_template('britpicktemplate.html')
-    # context = RequestContext(request, responsedata)
-    # html = template.render(context)
-    #
-    # return HttpResponse(html)
 
     return render(request, 'britpicktemplate.html', responsedata)
 

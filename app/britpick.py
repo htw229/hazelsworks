@@ -171,10 +171,10 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-    # if '688' in patternstring:
-    #     debug.sectionbreak()
-    #     debug.add(patternstring)
-    #     debug.sectionbreak()
+    if '688' in patternstring:
+        debug.sectionbreak()
+        debug.add(patternstring)
+        debug.sectionbreak()
 
     try:
         if ignorecase:

@@ -1,5 +1,8 @@
 
 <div class="worddata">
+{% if showdebug %}
+    <p><a href="{% url 'britpick' %}?id={{ replacement.pk }}">test</a></p>
+{% endif %}
     <p>Dialect: {{ replacement.dialect.name }}</p>
     <p>Category: {{ replacement.category.name }}</p>
 

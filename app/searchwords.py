@@ -5,7 +5,10 @@ import trie
 sortedspellinglist = [sorted(p, key=lambda x: len(x), reverse=True) for p in BRITISH_SPELLINGS]
 spellingvariantlist = [w[0] for w in BRITISH_SPELLINGS] + [w[1] for w in sortedspellinglist]
 
-def getwordpattern(searchstring) -> dict:
+
+#TODO: don't, can't, shouldn't etc being caught by apostrophe word
+
+def getwordpattern(searchstring, usetrie = None) -> dict:
 
     searchword = {}
 
@@ -161,7 +164,7 @@ def getwordpattern(searchstring) -> dict:
                             spellingvariants.append(w.replace(spellingpair[1], spellingpair[0]))
 
                 wordlist.extend(spellingvariants)
-                wordpattern = patternfromlist(wordlist, s)
+                wordpattern = patternfromlist(wordlist, s, usetrie=usetrie)
 
                 # replace DASHES with nothing/dash/space options
                 # does not replace dashes in protected words or phrases
@@ -187,16 +190,28 @@ def getwordpattern(searchstring) -> dict:
 
     return searchword
 
+def getspellingvariants(wordlist) -> list:
+    spellingvariants = []
+    for w in wordlist:
+        for spellingpair in sortedspellinglist:
+            if w.startswith(spellingpair[0]):
+                spellingvariants.append(w.replace(spellingpair[0], spellingpair[1]))
+            elif w.startswith(spellingpair[1]):
+                spellingvariants.append(w.replace(spellingpair[1], spellingpair[0]))
 
+    return spellingvariants
 
-def patternfromlist(wordlist, word = '') -> str:
+def patternfromlist(wordlist, word = '', usetrie = None) -> str:
     if word:
         wordlist = casematchedwordlist(wordlist, word)
 
     wordlist.append(word) # just in case
     wordlist = list(set(wordlist))
 
-    if TRIE_SEARCHWORD_PATTERN:
+    if usetrie is None:
+        usetrie = TRIE_SEARCHWORD_PATTERN
+
+    if usetrie:
         wordtrie = trie.Trie()
         for w in wordlist:
             wordtrie.add(w)
