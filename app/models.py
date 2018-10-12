@@ -138,10 +138,11 @@ class Replacement(models.Model):
 
     @property
     def title(self) -> str:
-        s = self.searchwordlist[0].replace('-', '').capitalize()
+        s = self.searchwordlist[0]
+        s = htmlutils.searchwordformat(s, title=True, markup=htmlutils.Delete_Markup, replacedashes=True)
         if self.replacementslist:
             s += ' 🡆 '
-            s += self.replacementslist[0].capitalize()
+            s += htmlutils.titlecase(self.replacementslist[0])
 
         return s
 
@@ -150,9 +151,31 @@ class Replacement(models.Model):
         wordlist = [w.strip() for w in self.searchstrings.split('\r\n') if w.strip() != '']
         return wordlist
 
+# TODO: exclude compound words (-); see 598, ill catches ill-mannered
+
     @property
     def searchwordstring(self) -> str:
         wordlist = self.searchwordlist
+        for i, w in enumerate(wordlist):
+            w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
+            wordlist[i] = w
+        wordstring = ', '.join(wordlist)
+        return wordstring
+
+    @property
+    def excludedwordlist(self) -> list:
+        try:
+            wordlist = [w.strip() for w in self.excludedstrings.split('\r\n') if w.strip() != '']
+        except AttributeError:
+            wordlist = []
+        return wordlist
+
+    @property
+    def excludedwordstring(self) -> str:
+        wordlist = self.excludedwordlist
+        for i, w in enumerate(wordlist):
+            w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
+            wordlist[i] = w
         wordstring = ', '.join(wordlist)
         return wordstring
 

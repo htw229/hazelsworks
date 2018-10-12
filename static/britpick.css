@@ -202,12 +202,16 @@ textarea {
     padding: 0 3px 0 3px;
 }
 
-.inputtext {
+.inputtext, .inputtext a:link, .inputtext a:hover, .inputtext a:any-link {
     /*background-color: var(--darkgray);*/
     color: var(--darkgray);
     margin-right: 3px;
     border-bottom: 1px dotted var(--darkgray);
 }
+
+/*inputtext a {*/
+    /*color: var(--darkgray);*/
+/*}*/
 
 .replacementwrapper.category-mandatory {
     /*background-color: lightgoldenrodyellow;*/

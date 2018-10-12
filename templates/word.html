@@ -1,12 +1,9 @@
-<div class="wordpage">
-
-<p class="adminlink"><a href="{% url 'admin:app_replacement_change' replacement.pk %}" target="_blank">edit</a></p>
 
 <div class="worddata">
     <p>Dialect: {{ replacement.dialect.name }}</p>
     <p>Category: {{ replacement.category.name }}</p>
 
-    <p>Search for: {{ replacement.searchwordstring }} {% if replacement.excludedstrings %} %}(exclude {{ replacement.excludedstrings }}{% endif %}</p>
+    <p>Search for: {{ replacement.searchwordstring }} {% if replacement.excludedwordstring %}(not: {{ replacement.excludedwordstring }}){% endif %}</p>
 
     {% if replacement.replacementsstring %}
         <p>Replace with: {{ replacement.replacementsstring }}</p>
@@ -24,6 +21,4 @@
             {% endfor %}
         </p>
     {% endif %}
-</div>
-
 </div>

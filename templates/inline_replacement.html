@@ -1,8 +1,8 @@
 <span class="replacementwrapper category-{{ replacement.category.name }}">
-    <span class="inputtext">{{ inputtext }}</span>
+    <span class="inputtext"><a href="{% url 'word' replacementpk=replacement.pk %}">{{ inputtext }}</a></span>
 
     {% if replacement.replacementhtml %}
-        [<a href="/admin/app/replacement/{{ replacement.pk }}/change/" target="_blank">{{ replacement.replacementhtml|safe }}</a>]
+        [<a href="{% url 'word' replacementpk=replacement.pk %}">{{ replacement.replacementhtml|safe }}</a>]
     {% endif %}
 
     {% if replacement.topics.all %}

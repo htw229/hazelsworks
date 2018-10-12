@@ -1,5 +1,5 @@
 <p>
-    <span class="searchword"><a href="/admin/app/britpickfindreplace/{{ o.pk }}/change/" target="_blank">{{ o.searchwordstring }}</a></span> -> {% if o.replacementwordsstring %}
+    <span class="searchword"><a href="{% url 'word' replacementpk=o.pk %}" target="_blank">{{ o.searchwordstring }}</a></span> -> {% if o.replacementwordsstring %}
         <span class="foundreplacementwords">{{  o.replacementwordsstring }}</span>
     {%  endif %}
 </p>

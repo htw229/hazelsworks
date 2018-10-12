@@ -1,4 +1,5 @@
 from django.urls import reverse
+import re
 
 def addspan(string, cssclass, wrapperstart='', wrapperend='', tagname='span'):
     '''
@@ -76,3 +77,65 @@ def replacecurlyquotes(text) -> str:
         replace("’", "'")
 
     return text
+
+def titlecase(inputtitle) -> str:
+    words = re.split(r'(\W+)', inputtitle)
+    lowercasewords = ['a', 'an', 'the']
+    for i, w in enumerate(words):
+        if w == w.lower(): #only change if nothing is capitalized
+            if i == 0 or i == len(words) - 1:
+                words[i] = w.capitalize()
+            elif w not in lowercasewords and len(w) > 4:
+                words[i] = w.capitalize()
+
+    title = ' '.join(words)
+
+    return title
+
+Keep_Markup = 0
+Delete_Markup = 1
+Explain_Markup = 2
+Explain_Markup_Verbose = 3
+
+# TODO: for dialect searches, add search results from generic?
+
+def searchwordformat(inputstring, title=False, markup=Explain_Markup, replacedashes=False) -> str:
+    s = inputstring
+
+    markup_explanations = [
+        (r'\[(\w*)\]', r'(any \1)'),
+        (r'\.', r''),
+        (r'\(n\)', r' (noun)'),
+        (r'#', r''),
+        (r'___', r''),
+        (r'\(_\)', r''),
+    ]
+
+    markup_explanations_optional = [
+        (r'^#(.*)', r'\1**'),
+        (r'#', '*'),
+        (r'\.$', r' (end of phrase)'),
+        (r'\?', ' (question)'),
+        (r'___', '(any words)'),
+        (r'\(_\)', '(optional words)'),
+    ]
+
+    if replacedashes:
+        s = s.replace('-', '')
+
+    if markup == Explain_Markup:
+        for m in markup_explanations:
+            s = re.sub(m[0], m[1], s)
+        for m in markup_explanations_optional:
+            s = re.sub(m[0], '', s)
+    elif markup == Explain_Markup_Verbose:
+        for m in (markup_explanations_optional + markup_explanations):
+            s = re.sub(m[0], m[1], s)
+    elif markup == Delete_Markup:
+        for m in (markup_explanations + markup_explanations_optional):
+            s = re.sub(m[0], '', s)
+
+    if title:
+        s = titlecase(s)
+
+    return s
