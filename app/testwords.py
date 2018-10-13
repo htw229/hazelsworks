@@ -6,17 +6,7 @@ from app.models import Replacement
 from django.core.exceptions import ObjectDoesNotExist
 
 testtext = """
-
-this is a @.
-"this is a @ in quotes."
-
-this is a plural @s.
-this is a @ in the middle of a phrase.
-is this a @?
-
-we are @ing here.
-we will be @.
-
+this is a %s.  "this is a %s in quotes."  this is a %s in the middle of a phrase.  is this %s? we will be %s.
 """
 
 
@@ -45,18 +35,23 @@ hardcoded:
 
 def gettestingtext(replacementpk) -> str:
     text = str(replacementpk) + ': \r\n'
-    teststrings = []
 
     try:
         r = Replacement.objects.get(pk=replacementpk)
     except ObjectDoesNotExist as e:
         return str(e)
 
+    text += '\r\n'.join(r.searchwordlist)
+    text += '\r\n'.join(str(w) for w in r.searchwords)
+    text += '\r\n'.join(p for p in r.excludepatterns)
+    text += '\r\n--------------------------\r\n\r\n'
+
+    teststrings = []
     wordslist = r.searchwordlist + r.excludedwordlist
     for w in wordslist:
         teststrings.extend(getsearchwordvariants(w))
 
-    text += '\r\n'.join(teststrings)
+    text += '\r\n'.join(testtext.replace('%s', s) for s in teststrings)
 
     return text
 
@@ -110,7 +105,8 @@ def getsearchwordvariants(searchstring) -> list:
             possiblevariants.extend(searchwords.getsuffixwordlist(word, REGULAR_CONJUGATES))
 
             # combine
-            wordvariants.extend(random.choice(possiblevariants) for _ in range(5))
+            if possiblevariants:
+                wordvariants.extend(random.choice(possiblevariants) for _ in range(5))
 
             wordvariants = list(set(list(wordvariants)))
 

@@ -14,7 +14,10 @@ def getwordpattern(searchstring, usetrie = None) -> dict:
 
     # IGNORECASE
     # if there are no capital letters in searchstring, then allow ignorecase regex flag
-    searchword['ignorecase'] = not any(x.isupper() for x in searchstring)
+    if searchstring != searchstring.lower():
+        searchword['ignorecase'] = False
+    else:
+        searchword['ignorecase'] = True
 
     # LENGTH
     # allows sorting for prioritizing longer/multiple word searches

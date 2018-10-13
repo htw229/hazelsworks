@@ -171,10 +171,10 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-    if '688' in patternstring:
-        debug.sectionbreak()
-        debug.add(patternstring)
-        debug.sectionbreak()
+    # if '688' in patternstring:
+    #     debug.sectionbreak()
+    #     debug.add(patternstring)
+    #     debug.sectionbreak()
 
     try:
         if ignorecase:
@@ -194,7 +194,9 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 
     for match in pattern.finditer(text):
         # debug.add(['match group', match.groupdict()])
-
+        # debug.sectionbreak()
+        # debug.add(patternstring)
+        # debug.sectionbreak()
 
 
         for groupname in match.groupdict().keys():
@@ -234,12 +236,12 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 
                         textchunk = text[startpos:endpos]
 
-                        debug.sectionbreak()
-                        debug.add(match.group())
-                        debug.add(excludepattern, loop='excludepatterns')
-                        debug.add('startpos', startpos, 'endpos', endpos)
-                        debug.add(textchunk)
-                        debug.sectionbreak()
+                        # debug.sectionbreak()
+                        # debug.add(match.group())
+                        # debug.add(excludepattern, loop='excludepatterns')
+                        # debug.add('startpos', startpos, 'endpos', endpos)
+                        # debug.add(textchunk)
+                        # debug.sectionbreak()
 
                         if re.search("[A-Z]", excludepattern):
                             compiledexcludepattern = re.compile(excludepattern)
