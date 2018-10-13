@@ -76,9 +76,9 @@ def getsearchwordvariants(searchstring) -> list:
 
         # get word
         word = matchgroups['protected_word'] if matchgroups['protected_word'] else None
-        word = matchgroups['plural_protected_word'] if matchgroups['plural_protected_word'] and not word else None
-        word = matchgroups['noun_protected_word'] if matchgroups['noun_protected_word'] and not word else None
-        word = matchgroups['word'] if matchgroups['word'] and not word else None
+        word = matchgroups['plural_protected_word'] if matchgroups['plural_protected_word'] and not word else word
+        word = matchgroups['noun_protected_word'] if matchgroups['noun_protected_word'] and not word else word
+        word = matchgroups['word'] if matchgroups['word'] and not word else word
 
         if matchgroups['optional_words_marker'] or matchgroups['words_marker']:
             constructors.append([ # get random words 0-3

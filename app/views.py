@@ -58,15 +58,6 @@ def britpickapp(request):
             replacementpk = int(request.GET.get('id'))
             text = testwords.gettestingtext(replacementpk)
             r = Replacement.objects.get(pk=replacementpk)
-            # testword = testwords.TestWord(r)
-            #
-            # text = '\r\n'.join(testword.variants)
-
-            # text = str(replacementpk) + ": \r\n"
-            # for w in r.searchwordlist:
-            #     text += searchwords.getwordpattern(w, usetrie=False)['pattern'] + '\r\n\r\n\r\n'
-            #     s = htmlutils.searchwordformat(w, markup=htmlutils.Delete_Markup, replacedashes=True)
-            #     text += testwords.text.replace('@', s)
 
             form = BritpickForm(initial={
                 'text': text,
@@ -77,9 +68,9 @@ def britpickapp(request):
             form = BritpickForm()
             debug.add(replacementpk,'is not valid', e)
 
-        # except TypeError as e:
-        #     form = BritpickForm()
-        #     debug.add('no initial arguments', e)
+        except TypeError as e:
+            form = BritpickForm()
+            debug.add('no initial arguments', e)
 
     else:
         form = BritpickForm()
