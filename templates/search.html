@@ -34,8 +34,8 @@
         {% if results.replacements %}
             <p><b>Replacement Words</b></p>
             <ul>
-            {% for r in results.replacements %}
-                <li>{% include "inline_replacement.html" with replacement=r %}</li>
+            {% for o in results.replacements %}
+                <li>{% include "britpick_wordsnippet.html" with replacement=r %}</li>
             {% endfor %}
             </ul>
         {% else %}
@@ -44,8 +44,8 @@
         {% if results.dialectreplacements %}
             <p><b>Dialect Replacement Words</b></p>
             <ul>
-            {% for r in results.dialectreplacements %}
-                <li>{% include "inline_replacement.html" with replacement=r %}</li>
+            {% for o in results.dialectreplacements %}
+                <li>{% include "britpick_wordsnippet.html" with replacement=r %}</li>
             {% endfor %}
             </ul>
         {% else %}

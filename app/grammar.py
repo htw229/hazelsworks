@@ -4,6 +4,8 @@ MARKUP = {
                  'tenth', 'eleventh', 'twelfth', 'thirteenth', 'fourteenth', 'fifteenth', 'sixteenth', 'seventeenth',
                  'eighteenth', 'nineteenth', 'twentieth', 'thirtieth', 'fourtieth', 'fiftieth', 'hundredth',
                  'thousandth', 'millionth'],
+    'digit': ['\d{1,4}', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight',
+                 'nine', 'ten', 'twenty', 'thirty', 'forty', 'fifty', 'sixty', 'seventy', 'eighty', 'ninety', 'a hundred', 'a thousand', 'a million'],
     'month': ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sept', 'oct', 'nov', 'dec', 'january',
                 'february', 'march', 'april', 'may', 'june', 'july', 'august', 'september', 'october', 'november',
                 'december'],
@@ -14,6 +16,7 @@ MARKUP = {
     'possessive': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)"],
     'the': ['the', 'a', 'an', 'that', 'this', 'what', 'which',],
     'noun_preceding': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)", 'the', 'a', 'an', 'that', 'this', 'what', 'which',],
+    'footballteams': ["United", "Albion", "Rovers", "Wanderers", "Arsenal", "Aston Villa", "Barnsley", "Birmingham", "Blackburn", "Blackpool", "Bolton", "Bournemouth", "Bradford", "Brighton & Hove", "Burnley", "Cardiff", "Charlton Athletic", "Chelsea", "Coventry", "Crystal Palace", "Derby County", "Everton", "Fulham", "Huddersfield", "Hull", "Ipswich", "Leeds", "Leicester", "Liverpool", "Manchester", "Manchester", "Middlesbrough", "Newcastle", "Norwich", "Nottingham", "Oldham Athletic", "Portsmouth", "Queens Park", "Rangers", "Reading", "Sheffield", "Southampton", "Stoke", "Sunderland", "Swansea", "Swindon", "Tottenham Hotspur", "Watford", "West Bromwich", "Albion", "West Ham", "Wigan Athletic", "Wimbledon", "Wolverhampton", "Man City"] ,
 }
 
 # necessary if more than one word only

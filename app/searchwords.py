@@ -12,16 +12,7 @@ def getwordpattern(searchstring, usetrie = None) -> dict:
 
     searchword = {}
 
-    # IGNORECASE
-    # if there are no capital letters in searchstring, then allow ignorecase regex flag
-    if searchstring != searchstring.lower():
-        searchword['ignorecase'] = False
-    else:
-        searchword['ignorecase'] = True
 
-    # LENGTH
-    # allows sorting for prioritizing longer/multiple word searches
-    searchword['length'] = len(searchstring)
 
 
     pattern = re.compile(SEARCH_STRING_PATTERN, re.IGNORECASE)
@@ -190,6 +181,18 @@ def getwordpattern(searchstring, usetrie = None) -> dict:
     pattern = pattern.strip()
 
     searchword['pattern'] = pattern
+
+    # IGNORECASE
+    # if there are no capital letters in searchstring, then allow ignorecase regex flag
+    # (do this with pattern instead of searchstring since may have case-sensitive markup)
+    if pattern != pattern.lower():
+        searchword['ignorecase'] = False
+    else:
+        searchword['ignorecase'] = True
+
+    # LENGTH
+    # allows sorting for prioritizing longer/multiple word searches
+    searchword['length'] = len(searchstring)
 
     return searchword
 

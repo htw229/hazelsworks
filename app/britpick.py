@@ -18,7 +18,10 @@ searchpatterns = {
     'SMART':(REPLACE_FIND_ANYWHERE, REPLACE_FIND_QUOTES_ONLY),
 }
 
-
+#TODO: search doesn't get dash words if spaces
+#TODO: change word page title for dashes to space between
+#TODO: standardize URLs with slash after (word, topic list)
+#TODO: dialect searching in all text
 
 
 def britpick(formdata):

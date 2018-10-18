@@ -61,6 +61,8 @@ p {
     font-size: 80%;
 }
 
+/* lists */
+
 ul {
     list-style-type: none;
     margin: 0;
@@ -72,6 +74,18 @@ li {
     font-size: 90%;
     margin-bottom: 1em;
 }
+
+.main-list {
+    font-size: 100%;
+}
+
+.level-two {
+    font-size: 80%;
+    margin-left: 2em;
+}
+
+
+/* links */
 
 a:link {
     color: var(--blue);
@@ -85,12 +99,10 @@ a:visited {
 }
 
 a:hover {
-    /*color: var(--red);*/
     text-decoration: underline;
 }
 
 a:active {
-    /*color: var(--darkred);*/
     text-decoration: underline;
 }
 
@@ -143,8 +155,6 @@ a:active {
     text-decoration: underline;
 }
 
-
-
 .navbar.footer {
     background-color: var(--blue);
     margin-top: 20px;
@@ -152,25 +162,15 @@ a:active {
 }
 
 
-/*--------------------------------------------*/
-/*  LISTS  */
-/*--------------------------------------------*/
 
 
-
-.main-list {
-    font-size: 100%;
-}
-
-.level-two {
-    font-size: 80%;
-    margin-left: 2em;
-}
 
 
 /*--------------------------------------------*/
-/*  BRITPICK  */
+/*  .britpick-page  */
 /*--------------------------------------------*/
+
+.britpick-page {}
 
 textarea {
     width: 100%;
@@ -178,12 +178,55 @@ textarea {
     resize: none;
 }
 
+/*--------------------------------------------*/
+/*  .topic-page  */
+/*--------------------------------------------*/
+
+.topic-page {}
+
+/*--------------------------------------------*/
+/*  .topics-list-page  */
+/*--------------------------------------------*/
+
+.topics-list-page {}
+
+/*--------------------------------------------*/
+/*  .search-page  */
+/*--------------------------------------------*/
+
+.search-page {}
+
+/*--------------------------------------------*/
+/*  .word-page  */
+/*--------------------------------------------*/
+
+.word-page {}
 
 
 /*--------------------------------------------*/
-/*  OUTPUT  */
-/* replacementwrapper "inputtext [replacement"considerstring: wordwrapper"word, word" (clarification; explanation)"] [topiclink]" */
+/*  .submission-page  */
 /*--------------------------------------------*/
+
+.submission-page {}
+
+/*--------------------------------------------*/
+/*  .references-page  */
+/*--------------------------------------------*/
+
+.references-page {}
+
+/*--------------------------------------------*/
+/*  .about-page  */
+/*--------------------------------------------*/
+
+.about-page {}
+
+
+
+
+
+
+
 
 .outputtext {
     line-height: 1.5em;
