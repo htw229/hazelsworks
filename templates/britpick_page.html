@@ -1,7 +1,7 @@
 {% load custom_tags %}
 
 <h2>Input</h2>
-<form action="/britpick/" method="post">
+<form action="{% url 'britpick' %}" method="post">
     {% csrf_token %}
 
     {{ form }}

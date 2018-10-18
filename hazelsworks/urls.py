@@ -25,19 +25,19 @@ urlpatterns = [
 
     url(r'^robots.txt', views.robotstxt, name='robots.txt'),
 
-    path(r'britpick/make-a-suggestion/<objclass>/<int:objpk>/', views.suggestion_view, name='objsuggestion'),
-    url(r'^britpick/make-a-suggestion/', views.suggestion_view, name='suggestion'),
+    path(r'suggestion/<objclass>/<int:objpk>/', views.suggestion_view, name='objsuggestion'),
+    url(r'^suggestion/', views.suggestion_view, name='suggestion'),
 
-    url(r'^britpick/about/', views.about_view, name='about'),
-    url(r'^britpick/references', views.references_view, name='references'),
+    url(r'^about/', views.about_view, name='about'),
+    url(r'^references', views.references_view, name='references'),
 
-    path(r'britpick/words/<int:replacementpk>/', views.word_view, name='word'),
-    url(r'^britpick/search/', views.search_view, name='search'),
+    path(r'words/<int:replacementpk>/', views.word_view, name='word'),
+    url(r'^search/', views.search_view, name='search'),
 
-    path(r'britpick/topics/<slug:topicslug>/', views.topic_view, name='topic'),
-    path(r'britpick/topics/<slug:topicslug>', views.topic_view,),
-    url(r'^britpick/topics/', views.topicslist_view, name='topicslist'),
+    path(r'topics/<slug:topicslug>/', views.topic_view, name='topic'),
+    path(r'topics/<slug:topicslug>', views.topic_view,),
+    url(r'^topics/', views.topicslist_view, name='topicslist'),
 
-    url(r'^britpick/$', views.britpick_view, name='britpick'),
+    url(r'^$', views.britpick_view, name='britpick'),
 
 ]
