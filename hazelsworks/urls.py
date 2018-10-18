@@ -21,13 +21,23 @@ from app import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls, name='admin'),
+    url(r'^britpick/findduplicates/', views.duplicates_view, name='britpick_findduplicates.html'),
+
     url(r'^robots.txt', views.robotstxt, name='robots.txt'),
-    url(r'^britpick/search/', views.searchview, name='search'),
-    url(r'^britpick/findduplicates/', views.britpickfindduplicates, name='britpick_findduplicates.html'),
-    path(r'britpick/topics/<slug:topicslug>', views.topicview, name='topic'),
-    path(r'britpick/words/<int:replacementpk>', views.wordview, name='word'),
-    url(r'^britpick/topics', views.topicslist, name='topicslist'),
-    url(r'^britpick/references', views.referenceslist, name='references'),
-    url(r'^britpick/references', views.referenceslist, name='references'),
-    url(r'^britpick/$', views.britpickapp, name='britpick'),
+
+    path(r'britpick/make-a-suggestion/<objclass>/<int:objpk>/', views.suggestion_view, name='objsuggestion'),
+    url(r'^britpick/make-a-suggestion/', views.suggestion_view, name='suggestion'),
+
+    url(r'^britpick/about/', views.about_view, name='about'),
+    url(r'^britpick/references', views.references_view, name='references'),
+
+    path(r'britpick/words/<int:replacementpk>/', views.word_view, name='word'),
+    url(r'^britpick/search/', views.search_view, name='search'),
+
+    path(r'britpick/topics/<slug:topicslug>/', views.topic_view, name='topic'),
+    path(r'britpick/topics/<slug:topicslug>', views.topic_view,),
+    url(r'^britpick/topics/', views.topicslist_view, name='topicslist'),
+
+    url(r'^britpick/$', views.britpick_view, name='britpick'),
+
 ]

@@ -30,7 +30,7 @@ def robotstxt(request):
     return render(request, 'robots.txt')
 
 
-def britpickapp(request):
+def britpick_view(request):
     forminput = None
     outputtext = ''
     debug = Debug()
@@ -82,20 +82,176 @@ def britpickapp(request):
 
     responsedata = {
         'pagetitle': 'Britpick',
-        'template': 'britpick.html',
+        'template': 'britpick_page.html',
         'form': form,
         'forminput': forminput,
         'outputtext': outputtext,
         'replacements': replacements,
         'showdebug': True,
         'debug': debug.html,
-        'csspage': 'textreplacepage',
+        'csspage': 'britpick-page',
     }
 
-    return render(request, 'britpicktemplate.html', responsedata)
+    return render(request, 'master_template.html', responsedata)
 
 
-def britpickfindduplicates(request):
+def topicslist_view(request):
+
+    topics = Topic.objects.filter(maintopic=True).order_by('name')
+
+    responsedata = {
+        'pagetitle': 'Topics',
+        'template': 'topicslist_page.html',
+        'topics': topics,
+        'debug': '',
+        'showdebug': True,
+        'csspage': 'topicslistpage',
+    }
+
+    return render(request, 'master_template.html', responsedata)
+
+
+def topic_view(request, topicslug):
+
+    # responsedata is dict that contains topic (obj), topichtml (html), searchstrings (object list), debug (as html)
+    responsedata = {
+        'pagetitle': 'Topic not found',
+        'topic': None,
+        'topichtml': 'Topic not found',
+        'searchwords': None,
+        'debug': '',
+        'showdebug': True,
+        'csspage': 'topicpage',
+    }
+
+    for topic in Topic.objects.all():
+        if topicslug == topic.slug:
+            responsedata = britpicktopic(topic)
+            responsedata['pagetitle'] = topic.name
+            responsedata['template'] = 'topic_page.html'
+            responsedata['adminlink'] = reverse('admin:app_topic_change', args=(topic.pk,))
+
+            break
+
+    return render(request, 'master_template.html', responsedata)
+
+
+def search_view(request):
+    # objects = Replacement.objects.all()
+    s = ''
+    searchwords = []
+    replacementwords = []
+    searchresults = {}
+    debug = Debug()
+
+    form = BritpickfindwordForm()
+
+    if request.method == 'POST':
+        form = BritpickfindwordForm(request.POST)
+        if form.is_valid():
+            searchresults = search.search(form.cleaned_data)
+            debug = searchresults['debug']
+        else:
+            form = BritpickfindwordForm()
+
+    responsedata = {
+        'pagetitle': 'Search',
+        'form': form,
+        'template': 'search_page.html',
+        'search': s,
+        'searchwordobjects': searchwords,
+        'replacementwordobjects': replacementwords,
+        'results': searchresults,
+        'showdebug': True,
+        'debug': debug.html,
+        'csspage': 'search-page',
+    }
+
+    return render(request, 'master_template.html', responsedata)
+
+# TODO: add dialect, category to replacement_list.html
+# TODO: reformat replacement_list.html
+# TODO: integrate replacement_list.html into topics
+# TODO: rename replacement snippets to standardized with 'snippet'
+# TODO: make search more powerful (looking for not just words but inside topics) and using search parameters from britpick.py to get suffixes etc; also can stop separate input/output
+# TODO: create word html (later - since now only using admin)
+# TODO: create about page
+# TODO: add do not find
+# TODO: add any single word markup
+# TODO: option don't add suffix
+# TODO: option require punctuation (like ? or !)
+# TODO: link to topic icon only with mouseover text
+
+
+
+def word_view(request, replacementpk):
+    responsedata = {
+        'pagetitle': 'Word not found',
+        'topic': None,
+        # 'topichtml': 'Word not found',
+        'template': 'word_page.html',
+        'debug': '',
+        'showdebug': True,
+        'adminlink': '',
+        'csspage': 'word-page',
+    }
+
+    try:
+        r = Replacement.objects.get(pk=replacementpk)
+        responsedata['replacement'] = r
+        responsedata['pagetitle'] = r.title
+        responsedata['adminlink'] = reverse('admin:app_replacement_change', args=(r.pk,))
+    except ObjectDoesNotExist:
+        responsedata['replacement'] = None
+
+    return render(request, 'master_template.html', responsedata)
+
+
+
+def references_view(request):
+
+    references = Reference.objects.filter(mainreference=True).order_by('name')
+
+    responsedata = {
+        'pagetitle': 'References',
+        'template': 'references_page.html',
+        'references': references,
+        'debug': '',
+        'showdebug': True,
+        'csspage': 'references-page',
+    }
+
+    return render(request, 'master_template.html', responsedata)
+
+
+
+def about_view(request):
+
+    responsedata = {
+        'pagetitle': 'About',
+        'template': 'about_page.html',
+        'debug': '',
+        'showdebug': True,
+        'csspage': 'about-page',
+    }
+
+    return render(request, 'master_template.html', responsedata)
+
+
+def suggestion_view(request, objclass = None, objpk = None):
+
+    responsedata = {
+        'pagetitle': 'Suggestion',
+        'template': 'suggestion_page.html',
+        'debug': '',
+        'showdebug': True,
+        'csspage': 'suggestion-page',
+    }
+
+    return render(request, 'master_template.html', responsedata)
+
+
+def duplicates_view(request):
     objects = Replacement.objects.all()
     duplicateobjects = []
 
@@ -122,126 +278,6 @@ def britpickfindduplicates(request):
     return render(request, 'britpick_findduplicates.html', responsedata)
 
 
-def searchview(request):
-    # objects = Replacement.objects.all()
-    s = ''
-    searchwords = []
-    replacementwords = []
-    searchresults = {}
-    debug = Debug()
+def debugdatabase_view(request):
 
-    form = BritpickfindwordForm()
-
-    if request.method == 'POST':
-        form = BritpickfindwordForm(request.POST)
-        if form.is_valid():
-            searchresults = search.search(form.cleaned_data)
-            debug = searchresults['debug']
-        else:
-            form = BritpickfindwordForm()
-
-    responsedata = {
-        'pagetitle': 'Search',
-        'form': form,
-        'template': 'search.html',
-        'search': s,
-        'searchwordobjects': searchwords,
-        'replacementwordobjects': replacementwords,
-        'results': searchresults,
-        'showdebug': True,
-        'debug': debug.html,
-        'csspage': 'searchpage',
-    }
-
-    return render(request, 'britpicktemplate.html', responsedata)
-
-# TODO: add dialect, category to replacement_list.html
-# TODO: reformat replacement_list.html
-# TODO: integrate replacement_list.html into topics
-# TODO: rename replacement snippets to standardized with 'snippet'
-# TODO: make search more powerful (looking for not just words but inside topics) and using search parameters from britpick.py to get suffixes etc; also can stop separate input/output
-# TODO: create word html (later - since now only using admin)
-# TODO: create about page
-# TODO: add do not find
-# TODO: add any single word markup
-# TODO: option don't add suffix
-# TODO: option require punctuation (like ? or !)
-# TODO: link to topic icon only with mouseover text
-
-def topicview(request, topicslug):
-
-    # responsedata is dict that contains topic (obj), topichtml (html), searchstrings (object list), debug (as html)
-    responsedata = {
-        'pagetitle': 'Topic not found',
-        'topic': None,
-        'topichtml': 'Topic not found',
-        'searchwords': None,
-        'debug': '',
-        'showdebug': True,
-        'csspage': 'topicpage',
-    }
-
-    for topic in Topic.objects.all():
-        if topicslug == topic.slug:
-            responsedata = britpicktopic(topic)
-            responsedata['pagetitle'] = topic.name
-            responsedata['template'] = 'britpick_topic.html'
-            responsedata['adminlink'] = reverse('admin:app_topic_change', args=(topic.pk,))
-
-            break
-
-    return render(request, 'britpicktemplate.html', responsedata)
-
-def topicslist(request):
-
-    topics = Topic.objects.filter(maintopic=True).order_by('name')
-
-    responsedata = {
-        'pagetitle': 'Topics',
-        'template': 'topicslist.html',
-        'topics': topics,
-        'debug': '',
-        'showdebug': True,
-        'csspage': 'topicslistpage',
-    }
-
-    return render(request, 'britpicktemplate.html', responsedata)
-
-
-def wordview(request, replacementpk):
-    responsedata = {
-        'pagetitle': 'Word not found',
-        'topic': None,
-        # 'topichtml': 'Word not found',
-        'template': 'word.html',
-        'debug': '',
-        'showdebug': True,
-        'adminlink': '',
-        'csspage': 'wordpage',
-    }
-
-    try:
-        r = Replacement.objects.get(pk=replacementpk)
-        responsedata['replacement'] = r
-        responsedata['pagetitle'] = r.title
-        responsedata['adminlink'] = reverse('admin:app_replacement_change', args=(r.pk,))
-    except ObjectDoesNotExist:
-        responsedata['replacement'] = None
-
-    return render(request, 'britpicktemplate.html', responsedata)
-
-
-def referenceslist(request):
-
-    references = Reference.objects.filter(mainreference=True).order_by('name')
-
-    responsedata = {
-        'pagetitle': 'References',
-        'template': 'britpick_references.html',
-        'references': references,
-        'debug': '',
-        'showdebug': True,
-        'csspage': 'referencespage',
-    }
-
-    return render(request, 'britpicktemplate.html', responsedata)
+    return
