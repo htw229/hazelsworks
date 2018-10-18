@@ -87,7 +87,7 @@ def britpick_view(request):
         'forminput': forminput,
         'outputtext': outputtext,
         'replacements': replacements,
-        'showdebug': True,
+        
         'debug': debug.html,
         'csspage': 'britpick-page',
     }
@@ -104,7 +104,7 @@ def topicslist_view(request):
         'template': 'topicslist_page.html',
         'topics': topics,
         'debug': '',
-        'showdebug': True,
+        
         'csspage': 'topicslistpage',
     }
 
@@ -120,7 +120,7 @@ def topic_view(request, topicslug):
         'topichtml': 'Topic not found',
         'searchwords': None,
         'debug': '',
-        'showdebug': True,
+        
         'csspage': 'topicpage',
     }
 
@@ -162,7 +162,7 @@ def search_view(request):
         'searchwordobjects': searchwords,
         'replacementwordobjects': replacementwords,
         'results': searchresults,
-        'showdebug': True,
+        
         'debug': debug.html,
         'csspage': 'search-page',
     }
@@ -191,7 +191,7 @@ def word_view(request, replacementpk):
         # 'topichtml': 'Word not found',
         'template': 'word_page.html',
         'debug': '',
-        'showdebug': True,
+        
         'adminlink': '',
         'csspage': 'word-page',
     }
@@ -217,7 +217,7 @@ def references_view(request):
         'template': 'references_page.html',
         'references': references,
         'debug': '',
-        'showdebug': True,
+        
         'csspage': 'references-page',
     }
 
@@ -231,7 +231,7 @@ def about_view(request):
         'pagetitle': 'About',
         'template': 'about_page.html',
         'debug': '',
-        'showdebug': True,
+        
         'csspage': 'about-page',
     }
 
@@ -244,7 +244,7 @@ def suggestion_view(request, objclass = None, objpk = None):
         'pagetitle': 'Suggestion',
         'template': 'suggestion_page.html',
         'debug': '',
-        'showdebug': True,
+        
         'csspage': 'suggestion-page',
     }
 

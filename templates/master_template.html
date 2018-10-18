@@ -47,7 +47,7 @@
 
 <div class="content">
     <h1>{{ pagetitle }}</h1>
-    {% if showdebug %}
+    {% if user.is_superuser %}
         {% if adminlink %}
             <p class="adminlink"><a href="{{ adminlink }}" target="_blank">edit</a></p>
         {% endif %}
@@ -59,7 +59,7 @@
 
 <div class="navbar footer"></div>
 
-{% if showdebug %}
+{% if user.is_superuser %}
 <div class="content">
     <h3>Debug:</h3>
     <p>

@@ -1,6 +1,6 @@
 
 <div class="worddata">
-{% if showdebug %}
+{% if user.is_superuser %}
     <p><a href="{% url 'britpick' %}?id={{ replacement.pk }}">test</a></p>
 {% endif %}
     <p>Dialect: {{ replacement.dialect.name }}</p>
