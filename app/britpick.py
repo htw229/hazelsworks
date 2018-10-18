@@ -1,10 +1,12 @@
 from .models import Replacement, Dialect, ReplacementExplanation, ReplacementCategory
 from .debug import Debug
-from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
+# from .htmlutils import addspan, getlinkhtml, linebreakstoparagraphs
+import htmlutils
 from __init__ import *
 
 
 import re
+import html
 
 import collections
 
@@ -26,26 +28,26 @@ def britpick(formdata):
 
     searchwords = getsearchwords(formdata)
     debug.add('SEARCHWORDS', len(searchwords))
-    debug.timer('create searchwords')
+    debug.timer('getsearchwords()')
 
-    debug.timer('create word patterns')
-    debug.resetcounter()
+    text = formatinputtext(formdata['text'])
 
-    text = formdata['text']
+    debug.sectionbreak()
 
     i = 0
     for searchpattern, ignorecase in searchpatterngenerator(searchwords, formdata):
         text = maketextreplacements(searchpattern, text, ignorecase)
         i += 1
-        if i > 5000: # prevent infinite loop if something goes wrong (generator has while loop)
+        if i > 10000: # prevent infinite loop if something goes wrong (generator has while loop)
             break
 
-    debug.add('ITERATIONS', i)
-    debug.timer('create text replacements')
+    debug.add('REGEX ITERATIONS', i)
+    debug.timer('maketextreplacements()')
+
 
     text = postprocesstext(text)
 
-    debug.timer('britpick()')
+    # debug.timer('britpick()')
 
     britpickeddata = {
         'text': text,
@@ -53,6 +55,12 @@ def britpick(formdata):
     }
 
     return britpickeddata
+
+
+def formatinputtext(inputtext) -> str:
+    text = htmlutils.replacecurlyquotes(inputtext)
+
+    return text
 
 
 
@@ -119,16 +127,6 @@ def getcategorypatternwrappers(formdata) -> dict:
 
 
 
-
-#     # TODO:  add british/american variable word endings
-#     # TODO: add negatives? (isn't, weren't, don't, can't, couldn't, shouldn't etc) add contractions? (is -> 's, 's not, s'not)
-#     # TODO: make curly quotes and apostrophes regular?
-#TODO: excluded working opposite of expected --> create custom capture group that if found during later parsing will not consider it found (what happens if is part of conjugation added? such as think<ing> -> reckon)
-# TODO: get possessives (separate function, run both irregular and regular words through it)
-
-
-
-
 def searchpatterngenerator(searchwords, formdata) -> list:
     global debug
 
@@ -148,9 +146,9 @@ def searchpatterngenerator(searchwords, formdata) -> list:
             if len(nextwords) == NUMBER_COMBINED_SEARCHES:
                 break
 
-            if 'is all' in word['pattern']:
-                debug.add('searchpatterngenerator- is all')
-                debug.add(word['obj'])
+            # if 'is all' in word['pattern']:
+            #     debug.add('searchpatterngenerator- is all')
+            #     debug.add(word['obj'])
 
             if word['patternwrapper'] == nextwords[0]['patternwrapper'] \
                 and word['ignorecase'] == ignorecase \
@@ -173,9 +171,10 @@ def searchpatterngenerator(searchwords, formdata) -> list:
 def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
     global debug
 
-
-    if 'is all' in patternstring:
-        debug.add(['is all', patternstring])
+    # if '688' in patternstring:
+    #     debug.sectionbreak()
+    #     debug.add(patternstring)
+    #     debug.sectionbreak()
 
     try:
         if ignorecase:
@@ -195,15 +194,68 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 
     for match in pattern.finditer(text):
         # debug.add(['match group', match.groupdict()])
+        # debug.sectionbreak()
+        # debug.add(patternstring)
+        # debug.sectionbreak()
+
+
         for groupname in match.groupdict().keys():
             if match.groupdict()[groupname]:
                 # debug.add(['OBJECT PK FOUND=', groupname])
                 pk = groupname[2:] # trim first two characters ('pk456' -> '456')
                 replacementtext = r'<' + createreplacementhtml(match.group(), pk) + r'>'
 
-        # replacementtext = 'found'
-                text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
-                addedtextlength += len(replacementtext) - len(match.group())
+                valid = True
+                r = Replacement.objects.get(pk=pk)
+
+                if r.excludepatterns:
+                    for excludepattern in r.excludepatterns:
+                        # debug.sectionbreak()
+                        # debug.add('match.start()', match.start())
+
+                        matchstartpos = match.start() + addedtextlength
+                        minstartpos = matchstartpos - EXCLUDE_TEXT_MARGIN
+                        startpositions = [0, minstartpos]
+
+                        matchendpos = match.end() + addedtextlength
+                        maxendpos = matchendpos + EXCLUDE_TEXT_MARGIN
+                        endpositions = [maxendpos]
+
+                        for marker in PHRASE_BOUNDARY_MARKERS:
+                            if marker not in excludepattern:
+                                p = text.rfind(marker, minstartpos, matchstartpos)
+                                if p > -1:
+                                    startpositions.append(p)
+
+                                p = text.find(marker, matchendpos, maxendpos)
+                                if p > -1:
+                                    endpositions.append(p)
+
+                        startpos = sorted(startpositions)[-1]
+                        endpos = sorted(endpositions)[0]
+
+                        textchunk = text[startpos:endpos]
+
+                        # debug.sectionbreak()
+                        # debug.add(match.group())
+                        # debug.add(excludepattern, loop='excludepatterns')
+                        # debug.add('startpos', startpos, 'endpos', endpos)
+                        # debug.add(textchunk)
+                        # debug.sectionbreak()
+
+                        if re.search("[A-Z]", excludepattern):
+                            compiledexcludepattern = re.compile(excludepattern)
+                        else:
+                            compiledexcludepattern = re.compile(excludepattern, re.IGNORECASE)
+
+                        if compiledexcludepattern.search(textchunk):
+                            debug.add('invalidated')
+                            valid = False
+                            break
+
+                if valid:
+                    text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
+                    addedtextlength += len(replacementtext) - len(match.group())
 
     outputtext = text[:-2] # remove added '<' from text
 
@@ -215,16 +267,16 @@ def maketextreplacements(patternstring, inputtext, ignorecase) -> str:
 def createreplacementhtml(inputtext, replacementpk):
     global debug
 
-    html = r'{% include "inline_replacement.html" with replacement=replacements.' + str(replacementpk) + r' inputtext="' + inputtext + r'" %}'
+    s = r"{% include 'inline_replacement.html' with replacement=replacements." + str(replacementpk) + r" inputtext='" + html.escape(inputtext) + r"' %}"
 
     # debug.add([inputtext, replacementpk, Replacement.objects.get(pk=replacementpk)])
-    return html
+    return s
 
 
 def postprocesstext(text):
     # remove created {}
     text = text.replace('<', '').replace('>', '')
     # create line breaks
-    text = linebreakstoparagraphs(text)
+    text = htmlutils.linebreakstoparagraphs(text)
 
     return text

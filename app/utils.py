@@ -7,11 +7,49 @@ debug = DebugClass()
 
 
 def saveall():
+    i = 0
     for obj in Replacement.objects.all():
         obj.save()
+        if i%10 == 0:
+            print(obj)
+        i += 1
     print('done')
 
 
+
+def fixsearchstrings():
+    for r in Replacement.objects.all():
+        oldsearchstrings = r.searchstrings
+        # if '###' in r.searchstrings:
+        #     stringlist = [w.strip() for w in r.searchstrings.split('\r\n') if w.strip() != '']
+        #     for i, s in enumerate(stringlist):
+        #         if '###' in s:
+        #             stringlist[i] = '#' + s.replace('###', '').strip()
+        #     searchstrings = u"\r\n".join(stringlist)
+        #     r.searchstrings = searchstrings
+        if (',' in r.searchstrings) or ('!' in r.searchstrings):
+            print(r.searchstrings)
+            print(' ')
+            # stringlist = [w.strip() for w in r.searchstrings.split('\r\n') if w.strip() != '']
+            # for i, s in enumerate(stringlist):
+            #     if s[-1] == ',' or s[-1] == '!':
+            #         stringlist[i] = s[:len(s)-1] + '.'
+            #     stringlist = list(set(list(stringlist)))
+            # searchstrings = u"\r\n".join(stringlist)
+            # r.searchstrings = searchstrings
+
+        # if oldsearchstrings != r.searchstrings:
+        #     print(oldsearchstrings)
+        #     print(r'-->')
+        #     print(r.searchstrings)
+        #     # r.save()
+
+    print('done')
+
+
+#find errors
+# incorrect markup
+# words with
 
 
 

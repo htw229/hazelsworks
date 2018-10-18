@@ -22,75 +22,32 @@ NUMBER_COMBINED_SEARCHES =5
 
 WORD_PATTERN_GROUP = r"(?P<pk{pk}>{wordpattern})"
 
-REPLACE_FIND_ANYWHERE = r"""\b(%s)\b(?=[^>]*?<)"""
-REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)\b(?=[^"”>]*?[^\s\w>]["”])(?=[^>]*?<)"""
+REPLACE_FIND_ANYWHERE = r"""\b(%s)(?=[^>]*?<)"""
+REPLACE_FIND_QUOTES_ONLY = r"""\b(%s)(?=[^\>"]*?(\<[^"]*?\>)*?[^\>"]*?[\,\.\!\?]")"""
+
+EXCLUDE_TEXT_MARGIN = 25
+PHRASE_BOUNDARY_MARKERS = [r'.', '\r\n', r'"', r'<', r'>', r',']
 
 
+#SEARCHWORDS
+TRIE_SEARCHWORD_PATTERN = True
 
-
-
-SEARCH_OPTIONAL_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"
-SEARCH_OPTIONAL_PLACEHOLDER_SEARCH = r"[ \\]*\<OPTIONAL\>(.*)\<\/OPTIONAL\>[ \\]*"
-SEARCH_OPTIONAL_PATTERN = "(?: %s | )"
+OPTIONAL_WORD_PLACEHOLDER = r"<OPTIONAL>%s</OPTIONAL>"
+OPTIONAL_WORD_PLACEHOLDER_PATTERN = r"[ \\]*\<OPTIONAL\>(.*)\<\/OPTIONAL\>[ \\]*"
+OPTIONAL_WORD_PATTERN = "(?: %s | )"
 
 SEARCH_FULL_STOP_PATTERN = r"[\.\,\!\?]"
 
+# TODO: do we still need pural protected word if we have noun protected word?
+SEARCH_STRING_PATTERN = r"^(?P<protected_phrase>\#)|(?P<question>\?)$|(?P<end_punctuation>[\.\,\!])$|(?P<optional_words_marker>\(\_\))|(?P<words_marker>\_\_\_)|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#]+)|(?P<protected_word>[\w\-]+\'[\w\-]+|[\w\-]+(?=\#))|(?P<plural_protected_word>[\w\-]+)\(s\)|(?P<noun_protected_word>[\w\-]+)\(n\)|(?P<word>[\w\-]+)"
 
-# SEARCH_STRING_PATTERN = r"(?P<nonmutable>\w\W|\w+'s|(?P<punctuation>[^\w\s\$\|])|\s)+|((?P<word>(\w+-?)+)(?P<protected>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-# - nonmutable (includes punctuation, spaces, words of single letter, words that end in possessive)
-# - word, (opt) protected
-# - flags, protectedphrase or preservecase
-
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"(?P<markup>\[\w+\])|(?P<punctuation>[^\w\s\$\|-])|(?P<nonmutable>\w\W|\w+'s|\s)|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"(?P<markup>\[\w+\])|(?P<punctuation>[^\w\s\$\|-])|(?P<nonmutable>\w[^\w-]|\w+'s|\s)|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"\<(?P<exclude>(\w+-))\>|(?P<optional>\(\w+\))|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\s\$\|\-\<\>\(\)\[\]])|(?P<nonmutable>\w[^\w-]|\w+'s|\s)|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"\<(?P<exclude>(\w+-))\>|(?P<optional>\(\w+\))|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\s\$\|\-\<\>\(\)\[\]])|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"
-
-# SEARCH_STRING_PATTERN_UNFORMATTED = r"""\<(?P<exclude>(\w+-))\>|\((?P<optional>\w+)\]|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]])|((?P<word>(\w+-?)+)(?P<protectedword>(\$)+)?)|(\s)+|\|(?P<flags>((?P<protectedphrase>\$)|(?P<preservecase>~))+)"""
-
-# SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|((?P<word>(?P<mainword>\w+-?)+)(?P<protectedword>(\#)?)?)|(\s)+"
-
-SEARCH_STRING_PATTERN = r"(?P<protectedphrase>[\#]{3}$)|\<(?P<exclude>(\w+|-))\>|\[(?P<markup>\w+)\]|(?P<punctuation>[^\w\$\|\-\<\>\(\)\[\]\#])|(?P<apostropheword>[\w\-]+\'[\w\-]+)|((?P<word>[\w\-]+)(?P<protectedword>(\#)+?)?)|(\s)+"
-# note protected phrase ### must have preceding space
-
-
-
-
-SEARCH_MARKUP = 'markup'
-SEARCH_PUNCTUATION = 'punctuation'
-SEARCH_WORD = 'word'
-# SEARCH_WORD_MAIN = 'mainword'
-SEARCH_WORD_WITH_APOSTROPHE = 'apostropheword'
-SEARCH_PROTECTED_WORD = 'protectedword'
-SEARCH_PROTECTED_PHRASE = 'protectedphrase'
-SEARCH_EXCLUDE = 'exclude'
-
-
-
-# NOTE: don't think this is doing anything? since not marking words as dict in string (would be hard to test regex)
-# SEARCH_STRING_PATTERN = SEARCH_STRING_PATTERN_UNFORMATTED.format(
-#     # nonmutable=SEARCH_NONMUTABLE,
-#     punctuation=SEARCH_PUNCTUATION,
-#     word=SEARCH_WORD,
-#     protectedword=SEARCH_PROTECTED_WORD,
-#     flags=SEARCH_FLAGS,
-#     protectedphrase=SEARCH_PROTECTED_PHRASE,
-#     preservecase=SEARCH_PRESERVE_CASE,
-#     exclude=SEARCH_EXCLUDE,
-#     optional=SEARCH_OPTIONAL,
-#     markup=SEARCH_MARKUP,
-# )
 
 DASH_REPLACEMENT_PATTERN = r"(?:|\-|\s)"
 
 
-
-
 # SEARCH
+MAKE_LOWERCASE = False
+
 SEARCH_PATTERN_WRAPPER = r"(?P<excerpt_start>(?:(?:\w{0,15})\b[ \"\'\,]{1,2}){0,10})\b(?P<found_string>%s)\b(?P<excerpt_end>(?:(?:\w{0,15})\b[ \"\'\,]{0,3}){0,10})"
 SEARCH_PATTERN_WRAPPER_REVERSE = r"\b%s\b"
 SEARCH_MAX_DIALECT_RESULTS = 100

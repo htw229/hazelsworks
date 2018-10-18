@@ -25,7 +25,9 @@ urlpatterns = [
     url(r'^britpick/search/', views.searchview, name='search'),
     url(r'^britpick/findduplicates/', views.britpickfindduplicates, name='britpick_findduplicates.html'),
     path(r'britpick/topics/<slug:topicslug>', views.topicview, name='topic'),
+    path(r'britpick/words/<int:replacementpk>', views.wordview, name='word'),
     url(r'^britpick/topics', views.topicslist, name='topicslist'),
     url(r'^britpick/references', views.referenceslist, name='references'),
-    url(r'^britpick/', views.britpickapp, name='britpick'),
+    url(r'^britpick/references', views.referenceslist, name='references'),
+    url(r'^britpick/$', views.britpickapp, name='britpick'),
 ]

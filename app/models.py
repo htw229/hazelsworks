@@ -68,10 +68,6 @@ class Topic(models.Model):
         s = htmlutils.getlinkhtml(urlname='topic', urlkwargs={'topicslug':self.slug}, text=self.name)
         return s
 
-    # @property
-    # def link(self) ->
-    #
-    #     return s
 
     @property
     def hascontent(self) -> bool:
@@ -80,8 +76,6 @@ class Topic(models.Model):
         if self.citations.count() > 0:
             return True
         return False
-
-    # TODO: maybe if link already used in outputtext to only have it once?
 
     def __str__(self):
         s = self.name
@@ -93,9 +87,16 @@ class Topic(models.Model):
             s += ' (INACTIVE)'
         return s
 
+    def save(self, *args, **kwargs):
+        self.text = htmlutils.replacecurlyquotes(self.text)
+
+        super().save(*args, **kwargs)
+
+
     class Meta:
         ordering = ['name']
 
+#TODO: inline replacement, explanation before clarification; add link if only has topic
 
 class ReplacementCategory(models.Model):
     name = models.CharField(max_length=100)
@@ -116,7 +117,11 @@ class Replacement(models.Model):
 
     category = models.ForeignKey(ReplacementCategory, default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk, on_delete=models.CASCADE)
 
-    searchstrings = models.TextField(blank=True, null=True, help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
+    searchstrings = models.TextField(blank=True, null=True,
+                                     help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
+
+    excludedstrings = models.TextField(blank=True, null=True,
+                                     help_text="Add phrases to exclude (example - searchstring 'shirt', excludedstring 't-shirt')")
 
     suggestreplacement = models.CharField(blank=True, null=True, max_length=200, help_text="for the strongest suggestion")
     considerreplacements = models.TextField(blank=True, null=True, help_text="for less strong suggestions")
@@ -131,29 +136,67 @@ class Replacement(models.Model):
 
     # TODO: change admin form to have checkboxes (like for topic)
 
+    @property
+    def title(self) -> str:
+        s = self.searchwordlist[0]
+        s = htmlutils.searchwordformat(s, title=True, markup=htmlutils.Delete_Markup, replacedashes=True)
+        if self.replacementslist:
+            s += ' 🡆 '
+            s += htmlutils.titlecase(self.replacementslist[0])
+
+        return s
 
     @property
     def searchwordlist(self) -> list:
         wordlist = [w.strip() for w in self.searchstrings.split('\r\n') if w.strip() != '']
         return wordlist
 
+# TODO: exclude compound words (-); see 598, ill catches ill-mannered
+
     @property
     def searchwordstring(self) -> str:
-        s = ', '.join(self.searchwordlist)
-        return s
+        wordlist = self.searchwordlist
+        for i, w in enumerate(wordlist):
+            w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
+            wordlist[i] = w
+        wordstring = ', '.join(wordlist)
+        return wordstring
 
     @property
-    def longestsearchwordlength(self) -> int:
-        return len(max(self.searchwordlist, key=lambda l: len(l)))
+    def excludedwordlist(self) -> list:
+        try:
+            wordlist = [w.strip() for w in self.excludedstrings.split('\r\n') if w.strip() != '']
+        except AttributeError:
+            wordlist = []
+        return wordlist
 
     @property
-    def multiplereplacements(self) -> bool:
-        if (self.suggestreplacement == '') or (len(self.considerreplacementlist) == 0):
-            return False
-        else:
-            return True
+    def excludedwordstring(self) -> str:
+        wordlist = self.excludedwordlist
+        for i, w in enumerate(wordlist):
+            w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
+            wordlist[i] = w
+        wordstring = ', '.join(wordlist)
+        return wordstring
 
+    @property
+    def replacementslist(self) -> list:
+        wordlist = []
+        if self.suggestreplacement:
+            wordlist.append(self.suggestreplacement)
+        wordlist.extend([w for w in self.considerreplacements.split('\r\n') if w.strip() != ''])
+        return wordlist
 
+    @property
+    def replacementsstring(self) -> str:
+        wordlist = self.replacementslist
+        wordstring = ', '.join(wordlist)
+        return wordstring
+
+    @property
+    def considerreplacementlist(self) -> list:
+        wordlist = [w for w in self.considerreplacements.split('\r\n') if w.strip() != '']
+        return wordlist
 
     @property
     def replacementwordshtml(self) -> str or bool:
@@ -178,15 +221,15 @@ class Replacement(models.Model):
         return s
 
 
-#TODO: not treating dialogue correctly
-
     @property
     def clarifyexplanationhtml(self) -> str or bool:
         # get strings from clarification and explanations
         # s = ''
 
-        w = [w for w in self.clarification.split('\r\n') if w.strip() != '']
+        w = []
         w.extend([o.text for o in self.explanations.all()])
+        w.extend([w for w in self.clarification.split('\r\n') if w.strip() != ''])
+
 
         if len(w) == 0:
             return False
@@ -223,10 +266,7 @@ class Replacement(models.Model):
 
 
 
-    @property
-    def considerreplacementlist(self) -> list:
-        wordlist = [w for w in self.considerreplacements.split('\r\n') if w.strip() != '']
-        return wordlist
+
 
     @property
     def replacementwordsstring(self) -> str:
@@ -280,6 +320,11 @@ class Replacement(models.Model):
             searchword = searchwords.getwordpattern(searchwordstring)
             self.searchwords.append(searchword)
 
+        self.excludepatterns = []
+        if self.excludedstrings:
+            for excludewordstring in [w for w in self.excludedstrings.split('\r\n') if w.strip() != '']:
+                excludepattern = searchwords.getwordpattern(excludewordstring)['pattern']
+                self.excludepatterns.append(excludepattern)
 
     def save(self, *args, **kwargs):
         # if it's the non-default dialect, unless the words are manually marked as something different

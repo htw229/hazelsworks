@@ -1,5 +1,6 @@
 from django.http import HttpResponseRedirect
 from django.shortcuts import render
+from django.urls import reverse
 import re
 import os
 
@@ -13,7 +14,11 @@ from .britpicktopic import britpicktopic
 from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
 import search
+import htmlutils
+import searchwords
+import testwords
 
+from django.core.exceptions import ObjectDoesNotExist
 
 def robotstxt(request):
     """
@@ -44,6 +49,29 @@ def britpickapp(request):
             }
         else:
             outputtext = 'Form is not valid'
+
+
+    elif request.method == 'GET':
+        # for testing words
+        replacementpk = None
+        try:
+            replacementpk = int(request.GET.get('id'))
+            text = testwords.gettestingtext(replacementpk)
+            r = Replacement.objects.get(pk=replacementpk)
+
+            form = BritpickForm(initial={
+                'text': text,
+                'dialect': r.dialect.name,
+            })
+
+        except ObjectDoesNotExist as e:
+            form = BritpickForm()
+            debug.add(replacementpk,'is not valid', e)
+
+        except TypeError as e:
+            form = BritpickForm()
+            debug.add('no initial arguments', e)
+
     else:
         form = BritpickForm()
 
@@ -61,20 +89,11 @@ def britpickapp(request):
         'replacements': replacements,
         'showdebug': True,
         'debug': debug.html,
+        'csspage': 'textreplacepage',
     }
-
-    # template = get_template('britpicktemplate.html')
-    # html = template.render(responsedata)
-
-    # template = get_template('britpicktemplate.html')
-    # context = RequestContext(request, responsedata)
-    # html = template.render(context)
-    #
-    # return HttpResponse(html)
 
     return render(request, 'britpicktemplate.html', responsedata)
 
-# TODO: give form's suggest replacements a default
 
 def britpickfindduplicates(request):
     objects = Replacement.objects.all()
@@ -131,6 +150,7 @@ def searchview(request):
         'results': searchresults,
         'showdebug': True,
         'debug': debug.html,
+        'csspage': 'searchpage',
     }
 
     return render(request, 'britpicktemplate.html', responsedata)
@@ -158,6 +178,7 @@ def topicview(request, topicslug):
         'searchwords': None,
         'debug': '',
         'showdebug': True,
+        'csspage': 'topicpage',
     }
 
     for topic in Topic.objects.all():
@@ -165,10 +186,9 @@ def topicview(request, topicslug):
             responsedata = britpicktopic(topic)
             responsedata['pagetitle'] = topic.name
             responsedata['template'] = 'britpick_topic.html'
+            responsedata['adminlink'] = reverse('admin:app_topic_change', args=(topic.pk,))
 
             break
-
-
 
     return render(request, 'britpicktemplate.html', responsedata)
 
@@ -182,7 +202,31 @@ def topicslist(request):
         'topics': topics,
         'debug': '',
         'showdebug': True,
+        'csspage': 'topicslistpage',
     }
+
+    return render(request, 'britpicktemplate.html', responsedata)
+
+
+def wordview(request, replacementpk):
+    responsedata = {
+        'pagetitle': 'Word not found',
+        'topic': None,
+        # 'topichtml': 'Word not found',
+        'template': 'word.html',
+        'debug': '',
+        'showdebug': True,
+        'adminlink': '',
+        'csspage': 'wordpage',
+    }
+
+    try:
+        r = Replacement.objects.get(pk=replacementpk)
+        responsedata['replacement'] = r
+        responsedata['pagetitle'] = r.title
+        responsedata['adminlink'] = reverse('admin:app_replacement_change', args=(r.pk,))
+    except ObjectDoesNotExist:
+        responsedata['replacement'] = None
 
     return render(request, 'britpicktemplate.html', responsedata)
 
@@ -197,6 +241,7 @@ def referenceslist(request):
         'references': references,
         'debug': '',
         'showdebug': True,
+        'csspage': 'referencespage',
     }
 
     return render(request, 'britpicktemplate.html', responsedata)

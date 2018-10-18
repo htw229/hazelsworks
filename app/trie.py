@@ -22,7 +22,8 @@ class Trie():
         return self.data
 
     def quote(self, char):
-        return re.escape(char)
+        return char
+        # return re.escape(char)
 
     def _pattern(self, pData):
         data = pData

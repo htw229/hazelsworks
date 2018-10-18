@@ -1,0 +1,27 @@
+
+<div class="worddata">
+{% if showdebug %}
+    <p><a href="{% url 'britpick' %}?id={{ replacement.pk }}">test</a></p>
+{% endif %}
+    <p>Dialect: {{ replacement.dialect.name }}</p>
+    <p>Category: {{ replacement.category.name }}</p>
+
+    <p>Search for: {{ replacement.searchwordstring }} {% if replacement.excludedwordstring %}(not: {{ replacement.excludedwordstring }}){% endif %}</p>
+
+    {% if replacement.replacementsstring %}
+        <p>Replace with: {{ replacement.replacementsstring }}</p>
+    {% endif %}
+
+    {% if replacement.clarifyexplanationhtml %}
+        <p>Explanation: {{ replacement.clarifyexplanationhtml|safe }}</p>
+    {% endif %}
+
+    {% if replacement.topics.all %}
+        <p>Topics:
+            {% for topic in replacement.topics.all %}
+                <a href="{% url 'topic' topicslug=topic.slug %}" title="{{ topic.name }}">{{ topic.name }}</a>
+    {#            [<span class="topiclink"><img src="/static/red-crown-16.png"> {{ topic.linkhtml|safe }}</span>]#}
+            {% endfor %}
+        </p>
+    {% endif %}
+</div>
