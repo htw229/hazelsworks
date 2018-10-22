@@ -15,7 +15,7 @@ DIALOGUE_OPTION_CHOICES = [
 
 class BritpickForm(forms.Form):
     text = forms.CharField(
-        label=STRINGS.BRITPICKFORM_TEXT_LABEL,
+        label='',
         widget=forms.Textarea,
         max_length=100000,
     )
@@ -23,7 +23,7 @@ class BritpickForm(forms.Form):
     dialect = forms.ChoiceField(
         label=STRINGS.BRITPICKFORM_DIALECT_LABEL,
         choices= [(dialect.pk, dialect.name) for dialect in Dialect.objects.all().order_by('name')],
-        widget=forms.RadioSelect
+        # widget=forms.RadioSelect
     )
 
     replacement_categories = forms.MultipleChoiceField(
@@ -35,7 +35,7 @@ class BritpickForm(forms.Form):
     dialogue_option = forms.ChoiceField(
         label=STRINGS.BRITPICKFORM_DIALOGUE_LABEL,
         choices=DIALOGUE_OPTION_CHOICES,
-        widget = forms.RadioSelect,
+        # widget = forms.RadioSelect,
     )
 
 

@@ -96,6 +96,7 @@ def britpick_view(request):
 
 
 def topicslist_view(request):
+    debug = Debug()
 
     topics = Topic.objects.filter(maintopic=True).order_by('name')
 
@@ -103,7 +104,7 @@ def topicslist_view(request):
         'pagetitle': 'Topics',
         'template': 'topicslist_page.html',
         'topics': topics,
-        'debug': '',
+        'debug': debug.html,
         
         'csspage': 'topicslistpage',
     }
@@ -112,6 +113,7 @@ def topicslist_view(request):
 
 
 def topic_view(request, topicslug):
+    debug = Debug()
 
     # responsedata is dict that contains topic (obj), topichtml (html), searchstrings (object list), debug (as html)
     responsedata = {
@@ -119,7 +121,7 @@ def topic_view(request, topicslug):
         'topic': None,
         'topichtml': 'Topic not found',
         'searchwords': None,
-        'debug': '',
+        'debug': debug.html,
         
         'csspage': 'topicpage',
     }
@@ -185,15 +187,15 @@ def search_view(request):
 
 
 def word_view(request, replacementpk):
+    debug = Debug()
+
     responsedata = {
         'pagetitle': 'Word not found',
-        'topic': None,
-        # 'topichtml': 'Word not found',
         'template': 'word_page.html',
-        'debug': '',
-        
-        'adminlink': '',
         'csspage': 'word-page',
+
+        'debug': debug.html,
+        'adminlink': '',
     }
 
     try:
@@ -209,16 +211,19 @@ def word_view(request, replacementpk):
 
 
 def references_view(request):
+    debug = Debug()
 
     references = Reference.objects.filter(mainreference=True).order_by('name')
 
     responsedata = {
         'pagetitle': 'References',
         'template': 'references_page.html',
-        'references': references,
-        'debug': '',
-        
         'csspage': 'references-page',
+
+        'references': references,
+        'debug': debug.html,
+        
+
     }
 
     return render(request, 'master_template.html', responsedata)
@@ -226,30 +231,42 @@ def references_view(request):
 
 
 def about_view(request):
+    debug = Debug()
 
     responsedata = {
         'pagetitle': 'About',
         'template': 'about_page.html',
-        'debug': '',
-        
         'csspage': 'about-page',
+        'debug': debug.html,
+
     }
 
     return render(request, 'master_template.html', responsedata)
 
 
 def suggestion_view(request, objclass = None, objpk = None):
-
+    debug = Debug()
     responsedata = {
         'pagetitle': 'Suggestion',
         'template': 'suggestion_page.html',
-        'debug': '',
+        'debug': debug.html,
         
         'csspage': 'suggestion-page',
     }
 
     return render(request, 'master_template.html', responsedata)
 
+
+def database_view(request):
+    debug = Debug()
+    responsedata = {
+        'pagetitle': 'Database',
+        'template': 'database_page.html',
+        'debug': debug.html,
+        'csspage': '',
+    }
+
+    return render(request, 'master_template.html', responsedata)
 
 def duplicates_view(request):
     objects = Replacement.objects.all()
@@ -278,6 +295,3 @@ def duplicates_view(request):
     return render(request, 'britpick_findduplicates.html', responsedata)
 
 
-def debugdatabase_view(request):
-
-    return

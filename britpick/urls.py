@@ -22,8 +22,9 @@ from app import views
 urlpatterns = [
     url(r'^admin/', admin.site.urls, name='admin'),
     url(r'^britpick/findduplicates/', views.duplicates_view, name='britpick_findduplicates.html'),
+    url(r'^database/', views.database_view, name='database'),
 
-    url(r'^robots.txt', views.robotstxt, name='robots.txt'),
+    url(r'^robots.txt', views.robotstxt),
 
     path(r'suggestion/<objclass>/<int:objpk>/', views.suggestion_view, name='objsuggestion'),
     url(r'^suggestion/', views.suggestion_view, name='suggestion'),
@@ -35,7 +36,7 @@ urlpatterns = [
     url(r'^search/', views.search_view, name='search'),
 
     path(r'topics/<slug:topicslug>/', views.topic_view, name='topic'),
-    path(r'topics/<slug:topicslug>', views.topic_view,),
+    path(r'topics/<slug:topicslug>', views.topic_view,), # without this, above will redirect to topicslist if no slash
     url(r'^topics/', views.topicslist_view, name='topicslist'),
 
     url(r'^$', views.britpick_view, name='britpick'),

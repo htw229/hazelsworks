@@ -1,6 +1,6 @@
 BRITPICKFORM_TEXT_LABEL = 'Text'
 BRITPICKFORM_DIALECT_LABEL = 'Dialect'
-BRITPICKFORM_REPLACEMENTCATEGORIES_LABEL = 'Search for words marked as'
+BRITPICKFORM_REPLACEMENTCATEGORIES_LABEL = 'Include britpicks that are'
 # BRITPICKFORM_REPLACEMENTCATEGORIES_CHOICES = [
 #     ('mandatory', 'mandatory'),
 #     ('suggested', 'suggested'),

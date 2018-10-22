@@ -1,10 +1,24 @@
 
-<form action="/britpick/search/" method="post">
+<form action="{% url 'search' %}" method="post">
     {% csrf_token %}
     {{  form }}
     <input type="submit" value="Submit">
 </form>
 <p>Hint: if searching for compound word, try adding dash between them; for example, if you want formalwear, search for 'formal-wear' will get you the best results; also try just searching for part of the term, such as 'formal'; if you think it should still show up and it's not, try just putting your search term in the 'Britpick' text field - this will get the best results of your search is for an american word</p>
+
+<script>
+  (function() {
+    var cx = '010189231001767014157:knultjcjkgm';
+    var gcse = document.createElement('script');
+    gcse.type = 'text/javascript';
+    gcse.async = true;
+    gcse.src = 'https://cse.google.com/cse.js?cx=' + cx;
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(gcse, s);
+  })();
+</script>
+<gcse:searchbox-only></gcse:searchbox-only>
+
 {% if results.search %}
 <p><b>{{ results.search }}</b></p>
     {% if results.error %}

@@ -68,6 +68,7 @@ ul {
     margin: 0;
     padding: 0;
     line-height: 110%;
+    font-size: 80%;
 }
 
 li {
@@ -176,6 +177,21 @@ textarea {
     width: 100%;
     height: 33%;
     resize: none;
+}
+
+.form-container {
+    width: 100%;
+}
+
+.form-row {
+
+}
+
+.form-container li {
+    display:inline;
+}
+
+.output-container {
 }
 
 /*--------------------------------------------*/

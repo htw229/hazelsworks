@@ -1,17 +1,36 @@
 {% load custom_tags %}
 
 
+<div class="form-container">
 <form action="{% url 'britpick' %}" method="post">
     {% csrf_token %}
 
-    {{ form }}
+    <div class="form-row">
+        {{ form.text }}
+        {{ form.text.errors }}
+    </div>
 
-    <input type="submit" value="Submit">
+    <div class="form-row">
+        {{ form.dialect }}
+        {{ form.dialect.errors }}
+
+        {{ form.dialogue_option }}
+        {{ form.dialogue_option.errors }}
+
+        {{ form.replacement_categories }}
+        {{ form.replacement_categories.errors }}
+    </div>
+
+    <div class="form-row">
+        <input type="submit" value="Submit">
+    </div>
+
 </form>
+</div>
 
 
 
-
+<div class="output-container">
 {% if forminput %}
 
     <h2>Britpicked</h2>
@@ -29,3 +48,4 @@
     </div>
 
 {% endif %}
+</div>

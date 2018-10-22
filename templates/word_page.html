@@ -1,12 +1,10 @@
 
 <div class="worddata">
-{% if user.is_superuser %}
-    <p><a href="{% url 'britpick' %}?id={{ replacement.pk }}">test</a></p>
-{% endif %}
+
     <p>Dialect: {{ replacement.dialect.name }}</p>
     <p>Category: {{ replacement.category.name }}</p>
 
-    <p>Search for: {{ replacement.searchwordstring }} {% if replacement.excludedwordstring %}(not: {{ replacement.excludedwordstring }}){% endif %}</p>
+    <p>Search for: {{ replacement.searchwordstring }} {% if replacement.excludedwordstring %}(not: {{ replacement.excludedwordstring }}){% endif %} {% if user.is_superuser %} <a href="{% url 'britpick' %}?id={{ replacement.pk }}">test</a> {% endif %}</p>
 
     {% if replacement.replacementsstring %}
         <p>Replace with: {{ replacement.replacementsstring }}</p>
