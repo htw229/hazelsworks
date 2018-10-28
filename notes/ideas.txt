@@ -140,6 +140,57 @@ topics
 
 
 
+"to be pissed" means to be drunk
+"to be on the piss" means to be out getting drunk
+telling someone to "piss off" means they should go away
+"to be pissed off" has the same meaning as it does in America which is to be annoyed with someone
+"to piss about" is to be silly or mess around
+"to take the piss out of" someone is to make fun of or tease them
+
+
+
+
+
+
+2nd level words
+words that have specific pages (sod, piss, bollocks, quite), direct link from either text itself or ???
+
+
+
+
+- change yorkshire to northern?
+
+
+- add quick reference (put URL in comment or text and it automatically creates reference and adds it to list)
+- add url to words themselves (caution with this one?)
+
+- get rid of suggestreplacement (merge into 1st consider)
+- references - make URL unique=True
+
+
+topics
+- "word" (examples, italics)
+- ""quoted text""
+- lists?
+- > (tab)
+- [url] (put in URL, will make link to that url without adding formal entry in references?)
+- preserve multiple linespaces
+
+
+database stuff
+- references that aren't used
+- topics that don't have links anywhere
+- lack of content
+
+
+
+Offensiveness
+* Mild
+** Medium
+*** Strong
+**** Strongest
+
+
 
 
 
