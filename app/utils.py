@@ -1,7 +1,9 @@
 from urllib.parse import unquote
 
-from .models import Dialect, Replacement, Reference, ReplacementCategory
+from .models import Dialect, Replacement, Reference, ReplacementCategory, Topic
 from .debug import Debug as DebugClass
+import re
+from __init__ import *
 
 debug = DebugClass()
 
@@ -15,6 +17,26 @@ def saveall():
         i += 1
     print('done')
 
+
+
+def updatetopiccitations(topicpk):
+    topic = Topic.objects.get(pk=topicpk)
+    text = topic.text
+
+    citationpattern = r"(?<=[\<\[])(?P<pk>\d+)(?=[\:\]])"
+
+    for match in re.finditer(citationpattern, topic.text):
+        pk = match.groupdict()['pk']
+        try:
+            reference = Reference.objects.get(pk=pk)
+            if reference not in topic.citations.all():
+                topic.citations.add(reference)
+        except ObjectDoesNotExist:
+            continue
+
+    topic.save()
+
+    print(str(Topic.objects.get(pk=topicpk).citations.all()))
 
 
 def fixsearchstrings():

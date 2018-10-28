@@ -20,6 +20,7 @@ def britpicktopic(topic):
     citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
     text = replacecitations(text, citationpattern)
     text = replacecitationswithquotes(text)
+
     text = linebreakstoparagraphs(text)
 
     responsedata = {
@@ -94,3 +95,44 @@ def getcitationlinkhtml(citationpk, citationtemplate = '%s'):
         citationlink = '[citation missing]'
 
     return citationlink
+
+
+def parsetopictext(topic):
+
+    text = topic.text
+
+    if 'http' in topic.text:
+
+        pattern = r"(?<=[\<\[])(?:(?P<name>.+)\:|)(?P<url>https?\:\/\/[^\s]+)(?=[\:\]])"
+        for match in re.finditer(pattern, topic.text):
+            m = match.groupdict()
+
+            if not m['url']:
+                continue
+            try:
+                reference = Reference.objects.get(url=m['url'])
+            except ObjectDoesNotExist:
+                reference = Reference(url=m['url'])
+
+                if m['name']:
+                    reference.name = m['name']
+
+                reference.save()
+
+            text = text.replace(match.group(0), str(reference.pk))
+
+
+# def addtopiccitations(topic):
+#
+#     citationpattern = r"(?<=[\<\[])(?P<pk>\d+)(?=[\:\]])"
+#
+#     for match in re.finditer(citationpattern, topic.text):
+#         pk = match.groupdict()['pk']
+#         try:
+#             reference = Reference.objects.get(pk=pk)
+#             if reference not in topic.citations.all():
+#                 topic.citations.add(reference)
+#         except ObjectDoesNotExist:
+#             continue
+
+    # return topic

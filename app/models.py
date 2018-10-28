@@ -1,9 +1,15 @@
 from django.db import models
 from django.template.defaultfilters import slugify
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 from picklefield.fields import PickledObjectField
+
+import re
 
 import htmlutils
 import searchwords
+import fetchreference
 from __init__ import *
 
 
@@ -24,7 +30,7 @@ class ReplacementExplanation(models.Model):
 
 
 class Reference(models.Model):
-    name = models.CharField(max_length=300)
+    name = models.CharField(max_length=300, blank=True, null=True)
     adminname = models.CharField(max_length=100, blank=True, null=True)
     url = models.URLField(blank=True, null=True)
     mainreference = models.BooleanField(default=False)
@@ -36,6 +42,8 @@ class Reference(models.Model):
         s += '</a>'
         return s
 
+
+
     def __str__(self):
         if self.adminname:
             s = self.adminname
@@ -43,6 +51,57 @@ class Reference(models.Model):
             s = self.name
         s += ' [' + str(self.pk) + ']'
         return s
+
+    def save(self, *args, **kwargs):
+        if not self.name or not self.adminname:
+            title = self.name
+
+            if not title:
+                title = fetchreference.fetchreferencetitle(self.url)
+
+            s = []
+            for divider in ['-', '|', '·', ':']:
+                s = title.split(' ' + divider + ' ')
+
+                if len(s) > 1:
+                    break
+
+            # s = title.split(' - ')
+            # if not len(s) > 1:
+            #     s = title.split(' | ')
+            # if not len(s) > 1:
+            #     s = title.split(' · ')
+            try:
+                pagename = s[0].strip()
+                sitename = s[1].strip()
+
+                name = pagename + ' (' + sitename + ')'
+                adminname = sitename + ' -  ' + pagename
+
+                self.adminname = sitename + ' - ' + pagename
+            except IndexError:
+                name = title.strip()
+                adminname = title.strip()
+
+            if not self.name:
+                self.name = name
+
+            if not self.adminname and self.name != adminname:
+                self.adminname = adminname
+
+
+            # if not self.adminname:
+            #     s = self.name.split(' - ')
+            #     if not len(s) > 1:
+            #         s = self.name.split(' | ')
+            #     try:
+            #         sitename = s[1]
+            #         pagename = s[0]
+            #         self.adminname = sitename + ' - ' + pagename
+            #     except IndexError:
+            #         pass
+
+        super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['adminname']
@@ -90,11 +149,87 @@ class Topic(models.Model):
     def save(self, *args, **kwargs):
         self.text = htmlutils.replacecurlyquotes(self.text)
 
+        if 'http' in self.text:
+            text = self.text
+            pattern = r"(?<=[\<\[])(?:(?P<name>.+)\:|)(?P<url>https?\:\/\/[^\s]+)(?=[\:\]])"
+            for match in re.finditer(pattern, self.text):
+                m = match.groupdict()
+
+                if not m['url']:
+                    continue
+                try:
+                    reference = Reference.objects.get(url=m['url'])
+                except ObjectDoesNotExist:
+                    reference = Reference(url=m['url'])
+
+                    if m['name']:
+                        reference.name = m['name']
+
+                    reference.save()
+
+                text = text.replace(match.group(0), str(reference.pk))
+
+        self.text = text
         super().save(*args, **kwargs)
 
 
     class Meta:
         ordering = ['name']
+
+
+# must be done after save to successfully add m2m relationship
+# @receiver(post_save, sender = Topic, dispatch_uid='update_citations_on_save')
+# def update_citations_on_save(sender, **kwargs):
+#     topic = kwargs['instance']
+#     text = topic.text
+#
+#     if 'http' in topic.text:
+#
+#         pattern = r"(?<=[\<\[])(?:(?P<name>.+)\:|)(?P<url>https?\:\/\/[^\s]+)(?=[\:\]])"
+#         for match in re.finditer(pattern, topic.text):
+#             m = match.groupdict()
+#
+#             if not m['url']:
+#                 continue
+#             try:
+#                 reference = Reference.objects.get(url=m['url'])
+#             except ObjectDoesNotExist:
+#                 reference = Reference(url=m['url'])
+#
+#                 if m['name']:
+#                     reference.name = m['name']
+#
+#                 reference.save()
+#
+#             text = text.replace(match.group(0), str(reference.pk))
+#
+#         Topic.objects.filter(pk=topic.pk).update(text=text)
+            # topic.citations.add(reference)
+
+
+
+    # citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
+    #
+    # for match in re.finditer(citationpattern, topic.text):
+    #     pk = match.groupdict()['pk']
+    #     try:
+    #         reference = Reference.objects.get(pk=pk)
+    #         if reference not in topic.citations.all():
+    #             Topic.objects.get(pk=65).citations.add(reference)
+    #             # text += 'adding' + str(reference)
+    #             # text += str(topic.citations.all())
+    #     except ObjectDoesNotExist:
+    #         continue
+    #
+    # text += 'BEFORE SAVE:' + str(Topic.objects.get(pk=topic.pk).citations.all())
+    #
+    # # use instead of 'save' to prevent loop
+    # Topic.objects.filter(pk=topic.pk).update(text=text)
+    #
+    # text += 'AFTER SAVE:' + str(Topic.objects.get(pk=topic.pk).citations.all())
+
+    # Topic.objects.filter(pk=topic.pk).update(text=text)
+
 
 #TODO: inline replacement, explanation before clarification; add link if only has topic
 

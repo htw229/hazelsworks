@@ -140,3 +140,42 @@ def searchwordformat(inputstring, title=False, markup=Explain_Markup, replacedas
         s = titlecase(s)
 
     return s
+
+#
+# def replacematch(match, replacement, text):
+#     text = text[:match.start() + addedtextlength] + replacementtext + text[match.end() + addedtextlength:]
+#     addedtextlength += len(replacementtext) - len(match.group())
+#
+#     return text
+
+
+def convertmarkup():
+    markups = [
+        {
+            'opentag': '*',
+            'closetag': '*',
+            'wrapper': 'div',
+            'class': 'emphasis',
+        },
+    ]
+
+    # TODO: create markup for emphasis * and all caps into headers and lists and automatic example text
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
