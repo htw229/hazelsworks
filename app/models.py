@@ -31,7 +31,12 @@ class ReplacementExplanation(models.Model):
 
 class Reference(models.Model):
     name = models.CharField(max_length=300, blank=True, null=True)
+
+    sitename = models.CharField(max_length=100, blank=True, null=True)
+    pagename = models.CharField(max_length=300, blank=True, null=True)
+
     adminname = models.CharField(max_length=100, blank=True, null=True)
+
     url = models.URLField(blank=True, null=True)
     mainreference = models.BooleanField(default=False)
 
@@ -45,6 +50,9 @@ class Reference(models.Model):
 
 
     def __str__(self):
+
+
+
         if self.adminname:
             s = self.adminname
         else:
@@ -169,7 +177,7 @@ class Topic(models.Model):
 
                 text = text.replace(match.group(0), str(reference.pk))
 
-        self.text = text
+            self.text = text
         super().save(*args, **kwargs)
 
 

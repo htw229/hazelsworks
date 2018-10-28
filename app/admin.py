@@ -13,15 +13,33 @@ from .models import ReplacementExplanation
 admin.site.register(ReplacementExplanation)
 
 from .models import Replacement
-admin.site.register(Replacement)
+
 
 from .models import Topic
+from .models import Reference
+from .models import ReplacementCategory
+
+# class ReferencesInline(admin.StackedInline):
+#     model = Reference
+#     filter_horizontal = ('name',)
+
 
 class TopicAdmin(admin.ModelAdmin):
+    list_display = ('name', 'maintopic', 'active')
+    list_filter = ('active',)
+    ordering = ('name',)
+
+    save_on_top = True
+    # list_display =
+    filter_horizontal = ('citations', 'relatedtopics')
+
+    # inlines = [ReferencesInline]
+
     formfield_overrides = {
         models.TextField: {'widget': Textarea(attrs={'rows':75, 'cols': 75})},
         # models.ManyToManyField: {'widget': CheckboxSelectMultiple(attrs={'size': '10'})},
     }
+
 
     def get_form(self, request, obj=None, **kwargs):
         form = super(TopicAdmin, self).get_form(request, obj, **kwargs)
@@ -51,13 +69,33 @@ class TopicAdmin(admin.ModelAdmin):
             pass
 
 
+
+
+class ReplacementAdmin(admin.ModelAdmin):
+    list_display = ('title', 'dialect', 'active')
+    list_filter = ('active', 'category', 'verified', 'dialect')
+    # ordering = ('name',)
+
+    save_on_top = True
+    # list_display =
+    filter_horizontal = ('topics',)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # TODO: add edit link to references for debug users
 
-
 admin.site.register(Topic, TopicAdmin)
-
-from .models import Reference
 admin.site.register(Reference)
-
-from .models import ReplacementCategory
 admin.site.register(ReplacementCategory)
+admin.site.register(Replacement, ReplacementAdmin)
