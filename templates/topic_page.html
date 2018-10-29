@@ -22,11 +22,11 @@
 {%  endif %}
 
 
-{% if citations %}
+{% if references %}
     <h3>References</h3>
     <ul>
-        {% for citation in citations %}
-            <li>{{ citation.link|safe }}</li>
+        {% for reference in references %}
+            <li>{{ reference.link|safe }}</li>
         {% endfor %}
     </ul>
 {%  endif %}

@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.forms import Textarea, CheckboxSelectMultiple
 from django.db import models
 from __init__ import *
-# from .britpicktopic import parsetopictext, addtopiccitations
+# from .britpicktopic import parsetopictext, addtopicreferences
 import re
 
 # Register your models here.
@@ -23,6 +23,14 @@ from .models import ReplacementCategory
 #     model = Reference
 #     filter_horizontal = ('name',)
 
+class ReferenceAdmin(admin.ModelAdmin):
+    list_display = ('name', 'sitename', 'pagename', 'mainreference', 'url')
+    list_filter = ('mainreference', 'sitename')
+    # ordering = ('name',)
+
+    save_on_top = True
+    # list_display =
+    # filter_horizontal = ('topics',)
 
 class TopicAdmin(admin.ModelAdmin):
     list_display = ('name', 'maintopic', 'active')
@@ -31,7 +39,7 @@ class TopicAdmin(admin.ModelAdmin):
 
     save_on_top = True
     # list_display =
-    filter_horizontal = ('citations', 'relatedtopics')
+    filter_horizontal = ('references', 'relatedtopics', 'minorreferences')
 
     # inlines = [ReferencesInline]
 
@@ -44,7 +52,7 @@ class TopicAdmin(admin.ModelAdmin):
     def get_form(self, request, obj=None, **kwargs):
         form = super(TopicAdmin, self).get_form(request, obj, **kwargs)
         form.base_fields['text'].widget.attrs['style'] = 'height: 600px'
-        # form.base_fields['citations'].widget.attrs['style'] = 'height: 600px;'
+        # form.base_fields['references'].widget.attrs['style'] = 'height: 600px;'
         # form.base_fields['relatedtopics'].widget.attrs['style'] = 'height: 400px;'
         return form
 
@@ -54,14 +62,25 @@ class TopicAdmin(admin.ModelAdmin):
 
         try:
             topic = Topic.objects.get(pk=form.instance.id)
-            citationpattern = r"(?<=[\<\[])(?P<pk>\d+)(?=[\:\]])"
 
-            for match in re.finditer(citationpattern, topic.text):
+            referencepattern = r"(?<=[\<])(?P<pk>\d+)(?:\:)"
+            for match in re.finditer(referencepattern, topic.text):
                 pk = match.groupdict()['pk']
                 try:
                     reference = Reference.objects.get(pk=pk)
-                    if reference not in topic.citations.all():
-                        topic.citations.add(reference)
+                    if reference not in topic.references.all():
+                        topic.references.add(reference)
+                except ObjectDoesNotExist:
+                    continue
+
+            # minor references
+            referencepattern = r"(?<=\[)(?P<pk>\d+)(?:\])"
+            for match in re.finditer(referencepattern, topic.text):
+                pk = match.groupdict()['pk']
+                try:
+                    reference = Reference.objects.get(pk=pk)
+                    if reference not in topic.references.all() and reference not in topic.minorreferences.all():
+                        topic.minorreferences.add(reference)
                 except ObjectDoesNotExist:
                     continue
 
@@ -78,7 +97,7 @@ class ReplacementAdmin(admin.ModelAdmin):
 
     save_on_top = True
     # list_display =
-    filter_horizontal = ('topics',)
+    filter_horizontal = ('topics', 'references',)
 
 
 
@@ -96,6 +115,6 @@ class ReplacementAdmin(admin.ModelAdmin):
 # TODO: add edit link to references for debug users
 
 admin.site.register(Topic, TopicAdmin)
-admin.site.register(Reference)
+admin.site.register(Reference, ReferenceAdmin)
 admin.site.register(ReplacementCategory)
 admin.site.register(Replacement, ReplacementAdmin)

@@ -17,16 +17,16 @@ def britpicktopic(topic):
     text = topic.text
 
 
-    citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
-    text = replacecitations(text, citationpattern)
-    text = replacecitationswithquotes(text)
+    referencepattern = r"[\[\{](?P<pk>\d+)[\}\]]"
+    text = replacereferences(text, referencepattern)
+    text = replacereferenceswithquotes(text)
 
     text = linebreakstoparagraphs(text)
 
     responsedata = {
         'topic': topic,
         'topichtml': text,
-        'citations': topic.citations.all(),
+        'references': topic.references.all(),
         'searchwordobjects': Replacement.objects.filter(topics__pk=topic.pk),
         'debug': debug.html,
         'showdebug': True,
@@ -36,7 +36,7 @@ def britpicktopic(topic):
     return responsedata
 
 
-def replacecitations(inputtext, templatepattern):
+def replacereferences(inputtext, templatepattern):
     global debug
 
     text = inputtext
@@ -44,29 +44,29 @@ def replacecitations(inputtext, templatepattern):
     pattern = re.compile(templatepattern)
 
     for match in pattern.finditer(inputtext):
-        citationpk = int(match.group('pk'))
+        referencepk = int(match.group('pk'))
 
         try:
-            citation = Reference.objects.get(pk=citationpk)
+            reference = Reference.objects.get(pk=referencepk)
 
-            # citationlink = citation.link
+            # referencelink = reference.link
             if '[' in match.group():
-                citationlink = getlinkhtml(citation.url, '[x]', citation.name)
+                referencelink = getlinkhtml(reference.url, '[x]', reference.liststring)
             elif '{' in match.group():
-                citationlink = getlinkhtml(citation.url, citation.name)
+                referencelink = getlinkhtml(reference.url, reference.name)
             else:
-                citationlink = '[incorrect markup]'
+                referencelink = '[incorrect markup]'
         except ObjectDoesNotExist:
-            citationlink = '[citation missing]'
+            referencelink = '[reference missing]'
 
-        replacetext = addspan(citationlink, 'citation-inline')
+        replacetext = addspan(referencelink, 'reference-inline')
         text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
         addedtextlength += len(replacetext) - len(match.group())
 
     return text
 
 
-def replacecitationswithquotes(inputtext):
+def replacereferenceswithquotes(inputtext):
     global debug
 
     text = inputtext
@@ -74,27 +74,27 @@ def replacecitationswithquotes(inputtext):
     pattern = re.compile(r"<(?P<pk>\d+):(?P<text>(.|\n)*?)>")
 
     for match in pattern.finditer(inputtext):
-        citationpk = int(match.group('pk'))
-        citationhtml = "From %s:\r\n" % getcitationlinkhtml(citationpk)
+        referencepk = int(match.group('pk'))
+        referencehtml = "From %s:\r\n" % getreferencelinkhtml(referencepk)
 
         quotedtext = addspan('\r\n' + match.group('text'), cssclass='quoted', tagname='div')
 
-        replacetext = citationhtml + quotedtext
+        replacetext = referencehtml + quotedtext
         text = text[:match.start() + addedtextlength] + replacetext + text[match.end() + addedtextlength:]
         addedtextlength += len(replacetext) - len(match.group())
 
     return text
 
 
-def getcitationlinkhtml(citationpk, citationtemplate = '%s'):
+def getreferencelinkhtml(referencepk, referencetemplate = '%s'):
     try:
-        citation = Reference.objects.get(pk=citationpk)
-        citationlink = getlinkhtml(citation.url, citationtemplate % citation.name)
+        reference = Reference.objects.get(pk=referencepk)
+        referencelink = getlinkhtml(reference.url, referencetemplate % reference.liststring, reference.liststring)
 
     except ObjectDoesNotExist:
-        citationlink = '[citation missing]'
+        referencelink = '[reference missing]'
 
-    return citationlink
+    return referencelink
 
 
 def parsetopictext(topic):
@@ -122,16 +122,16 @@ def parsetopictext(topic):
             text = text.replace(match.group(0), str(reference.pk))
 
 
-# def addtopiccitations(topic):
+# def addtopicreferences(topic):
 #
-#     citationpattern = r"(?<=[\<\[])(?P<pk>\d+)(?=[\:\]])"
+#     referencepattern = r"(?<=[\<\[])(?P<pk>\d+)(?=[\:\]])"
 #
-#     for match in re.finditer(citationpattern, topic.text):
+#     for match in re.finditer(referencepattern, topic.text):
 #         pk = match.groupdict()['pk']
 #         try:
 #             reference = Reference.objects.get(pk=pk)
-#             if reference not in topic.citations.all():
-#                 topic.citations.add(reference)
+#             if reference not in topic.references.all():
+#                 topic.references.add(reference)
 #         except ObjectDoesNotExist:
 #             continue
 

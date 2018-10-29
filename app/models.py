@@ -35,84 +35,122 @@ class Reference(models.Model):
     sitename = models.CharField(max_length=100, blank=True, null=True)
     pagename = models.CharField(max_length=300, blank=True, null=True)
 
-    adminname = models.CharField(max_length=100, blank=True, null=True)
+    # adminname = models.CharField(max_length=100, blank=True, null=True)
 
     url = models.URLField(blank=True, null=True)
     mainreference = models.BooleanField(default=False)
+    # minorreference = models.BooleanField(default=False)
 
     @property
     def link(self) -> str:
         s = '<a href="' + self.url + '"><img class="external-link" src="/static/flag.png">'
-        s += self.name
+        s += self.liststringorurl
         s += '</a>'
         return s
 
+    @property
+    def inlinestring(self) -> str:
+        s = self.pagename
+        if self.sitename:
+            s += ' (' + self.sitename + ')'
+        return s
+
+    @property
+    def liststring(self) -> str:
+        if self.pagename == self.sitename:
+            s = self.pagename
+        elif self.pagename and self.sitename:
+            s = self.sitename + ' - ' + self.pagename
+        elif self.pagename:
+            s = self.pagename
+        elif self.sitename:
+            s = self.sitename
+        else:
+            s = 'link'
+
+        return s
+
+    @property
+    def liststringorurl(self) -> str:
+        if self.pagename and self.sitename:
+            s = self.sitename + ' - ' + self.pagename
+        elif self.pagename:
+            s = self.pagename
+        else:
+            s = self.url
+
+        return s
+
+    @property
+    def adminliststring(self) -> str:
+        return self.liststring[:50]
 
 
     def __str__(self):
 
-
-
-        if self.adminname:
-            s = self.adminname
-        else:
-            s = self.name
-        s += ' [' + str(self.pk) + ']'
+        s = str(self.id) + ' | ' + self.liststring + ' | ' + self.url
+        # if self.adminname:
+        #     s = self.adminname
+        # else:
+        #     s = self.name
+        # s += ' [' + str(self.pk) + ']'
         return s
 
     def save(self, *args, **kwargs):
-        if not self.name or not self.adminname:
-            title = self.name
+        if not self.pagename and not self.sitename:
+        # if True:
+            pagetitle = fetchreference.fetchreferencetitle(self.url)
+            print()
+            print(pagetitle)
 
-            if not title:
-                title = fetchreference.fetchreferencetitle(self.url)
+            if 'error' in pagetitle.lower():
+                self.pagename = pagetitle
 
-            s = []
-            for divider in ['-', '|', '·', ':']:
-                s = title.split(' ' + divider + ' ')
+            else:
+                splittitle = []
 
-                if len(s) > 1:
-                    break
+                # page is listed first
+                for divider in [' | ', ' · ', ' : ', ' - ', '—', '--',]:
+                    if len(splittitle) > 1:
+                        break
 
-            # s = title.split(' - ')
-            # if not len(s) > 1:
-            #     s = title.split(' | ')
-            # if not len(s) > 1:
-            #     s = title.split(' · ')
-            try:
-                pagename = s[0].strip()
-                sitename = s[1].strip()
+                    splittitle = pagetitle.split(divider)
+                    if len(splittitle) > 2:
+                        self.pagename = splittitle.pop(0).strip()
+                        splittitle.reverse()
+                        self.sitename = ' - '.join(s.strip() for s in splittitle)
+                        break
+                    elif len(splittitle) > 1:
+                        self.pagename = splittitle[0].strip()
+                        self.sitename = splittitle[1].strip()
+                        break
 
-                name = pagename + ' (' + sitename + ')'
-                adminname = sitename + ' -  ' + pagename
+                # page is listed second
+                for divider in [': ']:
+                    if len(splittitle) > 1:
+                        break
 
-                self.adminname = sitename + ' - ' + pagename
-            except IndexError:
-                name = title.strip()
-                adminname = title.strip()
+                    splittitle = pagetitle.split(divider, 1)
+                    if len(splittitle) > 1:
+                        self.pagename = splittitle[1].strip()
+                        self.sitename = splittitle[0].strip()
+                        break
 
-            if not self.name:
-                self.name = name
+                if len(splittitle) < 2:
+                    self.pagename = pagetitle
 
-            if not self.adminname and self.name != adminname:
-                self.adminname = adminname
+                if 'reddit' in self.url.lower():
+                    self.sitename = 'r/' + self.sitename
 
+                self.name = self.liststring
 
-            # if not self.adminname:
-            #     s = self.name.split(' - ')
-            #     if not len(s) > 1:
-            #         s = self.name.split(' | ')
-            #     try:
-            #         sitename = s[1]
-            #         pagename = s[0]
-            #         self.adminname = sitename + ' - ' + pagename
-            #     except IndexError:
-            #         pass
+        if not self.name:
+            self.name = self.liststring
 
         super().save(*args, **kwargs)
 
     class Meta:
-        ordering = ['adminname']
+        ordering = ['sitename', 'pagename',]
 
 
 class Topic(models.Model):
@@ -120,8 +158,9 @@ class Topic(models.Model):
     maintopic = models.BooleanField(default=True)
 
     name = models.CharField(max_length=100)
-    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is citation pk) to add citation link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
-    citations = models.ManyToManyField(Reference, blank=True)
+    text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is reference pk) to add reference link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
+    references = models.ManyToManyField(Reference, blank=True)
+    minorreferences = models.ManyToManyField(Reference, blank=True, related_name='minor_references')
     relatedtopics = models.ManyToManyField("self", symmetrical=True, blank=True, help_text='back references are automatically created')
 
 
@@ -140,7 +179,7 @@ class Topic(models.Model):
     def hascontent(self) -> bool:
         if len(self.text) > 0:
             return True
-        if self.citations.count() > 0:
+        if self.references.count() > 0:
             return True
         return False
 
@@ -153,6 +192,8 @@ class Topic(models.Model):
         if not self.active:
             s += ' (INACTIVE)'
         return s
+
+
 
     def save(self, *args, **kwargs):
         self.text = htmlutils.replacecurlyquotes(self.text)
@@ -177,6 +218,7 @@ class Topic(models.Model):
 
                 text = text.replace(match.group(0), str(reference.pk))
 
+
             self.text = text
         super().save(*args, **kwargs)
 
@@ -184,59 +226,6 @@ class Topic(models.Model):
     class Meta:
         ordering = ['name']
 
-
-# must be done after save to successfully add m2m relationship
-# @receiver(post_save, sender = Topic, dispatch_uid='update_citations_on_save')
-# def update_citations_on_save(sender, **kwargs):
-#     topic = kwargs['instance']
-#     text = topic.text
-#
-#     if 'http' in topic.text:
-#
-#         pattern = r"(?<=[\<\[])(?:(?P<name>.+)\:|)(?P<url>https?\:\/\/[^\s]+)(?=[\:\]])"
-#         for match in re.finditer(pattern, topic.text):
-#             m = match.groupdict()
-#
-#             if not m['url']:
-#                 continue
-#             try:
-#                 reference = Reference.objects.get(url=m['url'])
-#             except ObjectDoesNotExist:
-#                 reference = Reference(url=m['url'])
-#
-#                 if m['name']:
-#                     reference.name = m['name']
-#
-#                 reference.save()
-#
-#             text = text.replace(match.group(0), str(reference.pk))
-#
-#         Topic.objects.filter(pk=topic.pk).update(text=text)
-            # topic.citations.add(reference)
-
-
-
-    # citationpattern = r"[\[\{](?P<pk>\d+)[\}\]]"
-    #
-    # for match in re.finditer(citationpattern, topic.text):
-    #     pk = match.groupdict()['pk']
-    #     try:
-    #         reference = Reference.objects.get(pk=pk)
-    #         if reference not in topic.citations.all():
-    #             Topic.objects.get(pk=65).citations.add(reference)
-    #             # text += 'adding' + str(reference)
-    #             # text += str(topic.citations.all())
-    #     except ObjectDoesNotExist:
-    #         continue
-    #
-    # text += 'BEFORE SAVE:' + str(Topic.objects.get(pk=topic.pk).citations.all())
-    #
-    # # use instead of 'save' to prevent loop
-    # Topic.objects.filter(pk=topic.pk).update(text=text)
-    #
-    # text += 'AFTER SAVE:' + str(Topic.objects.get(pk=topic.pk).citations.all())
-
-    # Topic.objects.filter(pk=topic.pk).update(text=text)
 
 
 #TODO: inline replacement, explanation before clarification; add link if only has topic
@@ -272,8 +261,8 @@ class Replacement(models.Model):
     explanations = models.ManyToManyField(ReplacementExplanation, blank=True)
     topics = models.ManyToManyField(Topic, blank=True)
 
-    # searchwords = models.TextField(blank=True, null=True)
-    # excludepatterns = models.TextField(blank=True, null=True)
+    references = models.ManyToManyField(Reference, blank=True)
+
     searchwords = PickledObjectField(null=True)
     excludepatterns = PickledObjectField(null=True)
 
