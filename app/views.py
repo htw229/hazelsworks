@@ -10,7 +10,8 @@ from django.template import RequestContext, Template
 
 from .forms import BritpickForm, BritpickfindwordForm, DIALOGUE_OPTION_CHOICES
 from .britpick import britpick
-from .britpicktopic import britpicktopic
+# from .topicpage import britpicktopic
+import topicpage
 from .models import Replacement, Topic, Reference, ReplacementCategory
 from .debug import Debug
 import search
@@ -128,10 +129,17 @@ def topic_view(request, topicslug):
 
     for topic in Topic.objects.all():
         if topicslug == topic.slug:
-            responsedata = britpicktopic(topic)
-            responsedata['pagetitle'] = topic.name
-            responsedata['template'] = 'topic_page.html'
-            responsedata['adminlink'] = reverse('admin:app_topic_change', args=(topic.pk,))
+            # responsedata = britpicktopic(topic)
+
+            responsedata = {
+                'topic': topic,
+                'topichtml': topicpage.topictexthtml(topic),
+                'references': topic.references.all(),
+                'searchwordobjects': Replacement.objects.filter(topics__pk=topic.pk),
+                'debug': debug.html,
+                'showdebug': True, 'pagetitle': topic.name,
+                'template': 'topic_page.html',
+                'adminlink': reverse('admin:app_topic_change', args=(topic.pk,))}
 
             break
 

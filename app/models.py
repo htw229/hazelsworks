@@ -157,15 +157,18 @@ class Topic(models.Model):
     active = models.BooleanField(default=True)
     maintopic = models.BooleanField(default=True)
 
-    name = models.CharField(max_length=100)
+
+    name = models.CharField(max_length=100, unique=True)
     text = models.TextField(blank=True, null=True, help_text='use [1] (where 1 is reference pk) to add reference link; [] will add [link] and {} will add title text only, <1:quoted text> will add quoted text')
+    relatedtopics = models.ManyToManyField("self", symmetrical=True, blank=True, help_text='back references are automatically created')
     references = models.ManyToManyField(Reference, blank=True)
     minorreferences = models.ManyToManyField(Reference, blank=True, related_name='minor_references')
-    relatedtopics = models.ManyToManyField("self", symmetrical=True, blank=True, help_text='back references are automatically created')
+
+    slug = models.CharField(max_length=100)
 
 
     @property
-    def slug(self) -> str:
+    def getslug(self) -> str:
         s = slugify(self.name)
         return s
 
@@ -218,8 +221,10 @@ class Topic(models.Model):
 
                 text = text.replace(match.group(0), str(reference.pk))
 
-
             self.text = text
+
+        self.slug = slugify(self.name)
+
         super().save(*args, **kwargs)
 
 
