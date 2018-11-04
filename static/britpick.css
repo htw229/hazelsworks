@@ -99,7 +99,7 @@ li {
 }
 
 .quote {
-    background-color: var(--lightgray);
+    background-color: var(--lightyellow);
 }
 
 /* links */
@@ -425,7 +425,21 @@ span.categorystring:hover {
 }
 
 .quoted {
-    margin-left: 5%;
+    /*margin-left: 2.5%;*/
+    /*padding: 0.1em 0.1em 0.1em 0.1em;*/
+    /*padding-top: 0.1em;*/
+    /*padding-bottom: 0.1em;*/
+    /*background-color: var(--lightgray);*/
+}
+
+.quoted p {
+    margin-left: 2.5%;
+    padding: 1em 1em 1em 1em;
+    background-color: var(--lightgray);
+}
+
+.quoted p.nobackground {
+    background-color: white;
 }
 
 .reference-inline {

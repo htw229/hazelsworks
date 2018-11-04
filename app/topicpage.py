@@ -54,8 +54,8 @@ def formathtml(inputtext) -> str:
     # prior to making list for simplicity of regex matching -
 
     # replace quotes (example quotes in {})
-    quotepattern = r"\{(.+)\}"
-    quotetemplate = r'"<span class="quote">\1</span>"'
+    quotepattern = r"\{(.+?)\}"
+    quotetemplate = r'<span class="quote">\1</span>'
     text = re.sub(quotepattern, quotetemplate, text)
 
     # list
@@ -86,6 +86,9 @@ def formathtml(inputtext) -> str:
 
     for emphasisformat in emphasisformats:
         text = re.sub(emphasisformat[0], emphasisformat[1], text)
+
+    text = text.replace("<p>...</p>", "<p class='nobackground'>&nbsp;</p>")
+    text = text.replace("<div class='quoted'></p>", "</p><div class='quoted'>")
 
     # for emphasispattern in emphasispatterns:
     #     text = re.sub(emphasispattern, emphasistemplate % r"\g<emphasistext>", text)
