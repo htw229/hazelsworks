@@ -14,30 +14,34 @@ def britpicktopic(topic):
 
     debug.add(['topic found: ', topic])
 
-    text = topic.text
-
-
-    referencepattern = r"[\[\{](?P<pk>\d+)[\}\]]"
-    text = replacereferences(text, referencepattern)
-    text = replacereferenceswithquotes(text)
-
-    text = linebreakstoparagraphs(text)
-
     responsedata = {
         'topic': topic,
-        'topichtml': text,
+        'topichtml': topictexthtml(topic.text),
         'references': topic.references.all(),
         'searchwordobjects': Replacement.objects.filter(topics__pk=topic.pk),
         'debug': debug.html,
         'showdebug': True,
     }
 
-
     return responsedata
 
 
-def replacereferences(inputtext, templatepattern):
+def topictexthtml(inputtext):
+    text = inputtext
+
+    text = replacereferences(text)
+    text = replacereferenceswithquotes(text)
+    text = linebreakstoparagraphs(text)
+
+    return text
+
+
+
+
+def replacereferences(inputtext):
     global debug
+
+    templatepattern = r"[\[\{](?P<pk>\d+)[\}\]]"
 
     text = inputtext
     addedtextlength = 0  # increment starting position after every replacement
@@ -122,17 +126,4 @@ def parsetopictext(topic):
             text = text.replace(match.group(0), str(reference.pk))
 
 
-# def addtopicreferences(topic):
-#
-#     referencepattern = r"(?<=[\<\[])(?P<pk>\d+)(?=[\:\]])"
-#
-#     for match in re.finditer(referencepattern, topic.text):
-#         pk = match.groupdict()['pk']
-#         try:
-#             reference = Reference.objects.get(pk=pk)
-#             if reference not in topic.references.all():
-#                 topic.references.add(reference)
-#         except ObjectDoesNotExist:
-#             continue
 
-    # return topic

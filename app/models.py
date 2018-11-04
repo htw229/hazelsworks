@@ -88,13 +88,13 @@ class Reference(models.Model):
 
     def __str__(self):
 
-        s = str(self.id) + ' | ' + self.liststring + ' | ' + self.url
+        # s = str(self.id) + ' | ' + self.liststring + ' | ' + self.url
         # if self.adminname:
         #     s = self.adminname
         # else:
         #     s = self.name
         # s += ' [' + str(self.pk) + ']'
-        return s
+        return self.name
 
     def save(self, *args, **kwargs):
         if not self.pagename and not self.sitename:

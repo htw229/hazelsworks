@@ -13,6 +13,7 @@ MARKUP = {
     'mine': ['his', 'hers', 'theirs', 'mine', 'ours'],
     'my': ['his', 'her', 'their', 'my', 'our',],
     'I': ['he', 'she', 'they', 'I', 'we', 'it',], # TODO: not working - see 100
+    'pronoun': ['he', 'she', 'they', 'I', 'we', 'it',],
     'possessive': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)"],
     'the': ['the', 'a', 'an', 'that', 'this', 'what', 'which',],
     'noun_preceding': ['my', 'our', 'your', 'his', 'her', 'its', r"(?<='s)", 'the', 'a', 'an', 'that', 'this', 'what', 'which',],
