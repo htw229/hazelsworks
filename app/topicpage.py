@@ -1,29 +1,17 @@
 from django.core.exceptions import ObjectDoesNotExist
 
+from bs4 import BeautifulSoup
+
 import re
 
 from app.models import Replacement, Topic, Reference
 from app.debug import Debug
 from app.htmlutils import addspan, linebreakstoparagraphs, getlinkhtml
 
+
+
 debug = None
 
-# def britpicktopic(topic):
-#     global debug
-#     debug = Debug()
-#
-#     debug.add(['topic found: ', topic])
-#
-#     responsedata = {
-#         'topic': topic,
-#         'topichtml': topictexthtml(topic.text),
-#         'references': topic.references.all(),
-#         'searchwordobjects': Replacement.objects.filter(topics__pk=topic.pk),
-#         'debug': debug.html,
-#         'showdebug': True,
-#     }
-#
-#     return responsedata
 
 
 def topictexthtml(topic):
@@ -32,17 +20,168 @@ def topictexthtml(topic):
 
     text = topic.text
 
-    text = replacereferences(text)
-    text = replacereferenceswithquotes(text)
-    # text = linebreakstoparagraphs(text)
+    text = formathtml2(text)
 
-    text = formathtml(text)
+    # text = replacereferences(text)
+    # text = replacereferenceswithquotes(text)
+    # # text = linebreakstoparagraphs(text)
+    #
+    # text = formathtml(text)
 
 
     # topic link [t3]
 
 
     return text
+
+def formathtml2(inputtext) -> str:
+    global debug
+
+    soup = BeautifulSoup()
+    debug.sectionbreak('debug')
+
+    # get sections
+    sectionpattern = re.compile(
+        r'(?P<excerpt>\<(?P<referencepk>\d+)\:(?P<excerptcontent>[^\>]*)\>)|\n(?P<header>[A-Z][^a-z\n]+)\n|\-{0,3} *(?P<example>"(?P<examplequote>.*?)"(?P<exampletrailer>.*?))\n|(?:(?P<l3>\-\-\-)|(?P<l2>\-\-)|(?P<l1>\-)) *(?P<listitem>.+)|(?P<p>.+)'
+    )
+
+    for match in sectionpattern.finditer(inputtext):
+        # debug.add(match.string)
+        groups = match.groupdict()
+
+        if groups['excerpt']:
+            # debug.add('EXCERPT', groups['referencepk'], groups['excerptcontent'])
+
+            p = soup.new_tag('p')
+            p.append(getreferencelink(groups['referencepk'], soup))
+            soup.append(p)
+
+            excerptdiv = soup.new_tag('div')
+            excerptdiv['class'] = 'quoted'
+
+            for paragraph in re.finditer('.+', groups['excerptcontent']):
+                p = soup.new_tag('p')
+                p.string = paragraph.group(0)
+                excerptdiv.append(p)
+
+            # excerptdiv.string = groups['excerptcontent']
+            soup.append(excerptdiv)
+
+        elif groups['header']:
+            # debug.add('HEADER', groups['header'])
+            p = soup.new_tag('p')
+            p['class'] = 'contentheader'
+            p.string = groups['header']
+            soup.append(p)
+
+        elif groups['example']:
+            # debug.add('EXAMPLE', groups['examplequote'])
+
+            # p = soup.new_tag('p')
+            # p['class'] = 'l2'
+            quote = soup.new_tag('span')
+            quote['class'] = 'quote'
+            quote.string = '"' + groups['examplequote'].strip() + '"'
+            # p.append(quote)
+            # p.append(groups['exampletrailer'])
+            p = createparagraph([quote, groups['exampletrailer']], soup, paragraphclass='l2')
+
+            debug.add('EXAMPLE')
+            debug.add('p.strings', [s for s in p.strings])
+
+            soup.append(p)
+
+        elif groups['listitem']:
+            # debug.add('LISTITEM', groups['listitem'])
+            p = soup.new_tag('p')
+            if groups['l1']:
+                p['class'] = 'l1'
+            elif groups['l2']:
+                p['class'] = 'l2'
+            elif groups['l3']:
+                p['class'] = 'l3'
+
+            p.string = groups['listitem']
+            soup.append(p)
+
+        elif groups['p']:
+            # debug.add('P', groups['p'])
+            p = soup.new_tag('p')
+            p.string = groups['p']
+            soup.append(p)
+
+
+
+    for p in soup.find_all('p'):
+
+
+        try:
+            if "[" in p.string:
+                p.string = 'FOUND REFERENCE'
+        except TypeError:
+            strings = [s for s in p.strings]
+            if "[" in strings[-1]:
+                strings[-1] = 'FOUND REFERENCE'
+            # pass
+
+
+    # divide excerpt into paragraphs
+
+    # parse tags within each paragraph
+
+    # inside sections, get paragraphs
+
+    # div - nothing, list, excerpt
+    # <> - start and end excerpt div
+    # - - paragraph with class tag for levels (instead of doing ul/li do css list)
+
+
+
+    s = soup.prettify()
+    s = s + debug.html
+
+    return s
+
+
+def createparagraph(contents, soup, paragraphclass=None):
+    if type(contents) != list:
+        contents = [contents]
+
+    p = soup.new_tag('p')
+    if paragraphclass:
+        p['class'] = paragraphclass
+
+    for c in contents:
+        if type(c) == str:
+            p.append('STRING' + c)
+        else:
+            p.append(c)
+
+    return p
+
+
+def gettexttags(inputtext, soup) -> list:
+    contentslist = []
+
+
+    return contentslist
+
+def getreferencelink(pk, soup):
+    a = soup.new_tag('a')
+
+    try:
+        reference = Reference.objects.get(pk=int(pk))
+        a['href'] = reference.url
+        a.string = '[x]'
+    except ObjectDoesNotExist:
+        a.string = '[reference not found]'
+
+    return a
+
+
+
+def getlines(inputtext) -> list:
+    return inputtext.split('\r\n')
 
 
 def formathtml(inputtext) -> str:

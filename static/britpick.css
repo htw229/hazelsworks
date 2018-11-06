@@ -56,7 +56,7 @@ h3 {
     font-weight: bold;
 }
 
-h4 {
+h4, .contentheader {
     font-size: 0.9em;
     -webkit-margin-before: 2.5em;
     -webkit-margin-after: 0.5em;
@@ -83,6 +83,18 @@ ul {
 li {
     font-size: 80%;
     margin-bottom: 1em;
+}
+
+.l1 {
+
+}
+
+.l2 {
+    margin-left: 5%;
+}
+
+.l3 {
+    margin-left: 10%;
 }
 
 .main-list {
