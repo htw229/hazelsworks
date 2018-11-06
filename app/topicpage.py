@@ -8,7 +8,8 @@ from app.models import Replacement, Topic, Reference
 from app.debug import Debug
 from app.htmlutils import addspan, linebreakstoparagraphs, getlinkhtml
 
-
+paragraphsforsectionbreak = 2
+emptyparagraphs = 0
 
 debug = None
 
@@ -52,16 +53,18 @@ def formathtml2(inputtext) -> str:
         if groups['excerpt']:
             # debug.add('EXCERPT', groups['referencepk'], groups['excerptcontent'])
 
-            p = soup.new_tag('p')
-            p.append(getreferencelink(groups['referencepk'], soup))
+            p = createparagraph('From {%s}:' % groups['referencepk'], soup)
+            # p = soup.new_tag('p')
+            # p.append(getreferencelink(groups['referencepk'], soup))
             soup.append(p)
 
             excerptdiv = soup.new_tag('div')
             excerptdiv['class'] = 'quoted'
 
             for paragraph in re.finditer('.+', groups['excerptcontent']):
-                p = soup.new_tag('p')
-                p.string = paragraph.group(0)
+                # p = soup.new_tag('p')
+                # p.string = paragraph.group(0)
+                p = createparagraph(paragraph.group(0), soup)
                 excerptdiv.append(p)
 
             # excerptdiv.string = groups['excerptcontent']
@@ -86,43 +89,47 @@ def formathtml2(inputtext) -> str:
             # p.append(groups['exampletrailer'])
             p = createparagraph([quote, groups['exampletrailer']], soup, paragraphclass='l2')
 
-            debug.add('EXAMPLE')
-            debug.add('p.strings', [s for s in p.strings])
+            # debug.add('EXAMPLE')
+            # debug.add('p.strings', [s for s in p.strings])
 
             soup.append(p)
 
         elif groups['listitem']:
             # debug.add('LISTITEM', groups['listitem'])
-            p = soup.new_tag('p')
+            # p = soup.new_tag('p')
             if groups['l1']:
-                p['class'] = 'l1'
+                # p['class'] = 'l1'
+                p = createparagraph(groups['listitem'], soup, paragraphclass='l1')
             elif groups['l2']:
-                p['class'] = 'l2'
+                # p['class'] = 'l2'
+                p = createparagraph(groups['listitem'], soup, paragraphclass='l2')
             elif groups['l3']:
-                p['class'] = 'l3'
+                # p['class'] = 'l3'
+                p = createparagraph(groups['listitem'], soup, paragraphclass='l3')
 
-            p.string = groups['listitem']
+            # p.string = groups['listitem']
             soup.append(p)
 
         elif groups['p']:
             # debug.add('P', groups['p'])
-            p = soup.new_tag('p')
-            p.string = groups['p']
+            # p = soup.new_tag('p')
+            # p.string = groups['p']
+            p = createparagraph(groups['p'], soup)
             soup.append(p)
 
 
 
-    for p in soup.find_all('p'):
-
-
-        try:
-            if "[" in p.string:
-                p.string = 'FOUND REFERENCE'
-        except TypeError:
-            strings = [s for s in p.strings]
-            if "[" in strings[-1]:
-                strings[-1] = 'FOUND REFERENCE'
-            # pass
+    # for p in soup.find_all('p'):
+    #
+    #
+    #     try:
+    #         if "[" in p.string:
+    #             p.string = 'FOUND REFERENCE'
+    #     except TypeError:
+    #         strings = [s for s in p.strings]
+    #         if "[" in strings[-1]:
+    #             strings[-1] = 'FOUND REFERENCE'
+    #         # pass
 
 
     # divide excerpt into paragraphs
@@ -144,6 +151,24 @@ def formathtml2(inputtext) -> str:
 
 
 def createparagraph(contents, soup, paragraphclass=None):
+    global emptyparagraphs
+
+    debug.add('contents', contents)
+
+    # todo: make this work
+    if not contents or contents == ' ':
+        debug.add('not contents')
+        emptyparagraphs += 1
+        if emptyparagraphs >= paragraphsforsectionbreak:
+            sectionbreakdiv = soup.new_tag('div')
+            sectionbreakdiv['class'] = 'sectionbreak'
+            emptyparagraphs = 0
+            return sectionbreakdiv
+        else:
+            return None
+    else:
+        emptyparagraphs = 0
+
     if type(contents) != list:
         contents = [contents]
 
@@ -152,19 +177,80 @@ def createparagraph(contents, soup, paragraphclass=None):
         p['class'] = paragraphclass
 
     for c in contents:
+        debug.add('c in contents', c)
         if type(c) == str:
-            p.append('STRING' + c)
+            debug.add(gettexttags(c))
+            p.append(gettexttags(c))
         else:
             p.append(c)
 
     return p
 
 
-def gettexttags(inputtext, soup) -> list:
-    contentslist = []
+def gettexttags(inputtext) -> BeautifulSoup:
 
+    texttagpattern = re.compile(r'(?:(?P<shortreference>\[)|(?P<longreference>\{))(?P<referencepk>\d+)(?:\]|\})|\[T(?P<topicpk>\d+)\]|""(?P<plainquote>.+?)""|"(?P<example>.+?)"')
 
-    return contentslist
+    html = inputtext
+
+    referencelinkhtml = r'<a href={href} class={classname} title={name}>{text}</a>'
+    # referencelinkhtmllong = r'<a href={href} class={classname} title={name}>{text}</a>'
+    referencenotfoundhtml = r'[missing link]'
+    topiclinkhtml = r'<a href={href} class={classname} title={name}>{text}</a>'
+    examplehtml = r'"<span class="quote">{text}</span>"'
+
+    # html = re.sub()
+
+    for match in texttagpattern.finditer(inputtext):
+        matchdict = match.groupdict()
+        replacementhtml = 'error'
+        if matchdict['referencepk']:
+            referencepk = int(matchdict['referencepk'])
+
+            try:
+                reference = Reference.objects.get(pk=referencepk)
+                if matchdict['shortreference']:
+                    text = '[x]'
+                else:
+                    text = reference.name
+                replacementhtml = referencelinkhtml.format(
+                    href=reference.url,
+                    name=reference.name,
+                    classname='referencelink',
+                    text=text,
+                )
+            except ObjectDoesNotExist:
+                replacementhtml = referencenotfoundhtml
+        elif matchdict['topicpk']:
+            topicpk = int(matchdict['topicpk'])
+            try:
+                topic = Topic.objects.get(pk=topicpk)
+                replacementhtml = topiclinkhtml.format(
+                    href=topic.slug,
+                    name=topic.name,
+                    classname='topiclink',
+                    text=topic.name
+                )
+            except ObjectDoesNotExist:
+                replacementhtml = '[topic not found]'
+        elif matchdict['example']:
+            replacementhtml = examplehtml.format(
+                text=matchdict['example']
+            )
+        elif matchdict['plainquote']:
+            replacementhtml = '"%s"' % matchdict['plainquote']
+        html = html.replace(match.group(0), replacementhtml)
+
+    # boldtagpattern = re.compile(r"\*(?P<emphasis>.+?)\*|^ ?(?P<definition>.{1,25}?)\-")
+    # for match in boldtagpattern.finditer(html):
+    #     matchdict = match.groupdict()
+    #     if matchdict['emphasis']:
+    #
+
+    html = re.sub(r'\*(.{3,})\*', r'<b>\1</b>', html)
+    html = re.sub(r'^ ?(.{1,25}?)(\-|$|\()', r'<b>\1</b>\2', html)
+
+    return BeautifulSoup(html)
 
 def getreferencelink(pk, soup):
     a = soup.new_tag('a')
