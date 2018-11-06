@@ -1,7 +1,7 @@
 from django.db import models
 from django.template.defaultfilters import slugify
-from django.db.models.signals import post_save
-from django.dispatch import receiver
+# from django.db.models.signals import post_save
+# from django.dispatch import receiver
 
 from picklefield.fields import PickledObjectField
 
@@ -96,58 +96,58 @@ class Reference(models.Model):
         # s += ' [' + str(self.pk) + ']'
         return self.name
 
-    def save(self, *args, **kwargs):
-        if not self.pagename and not self.sitename:
-        # if True:
-            pagetitle = fetchreference.fetchreferencetitle(self.url)
-            print()
-            print(pagetitle)
-
-            if 'error' in pagetitle.lower():
-                self.pagename = pagetitle
-
-            else:
-                splittitle = []
-
-                # page is listed first
-                for divider in [' | ', ' · ', ' : ', ' - ', '—', '--',]:
-                    if len(splittitle) > 1:
-                        break
-
-                    splittitle = pagetitle.split(divider)
-                    if len(splittitle) > 2:
-                        self.pagename = splittitle.pop(0).strip()
-                        splittitle.reverse()
-                        self.sitename = ' - '.join(s.strip() for s in splittitle)
-                        break
-                    elif len(splittitle) > 1:
-                        self.pagename = splittitle[0].strip()
-                        self.sitename = splittitle[1].strip()
-                        break
-
-                # page is listed second
-                for divider in [': ']:
-                    if len(splittitle) > 1:
-                        break
-
-                    splittitle = pagetitle.split(divider, 1)
-                    if len(splittitle) > 1:
-                        self.pagename = splittitle[1].strip()
-                        self.sitename = splittitle[0].strip()
-                        break
-
-                if len(splittitle) < 2:
-                    self.pagename = pagetitle
-
-                if 'reddit' in self.url.lower():
-                    self.sitename = 'r/' + self.sitename
-
-                self.name = self.liststring
-
-        if not self.name:
-            self.name = self.liststring
-
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.pagename and not self.sitename:
+    #     # if True:
+    #         pagetitle = fetchreference.fetchreferencetitle(self.url)
+    #         print()
+    #         print(pagetitle)
+    #
+    #         if 'error' in pagetitle.lower():
+    #             self.pagename = pagetitle
+    #
+    #         else:
+    #             splittitle = []
+    #
+    #             # page is listed first
+    #             for divider in [' | ', ' · ', ' : ', ' - ', '—', '--',]:
+    #                 if len(splittitle) > 1:
+    #                     break
+    #
+    #                 splittitle = pagetitle.split(divider)
+    #                 if len(splittitle) > 2:
+    #                     self.pagename = splittitle.pop(0).strip()
+    #                     splittitle.reverse()
+    #                     self.sitename = ' - '.join(s.strip() for s in splittitle)
+    #                     break
+    #                 elif len(splittitle) > 1:
+    #                     self.pagename = splittitle[0].strip()
+    #                     self.sitename = splittitle[1].strip()
+    #                     break
+    #
+    #             # page is listed second
+    #             for divider in [': ']:
+    #                 if len(splittitle) > 1:
+    #                     break
+    #
+    #                 splittitle = pagetitle.split(divider, 1)
+    #                 if len(splittitle) > 1:
+    #                     self.pagename = splittitle[1].strip()
+    #                     self.sitename = splittitle[0].strip()
+    #                     break
+    #
+    #             if len(splittitle) < 2:
+    #                 self.pagename = pagetitle
+    #
+    #             if 'reddit' in self.url.lower():
+    #                 self.sitename = 'r/' + self.sitename
+    #
+    #             self.name = self.liststring
+    #
+    #     if not self.name:
+    #         self.name = self.liststring
+    #
+    #     super().save(*args, **kwargs)
 
     class Meta:
         ordering = ['sitename', 'pagename',]
@@ -198,34 +198,34 @@ class Topic(models.Model):
 
 
 
-    def save(self, *args, **kwargs):
-        self.text = htmlutils.replacecurlyquotes(self.text)
-
-        if 'http' in self.text:
-            text = self.text
-            pattern = r"(?<=[\<\[])(?:(?P<name>.+)\:|)(?P<url>https?\:\/\/[^\s]+)(?=[\:\]])"
-            for match in re.finditer(pattern, self.text):
-                m = match.groupdict()
-
-                if not m['url']:
-                    continue
-                try:
-                    reference = Reference.objects.get(url=m['url'])
-                except ObjectDoesNotExist:
-                    reference = Reference(url=m['url'])
-
-                    if m['name']:
-                        reference.name = m['name']
-
-                    reference.save()
-
-                text = text.replace(match.group(0), str(reference.pk))
-
-            self.text = text
-
-        self.slug = slugify(self.name)
-
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     self.text = htmlutils.replacecurlyquotes(self.text)
+    #
+    #     if 'http' in self.text:
+    #         text = self.text
+    #         pattern = r"(?<=[\<\[])(?:(?P<name>.+)\:|)(?P<url>https?\:\/\/[^\s]+)(?=[\:\]])"
+    #         for match in re.finditer(pattern, self.text):
+    #             m = match.groupdict()
+    #
+    #             if not m['url']:
+    #                 continue
+    #             try:
+    #                 reference = Reference.objects.get(url=m['url'])
+    #             except ObjectDoesNotExist:
+    #                 reference = Reference(url=m['url'])
+    #
+    #                 if m['name']:
+    #                     reference.name = m['name']
+    #
+    #                 reference.save()
+    #
+    #             text = text.replace(match.group(0), str(reference.pk))
+    #
+    #         self.text = text
+    #
+    #     self.slug = slugify(self.name)
+    #
+    #     super().save(*args, **kwargs)
 
 
     class Meta:
@@ -252,7 +252,13 @@ class Replacement(models.Model):
     active = models.BooleanField(default=True)
     verified = models.BooleanField(default=True)
 
-    category = models.ForeignKey(ReplacementCategory, default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk, on_delete=models.CASCADE)
+    category = models.ForeignKey(
+        ReplacementCategory,
+        # default=ReplacementCategory.objects.get(name=DEFAULT_REPLACEMENTTYPE).pk,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
 
     searchstrings = models.TextField(blank=True, null=True,
                                      help_text="Add multiple words on separate lines; dash in word can be dash, space or no space;")
@@ -463,15 +469,25 @@ class Replacement(models.Model):
                 excludepattern = searchwords.getwordpattern(excludewordstring)['pattern']
                 self.excludepatterns.append(excludepattern)
 
-    def save(self, *args, **kwargs):
-        # if it's the non-default dialect, unless the words are manually marked as something different
-        # assign them to 'informal'
-        if self.dialect.name != DEFAULT_DIALECT and self.category.name == DEFAULT_REPLACEMENTTYPE:
-            self.category = ReplacementCategory.objects.get(name=DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE)
-
-        self.createpatterns()
-
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     # if it's the non-default dialect, unless the words are manually marked as something different
+    #     # assign them to 'informal'
+    #
+    #     if self.dialect.name != DEFAULT_DIALECT and self.category.name == DEFAULT_REPLACEMENTTYPE:
+    #         self.category = ReplacementCategory.objects.get(name=DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE)
+    #
+    #     self.createpatterns()
+    #
+    #     super().save(*args, **kwargs)    # def save(self, *args, **kwargs):
+    #     # if it's the non-default dialect, unless the words are manually marked as something different
+    #     # assign them to 'informal'
+    #
+    #     if self.dialect.name != DEFAULT_DIALECT and self.category.name == DEFAULT_REPLACEMENTTYPE:
+    #         self.category = ReplacementCategory.objects.get(name=DEFAULT_NONDEFAULTDIALECT_REPLACEMENTTYPE)
+    #
+    #     self.createpatterns()
+    #
+    #     super().save(*args, **kwargs)
 
 
 
