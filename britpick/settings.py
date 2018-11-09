@@ -11,7 +11,6 @@ https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
 import os
-
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -37,6 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'app.apps.AppConfig',
+    'britpick_app',
 ]
 
 MIDDLEWARE = [
@@ -78,8 +78,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-    }
+    },
+    'db_britpick_app': {
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'htw$britpickdb',
+        'USER': 'htw',
+        'PASSWORD': 'britpickmysql',
+        'HOST': 'htw.mysql.pythonanywhere-services.com',
+        'OPTIONS': {'init_command': "SET sql_mode='STRICT_TRANS_TABLES'",},
+    },
 }
+
+DATABASE_ROUTERS = ['britpick_app.dbRouter.BritpickAppDBRouter',]
 
 
 # Password validation
