@@ -227,6 +227,8 @@ class Topic(models.Model):
 
         super().save(*args, **kwargs)
 
+        # test
+        s = ''
 
     class Meta:
         ordering = ['name']
