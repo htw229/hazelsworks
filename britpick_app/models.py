@@ -1,7 +1,7 @@
 from django.db import models
 from django.urls import reverse
 
-# custom model
+# britpick_app model
 class BaseModel(models.Model):
     name = models.CharField(max_length=100, blank=True)
     active = models.BooleanField(default=True)
@@ -107,17 +107,24 @@ class Britpick(BaseModel):
     category = models.ForeignKey("Category", models.CASCADE, related_name='britpicks', blank=True, null=True)
     # For category, if none chosen, generate on the fly from replacement if needed for filtering
 
+
+
     # searches = models.ManyToManyField("Search", blank=True, related_name='britpicks')
 
     # SEARCH FOR
-    search_strings = models.ManyToManyField("SearchString", blank=True, related_name='britpicks')
-    search_groups = models.ManyToManyField("SearchGroup", blank=True, related_name='britpicks')
+
+    # search (lines) as text
+    #
+
+
+    # search_strings = models.ManyToManyField("SearchString", blank=True, related_name='britpicks', verbose_name='search string')
+    # search_groups = models.ManyToManyField("SearchGroup", blank=True, related_name='britpicks')
 
     # CONTEXT
-    exclude_nearby_strings = models.ManyToManyField("SearchString", blank=True, related_name='britpicks_excluded_by')
-    exclude_nearby_groups = models.ManyToManyField("SearchGroup", blank=True, related_name='britpicks_excluded_by')
-    require_nearby_strings = models.ManyToManyField("SearchString", blank=True, related_name='britpicks_required_by')
-    require_nearby_groups = models.ManyToManyField("SearchGroup", blank=True, related_name='britpicks_required_by')
+    # exclude_nearby_strings = models.ManyToManyField("SearchString", blank=True, related_name='britpicks_excluded_by')
+    # exclude_nearby_groups = models.ManyToManyField("SearchGroup", blank=True, related_name='britpicks_excluded_by')
+    # require_nearby_strings = models.ManyToManyField("SearchString", blank=True, related_name='britpicks_required_by')
+    # require_nearby_groups = models.ManyToManyField("SearchGroup", blank=True, related_name='britpicks_required_by')
 
 
     words = models.ManyToManyField("Word", blank=True, related_name='britpicks')
@@ -149,6 +156,20 @@ class Britpick(BaseModel):
 
 
 class SearchString(BaseModel):
+    # britpick = models.ForeignKey("Britpick", on_delete=models.CASCADE, related_name='search_string_fks',)
+
+    # manytomany is too hard
+    # single field within britpick doesn't allow reusability
+    # if making foreignkey, can only link it to 1 britpick
+        # can edit in place
+        # have to deal with searching/removing them
+        # will allow
+    # making manytomany with faux textfield input on the form
+        # appreciable benefit beyond finding duplicates?
+    #
+
+    # if need to link to multiple, can use searchgroup
+    #
 
     # britpick linked to:
     #   search_words - word (+groups)

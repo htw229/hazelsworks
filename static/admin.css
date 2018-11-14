@@ -1,0 +1,9 @@
+.form-row .inline-group {
+    margin-top: 30px;
+}
+
+.britpick-inline select {
+    background-color: yellow;
+    visibility: hidden;
+    display: none;
+}

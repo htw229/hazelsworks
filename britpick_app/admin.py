@@ -1,13 +1,20 @@
 from django.contrib import admin
 from django import forms
 
+import nested_admin
+
 from britpick_app.models import *
 
+# using https://linevi.ch/en/django-inline-in-fieldset.html
 
 class BaseAdmin(admin.ModelAdmin):
     exclude = ('date_created', 'date_edited',)
     save_on_top = True
 
+    # class Media:
+    #     css = {
+    #         'all': ('admin/admin.css',),
+    #     }
 
 
 
@@ -52,31 +59,59 @@ class SearchStringAdmin(BaseAdmin):
 admin.site.register(SearchString, SearchStringAdmin)
 
 class SearchStringInline(admin.TabularInline):
-    model = SearchString.britpicks.through
-    # model = Britpick.search_strings.through
-    # model = Britpick.search_strings
-    # model = SearchString.britpicks_searched_by.through
+    model = Britpick.search_strings.through
     extra = 0
-    # fields = ('search_strings_string',)
+    insert_after = 'verified'
+
+    # fields = ('searchstringname',)
+    readonly_fields = ('searchstringname',)
+
+    verbose_name = 'search'
+    verbose_name_plural = 'searches'
+
+    def searchstringname(self, obj):
+        return str(obj)
+
+class ExcludeNearbyStringsInline(admin.TabularInline):
+    model = Britpick.exclude_nearby_strings.through
+    extra = 0
+    insert_after = 'exclude_nearby_groups'
+
+class RequireNearbyStringsInline(admin.TabularInline):
+    model = Britpick.require_nearby_strings.through
+    extra = 0
+    insert_after = 'require_nearby_groups'
+
+
+
+# class SearchStringNestedInline(nested_admin.NestedStackedInline):
+#     model = SearchString
+#
+# class SearchStringThroughInline(nested_admin.NestedStackedInline):
+#     # model = Britpick.search_strings.through
+#     model = SearchString.britpicks.through
+#     inlines = [SearchStringNestedInline]
+
 
 class BritpickAdmin(BaseAdmin):
 
-    change_form_template = 'admin/custom/britpick.html'
 
     list_display = ('name', 'dialect', 'category', 'active', 'verified', 'date_edited', 'date_created',)
     list_editable = ('active', 'verified', 'dialect', 'category',)
     list_filter = ('active', 'verified', 'dialect', 'category', 'explanations',)
     # create a list_filter to get problematic conflicts (instead of duplicates page)
     search_fields = ('name',)
-    # add custom search https://docs.djangoproject.com/en/2.0/ref/contrib/admin/#django.contrib.admin.ModelAdmin.get_search_results
+    # add britpick_app search https://docs.djangoproject.com/en/2.0/ref/contrib/admin/#django.contrib.admin.ModelAdmin.get_search_results
     date_hierarchy = 'date_edited'
     empty_value_display = '- unnamed -'
 
 
     exclude = ('name',)
-    autocomplete_fields = ('topics', 'references', 'explanations', 'search_groups', 'exclude_nearby_groups', 'require_nearby_groups', 'word_groups',)
-    inlines = (SearchStringInline,)
+    autocomplete_fields = ('topics', 'references', 'explanations', 'search_groups', 'exclude_nearby_groups', 'require_nearby_groups', 'word_groups', 'exclude_nearby_strings',)
+    inlines = (SearchStringInline, ExcludeNearbyStringsInline, RequireNearbyStringsInline,)
     filter_horizontal = ('topics', 'references', 'words',)
+
+    # inlines = [SearchStringThroughInline]
 
     fieldsets = (
         (None, {
@@ -84,12 +119,16 @@ class BritpickAdmin(BaseAdmin):
         }),
         ('Advanced search options', {
             'classes': ('collapse',),
-            'fields': ('exclude_nearby_strings', 'exclude_nearby_groups', 'require_nearby_strings', 'require_nearby_groups',),
+            'fields': ('exclude_nearby_strings', 'exclude_nearby_groups', 'require_nearby_groups',),
         }),
         (None, {
             'fields': ('words', 'word_groups', 'details', 'explanations', 'topics', 'references',)
         }),
     )
+
+    # def search_strings(self):
+    #     url = 'hello'
+    #     return mark_safe()
 
 admin.site.register(Britpick, BritpickAdmin)
 

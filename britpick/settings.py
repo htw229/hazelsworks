@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'app.apps.AppConfig',
     'britpick_app',
+    'nested_admin',
 ]
 
 MIDDLEWARE = [
