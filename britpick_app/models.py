@@ -8,10 +8,10 @@ class BaseModel(models.Model):
     _description = models.TextField(blank=True, verbose_name='description')
     _display_description = models.TextField(blank=True, help_text="overrides description for front-end display", verbose_name='display description')
     _active = models.BooleanField(default=True, verbose_name='active')
-    _hidden = models.BooleanField(default=True, verbose_name='hidden')
+    _hidden = models.BooleanField(default=False, verbose_name='hidden')
     _verified = models.BooleanField(default=True, verbose_name='verified')
     date_created = models.DateTimeField(auto_now_add=True)
-    date_edited = models.DateTimeField(auto_now=True)
+    date_edited = models.DateTimeField(auto_now=True, verbose_name='last edited')
 
     class Meta:
         abstract = True
@@ -182,12 +182,12 @@ class Britpick(BaseModel):
     for use in-text and in showing relationships in a topic
     """
 
-    dialect = models.ForeignKey(
-        "Dialect",
-        models.CASCADE,
-        related_name='britpicks',
-        default=Dialect.objects.get(default=True).pk,
-    )
+    # dialect = models.ForeignKey(
+    #     "Dialect",
+    #     models.CASCADE,
+    #     related_name='britpicks',
+    #     default=Dialect.objects.get(default=True).pk,
+    # )
 
     # could prepopulate type with link from category?
     type = models.ForeignKey(
@@ -230,8 +230,8 @@ class Britpick(BaseModel):
         default=False,
         help_text=
             """
-                True if you want topics to provide context
-                ex 'sports', 'cars', 'clothing'
+                select if topic name needed to provide context
+                (ex 'sports', 'cars', 'clothing')
             """,
     )
 
@@ -245,9 +245,9 @@ class Britpick(BaseModel):
 
 
 class SearchString(BaseModel):
-    OPTIONS = (('1', 'one'),)
 
-    searched_by = models.ForeignKey("Britpick", on_delete=models.CASCADE, related_name='search_strings',)
+    # foreign key - so that any duplicates have to be made with groups
+    searched_by = models.ForeignKey("Britpick", on_delete=models.CASCADE, related_name='search_strings', blank=True, null=True)
 
     string = models.CharField(max_length=300)
     # options created from separate searchwords functions/regex wrapper to create pattern; ie preserve all words, preserve case, beginning of sentence, end of phrase, question, noun
@@ -272,6 +272,9 @@ class SearchString(BaseModel):
     @pattern.setter
     def pattern(self, value):
         self._pattern = value
+
+
+
 
 
 class SearchGroup(BaseModel):
