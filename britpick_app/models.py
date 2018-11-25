@@ -28,9 +28,14 @@ class BaseModel(models.Model):
         else:
             return self.name_model_pk
 
+    @name.setter
+    def name(self, value):
+        self._name = value
+
     @property
     def name_model_pk(self):
         return type(self).__name__ + ' [%s]' % str(self.pk)
+
 
     @property
     def name_verbose(self):
@@ -48,6 +53,10 @@ class BaseModel(models.Model):
         else:
             return self.name
 
+    @display_name.setter
+    def display_name(self, value):
+        self._display_name = value
+
     @property
     def display_name_verbose(self):
         return self.display_name + ': ' + self.description
@@ -59,6 +68,10 @@ class BaseModel(models.Model):
         else:
             return self._display_description
 
+    @description.setter
+    def description(self, value):
+        self._description = value
+
     @property
     def display_description(self):
         if self._display_description:
@@ -66,18 +79,33 @@ class BaseModel(models.Model):
         else:
             return self._description
 
+    @display_description.setter
+    def display_description(self, value):
+        self._display_description = value
+
     @property
     def active(self):
         return self._active
+
+    @active.setter
+    def active(self, value):
+        self._active = value
 
     @property
     def hidden(self):
         return self._hidden
 
+    @hidden.setter
+    def hidden(self, value):
+        self._hidden = value
+
     @property
     def verified(self):
         return self._verified
 
+    @verified.setter
+    def verified(self, value):
+        self._verified = value
 
 
 # class Suggestion(models.Model):

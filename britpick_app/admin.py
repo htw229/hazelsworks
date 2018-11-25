@@ -5,11 +5,13 @@ from django.utils.html import mark_safe
 # import nested_admin
 #
 from britpick_app.models import *
-#
-# # using https://linevi.ch/en/django-inline-in-fieldset.html
-#
 
 
+# class BaseForm(forms.ModelForm):
+#     class Meta:
+#         widgets = {
+#             '_description': forms.CharField,
+#         }
 
 class BaseAdmin(admin.ModelAdmin):
     list_display = ('name_verbose', '_active', '_hidden', '_verified', 'date_edited',)
@@ -25,6 +27,18 @@ class BaseAdmin(admin.ModelAdmin):
         }),
     ]
 
+    textinputoverrides = ['_description', '_display_description',]
+    # hidelabels = []
+
+    def formfield_for_dbfield(self, db_field, **kwargs):
+        formfield = super(BaseAdmin, self).formfield_for_dbfield(db_field, **kwargs)
+        if db_field.name in self.textinputoverrides:
+            formfield.widget = forms.TextInput(attrs={'class':'vTextField',})
+        # if db_field.name in self.hidelabels:
+        #     formfield.widget.attrs['class'] = 'hidden-label'
+        return formfield
+
+
     # def get_form(self, request, obj=None, **kwargs):
     #     form = super(BaseAdmin, self).get_form(request, obj, **kwargs)
     #     form.base_fields['_description'].widget.attrs['style'] = 'height: 100px'
@@ -36,9 +50,14 @@ class BaseAdmin(admin.ModelAdmin):
 
 
 
+
 admin.site.register(Dialect)
 admin.site.register(BritpickType)
-admin.site.register(BritpickCategory)
+
+class CategoryAdmin(BaseAdmin):
+    pass
+
+admin.site.register(BritpickCategory, CategoryAdmin)
 
 class ReferenceAdmin(BaseAdmin):
     pass
@@ -64,22 +83,28 @@ class BritpickSearchStringInline(admin.TabularInline):
     model = SearchString
     extra = 0
     fields = ('string',)
+    insert_before = 'search_groups'
+
 
 class BritpickAdmin(BaseAdmin):
+    # form = BaseForm
+
     inlines = [BritpickSearchStringInline,]
     autocomplete_fields = ('categories','topics', 'words', 'word_groups', 'references',)
     filter_horizontal = ('search_groups', 'exclude_search_groups', 'require_search_groups',)
 
     readonly_fields = [f for f in BaseAdmin.readonly_fields]
-    readonly_fields.extend(['words_changelinks','search_groups_changelinks','exclude_search_groups_changelinks','require_search_groups_changelinks','word_groups_changelinks','topics_changelinks'])
+    readonly_fields.extend(['words_changelinks','search_changelinks','exclude_search_groups_changelinks','require_search_groups_changelinks','word_groups_changelinks','topics_changelinks', 'references_changelinks',])
 
+    textinputoverrides = ['_description', ]
+    # hidelabels = ['topics_changelinks',]
 
     fieldsets = [
         (None, {
             'fields': ('date_edited', ('_name','_description',), ('_active', '_verified', '_hidden',), 'type', 'categories',),
         }),
         (None, {
-            'fields': ('search_groups_changelinks',),
+            'fields': ('search_changelinks',),
         }),
         ('edit search', {
             'classes': ('collapse',),
@@ -87,21 +112,21 @@ class BritpickAdmin(BaseAdmin):
         }),
 
         (None, {
-            'fields': ('words_changelinks', 'word_groups_changelinks',),
+            'fields': (('words', 'words_changelinks', 'word_groups', 'word_groups_changelinks'),),
         }),
-        ('add/remove words', {
-            'classes': ('collapse',),
-            'fields': ('words', 'word_groups',),
-        }),
+        # ('add/remove words', {
+        #     'classes': ('collapse',),
+        #     'fields': ('words', 'word_groups',),
+        # }),
         (None, {
-            'fields': (('topics_changelinks','always_show_topic_names',),),
+            'fields': (('topics','topics_changelinks','always_show_topic_names',),),
         }),
-        ('add/remove topics', {
-            'classes': ('collapse',),
-            'fields': ('topics',),
-        }),
+        # ('add/remove topics', {
+        #     'classes': ('collapse',),
+        #     'fields': ('topics',),
+        # }),
         (None, {
-            'fields': ('references', '_display_description',),
+            'fields': (('references','references_changelinks'), '_display_description',),
         }),
     ]
 
@@ -115,10 +140,14 @@ class BritpickAdmin(BaseAdmin):
 
     def topics_changelinks(self, obj):
         return getchangelinks(obj.topics.all())
-    topics_changelinks.short_description = 'topics'
+    topics_changelinks.short_description = 'links'
+
+    def references_changelinks(self, obj):
+        return getchangelinks(obj.references.all())
+    references_changelinks.short_description = 'links'
 
 
-    def search_groups_changelinks(self, obj):
+    def search_changelinks(self, obj):
         # s = '<div>%s</div>' % getchangelinks(obj.search_groups.all())
         # s += '<div>exclude if nearby:%s</div>' % getchangelinks(obj.exclude_search_groups.all())
         # s += '<div>require nearby:%s</div>' % getchangelinks(obj.require_search_groups.all())
@@ -127,19 +156,17 @@ class BritpickAdmin(BaseAdmin):
         s += getchangelinks(obj.exclude_search_groups.all(), label='exclude:')
         s += getchangelinks(obj.require_search_groups.all(), label='require:')
 
-
-
         return mark_safe(s)
 
-    search_groups_changelinks.short_description = 'search'
+    search_changelinks.short_description = 'search'
 
-    def exclude_search_groups_changelinks(self, obj):
-        return getchangelinks(obj.exclude_search_groups.all())
-    exclude_search_groups_changelinks.short_description = 'exclude groups'
-
-    def require_search_groups_changelinks(self, obj):
-        return getchangelinks(obj.require_search_groups.all())
-    require_search_groups_changelinks.short_description = 'require groups'
+    # def exclude_search_groups_changelinks(self, obj):
+    #     return getchangelinks(obj.exclude_search_groups.all())
+    # exclude_search_groups_changelinks.short_description = 'exclude groups'
+    #
+    # def require_search_groups_changelinks(self, obj):
+    #     return getchangelinks(obj.require_search_groups.all())
+    # require_search_groups_changelinks.short_description = 'require groups'
 
 admin.site.register(Britpick, BritpickAdmin)
 

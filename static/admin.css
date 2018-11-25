@@ -1,9 +1,56 @@
-.form-row .inline-group {
+.inline-insert-after .form-row .inline-group {
     margin-top: 30px;
 }
 
-.britpick-inline select {
-    background-color: yellow;
-    visibility: hidden;
+.module.aligned label {
+    width: 90px;
+}
+
+.module.aligned label.vCheckboxLabel {
+    width: 180px;
+}
+
+.module.aligned .readonly {
+    margin-left: 100px;
+}
+
+.module.aligned.collapse div {
+    background-color: #f8f8f8;
+}
+
+.model-britpick.change-form .inline-related h2 {
     display: none;
 }
+
+.model-britpick.change-form .inline-related td.original p {
+    display: none;
+}
+
+.model-britpick.change-form .inline-related tr.form-row,
+.model-britpick.change-form .inline-related tr.form-row td {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+.model-britpick.change-form .module.aligned.collapse label {
+    display: none;
+}
+
+
+.hidden-label {
+    display: none;
+}
+
+.field-box[class*="_changelinks"] label.inline {
+    display: none;
+}
+
+.field-box[class*="_changelinks"] .readonly {
+    margin-left: 0;
+}
+
+/*.britpick-inline select {*/
+    /*background-color: yellow;*/
+    /*visibility: hidden;*/
+    /*display: none;*/
+/*}*/
