@@ -9,7 +9,7 @@ class BaseModel(models.Model):
     _display_description = models.TextField(blank=True, help_text="overrides description for front-end display", verbose_name='display description')
     _active = models.BooleanField(default=True, verbose_name='active')
     _hidden = models.BooleanField(default=False, verbose_name='hidden')
-    _verified = models.BooleanField(default=True, verbose_name='verified')
+    _verified = models.BooleanField(default=False, verbose_name='verified')
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True, verbose_name='last edited')
 
@@ -152,8 +152,12 @@ class Reference(BaseModel):
 
 
 class Quote(BaseModel):
-    text = models.TextField(blank=True)
+    text = models.TextField(
+        blank=True,
+        verbose_name='quote',
+    )
     reference = models.ForeignKey("Reference", on_delete=models.CASCADE, related_name='quotes', null=True, blank=True,)
+    word = models.ForeignKey("Word", on_delete=models.CASCADE, related_name='quotes', null=True, blank=True,)
 
 
 class Topic(BaseModel):
@@ -320,11 +324,17 @@ class SearchVariables(BaseModel):
     pass
 
 class Word(BaseModel):
-    """
-    name = unique ('Grade (noun)')
-    word = not unique ('grade')
-    """
-    word = models.CharField(max_length=200)
+
+    word = models.CharField(
+        max_length=200,
+        help_text=
+            """
+                not unique (ex 'grade')
+                use description for differentiation (ex 'Grade (noun)')
+                (replaces .name)
+            """,
+    )
+
     dialect = models.ForeignKey(
         "Dialect",
         models.CASCADE,
@@ -345,7 +355,7 @@ class Word(BaseModel):
             """,
     )
 
-    quotes = models.ManyToManyField("Quote", blank=True, related_name='words',)
+    # quotes = models.ManyToManyField("Quote", blank=True, related_name='words',)
     # word_topic = models.ForeignKey("Topic", on_delete=models.CASCADE, related_name='words', blank=True, null=True,)
     topics = models.ManyToManyField(
         "Topic",
@@ -358,6 +368,14 @@ class Word(BaseModel):
             """,
     )
     references = models.ManyToManyField("Reference", blank=True, related_name='words')
+
+    @property
+    def name(self):
+        return self.word
+
+    @name.setter
+    def name(self, value):
+        self.word = value
 
 
 class WordGroup(BaseModel):

@@ -2,12 +2,16 @@
     margin-top: 30px;
 }
 
-.module.aligned label {
-    width: 90px;
+.module {
+    margin-bottom: 0;
 }
 
-.module.aligned label.vCheckboxLabel {
-    width: 180px;
+.module.aligned label {
+    max-width: 90px;
+}
+
+.module.aligned label.vCheckboxLabel.inline {
+    max-width: initial;
 }
 
 .module.aligned .readonly {
@@ -15,8 +19,86 @@
 }
 
 .module.aligned.collapse div {
-    background-color: #f8f8f8;
+    background-color: #dcdcdc;
 }
+
+.module.aligned.collapse .form-row {
+    padding: 10px 20px;
+}
+
+/*div[class*="field-"] {*/
+    /*background-color: #ececec;*/
+/*}*/
+
+/*!*optional fields*!*/
+/*.model-britpick.change-form .field-box.field-_description,*/
+/*.model-britpick.change-form .field-box.field-_name,*/
+/*.model-word.change-form .field-_description,*/
+/*.model-word.change-form .field-dialect,*/
+/*.model-word.change-form .field-britpick_type*/
+/*{*/
+    /*background-color: white;*/
+/*}*/
+
+fieldset label {
+    font-weight: bold;
+}
+
+.vTextField {
+    width: 15em;
+}
+
+.select2 .select2-container .select2-container--admin-autocomplete {
+    width: 100% !important;
+}
+
+.select2-container--admin-autocomplete .select2-selection--multiple .select2-selection__choice {
+    background-color: #79aec8 !important;
+    color: white;
+    border: none !important;
+    padding: 3px 8px !important;
+    /*font-size: 14px;*/
+}
+
+.select2-container--admin-autocomplete .select2-selection--multiple .select2-selection__choice__remove {
+    color: #f1f1f1 !important;
+}
+
+.module select {
+    font-size: 13px;
+}
+
+
+
+.header-fieldset {
+    background-color: #79aec8;
+}
+
+.header-fieldset label {
+    color: white !important;
+}
+
+.header-fieldset .help {
+    color: #e6e6e6 !important;
+}
+
+.indented-fieldset {
+    margin-left: 50px;
+    padding-left: 10px;
+}
+
+.internal-fieldset {
+    /*background-color: #ececec;*/
+}
+
+.internal-fieldset label {
+    color: #969696 !important;
+    font-weight: normal !important;
+}
+
+/*.optional-fieldset label {*/
+    /*color: #a9a9a9;*/
+/*}*/
 
 .model-britpick.change-form .inline-related h2 {
     display: none;
@@ -32,9 +114,79 @@
     padding-bottom: 0.5em;
 }
 
-.model-britpick.change-form .module.aligned.collapse label {
+.inline-related h2 {
     display: none;
 }
+
+.inline-related td.original p {
+    display: none;
+}
+
+.inline-related tr.form-row,
+.inline-related tr.form-row td {
+    padding-top: 0.5em;
+    padding-bottom: 0.5em;
+}
+
+form .aligned div.help,
+form .aligned input + div.help {
+    margin-left: 90px;
+    max-width: 250px;
+}
+
+.model-word div#quotes-group td {
+    padding-top: 10px;
+}
+
+.model-word div#quotes-group td.field-text {
+    width: 250px;
+    max-width: 100%;
+    padding-left: 110px;
+    padding-right: 40px;
+}
+
+.model-word div#quotes-group textarea {
+    width: 100%;
+    /*max-width: 100%;*/
+    max-height: 100px;
+}
+
+
+
+/*.model-word div#quotes-group .vLargeTextField {*/
+    /*width: 100%;*/
+/*}*/
+
+@media (max-width: 1024px) {
+    fieldset .field-box {
+        float: left !important;
+        margin: initial !important;
+        margin-right: 20px !important;
+        padding: 10px !important;
+        border-top: 0 !important;
+    }
+
+    label {
+        font-size: 13px !important;
+    }
+
+    .form-row select {
+        font-size: 13px !important;
+    }
+}
+
+
+
+
+
+/*.model-word div#quotes-group tr.form-row td {*/
+    /*max-width: 100px;*/
+/*}*/
+
+
+/*.model-britpick.change-form .module.aligned.collapse label {*/
+    /*display: none;*/
+/*}*/
 
 
 .hidden-label {
@@ -47,6 +199,12 @@
 
 .field-box[class*="_changelinks"] .readonly {
     margin-left: 0;
+    font-size: 14px;
+}
+
+.field-box[class*="_changelinks"] .readonly div a:after {
+    content:url(/static/admin/img/icon-changelink.svg);
+    margin-left: 5px
 }
 
 /*.britpick-inline select {*/
