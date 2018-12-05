@@ -69,30 +69,40 @@ fieldset label {
 }
 
 
-
-.header-fieldset {
-    background-color: #79aec8;
+fieldset {
+    margin-left: 20px;
 }
 
-.header-fieldset label {
+fieldset.header-fieldset {
+    background-color: #79aec8;
+    margin-left: 0;
+}
+
+fieldset.header-fieldset label {
     color: white !important;
 }
 
-.header-fieldset .help {
+fieldset.header-fieldset .help {
     color: #e6e6e6 !important;
 }
 
-.indented-fieldset {
+fieldset.indented-fieldset {
     margin-left: 50px;
     padding-left: 10px;
 }
 
-.internal-fieldset {
-    /*background-color: #ececec;*/
+fieldset.internal-fieldset {
+    background-color: #e6e6e6;
+    margin-left: 0;
 }
 
-.internal-fieldset label {
+fieldset.internal-fieldset label {
     color: #969696 !important;
+    font-weight: normal !important;
+}
+
+fieldset.optional-fieldset label {
+    /*background-color: #e6e6e6;*/
     font-weight: normal !important;
 }
 
@@ -202,7 +212,7 @@ form .aligned input + div.help {
     font-size: 14px;
 }
 
-.field-box[class*="_changelinks"] .readonly div a:after {
+.field-box[class*="_changelinks"] .readonly a:after {
     content:url(/static/admin/img/icon-changelink.svg);
     margin-left: 5px
 }

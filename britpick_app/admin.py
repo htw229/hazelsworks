@@ -6,75 +6,108 @@ from britpick_app.models import *
 
 
 class BaseAdmin(admin.ModelAdmin):
-    HEADER_FIELDSET = [
-        (None, {
-            'fields': ('date_edited',),
-            'classes': ('optional-fieldset', 'indented-fieldset',),
-        }),
-        (None, {
-            'fields': (('_active', '_verified', '_hidden',),),
-        }),
-    ]
+    ACTIVE_VERIFIED_LIST = ['active', 'verified', 'hidden', ]
 
     DATE_EDITED_FIELDSET = (None, {
-            'fields': ('date_edited',),
-            'classes': ('optional-fieldset', 'indented-fieldset',),
-        })
+        'fields': (('date_edited', 'notes'),),
+        'classes': ('internal-fieldset',),
+    })
 
     ACTIVE_VERIFIED_FIELDSET = (None, {
-            'fields': (('_active', '_verified', '_hidden',),),
-        })
+        'fields': (('active', 'verified', 'hidden',),),
+        'classes': (),
+    })
 
-    DEFAULT_FIELDSETS = [
-        (None, {
-            'fields': ('date_edited', ('_active', '_verified', '_hidden',), ('_name', '_display_name',), ('_description', '_display_description',)),
-        }),
-    ]
+    # NOTES_FIELDSET = (None, {
+    #     'fields': ('notes',),
+    #     'classes': ('internal-fieldset',),
+    # })
 
     READONLY_FIELDS = ['date_edited',]
 
-    list_display = ('name_verbose', '_active', '_hidden', '_verified', 'date_edited',)
-    list_editable = ('_active', '_hidden', '_verified',)
-    search_fields = ('_name', '_display_name', '_description', '_display_description',)
+    list_filter = ACTIVE_VERIFIED_LIST
     date_hierarchy = 'date_edited'
+    list_display = ('__str__',*ACTIVE_VERIFIED_LIST, 'date_edited',)
+    list_editable = ('active', 'verified', 'hidden',)
 
     save_on_top = True
-    readonly_fields = ['date_edited',]
+    readonly_fields = READONLY_FIELDS
 
-    fieldsets = [DATE_EDITED_FIELDSET, ACTIVE_VERIFIED_FIELDSET]
-
-    textinputoverrides = ['_description', '_display_description',]
+    textinputoverrides = []
     optionalinputs = []
     requiredinputs = []
 
     def formfield_for_dbfield(self, db_field, **kwargs):
+        # for displaying text fields as inputs rather than textareas
         formfield = super(BaseAdmin, self).formfield_for_dbfield(db_field, **kwargs)
         if db_field.name in self.textinputoverrides:
             formfield.widget = forms.TextInput(attrs={'class':'vTextField',})
 
         return formfield
 
+class DialectAdmin(BaseAdmin):
+    fieldsets = [
+        BaseAdmin.DATE_EDITED_FIELDSET,
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': (
+                'name',
+            ),
+            'classes': ('header-fieldset',)
+        }),
+        (None, {
+            'fields': ('description','default', 'limit_to_dialogue',),
+        }),
+        # BaseAdmin.NOTES_FIELDSET,
+    ]
 
-admin.site.register(Dialect)
-admin.site.register(BritpickType)
 
-class CategoryAdmin(BaseAdmin):
-    pass
+admin.site.register(Dialect, DialectAdmin)
 
-admin.site.register(BritpickCategory, CategoryAdmin)
+class BritpickCategoryAdmin(BaseAdmin):
+    fieldsets = [
+        BaseAdmin.DATE_EDITED_FIELDSET,
+        (None, {
+            'fields': (
+                'name',
+            ),
+            'classes': ('header-fieldset',)
+        }),
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': (
+                'description','allow_for_word', 'default',
+            ),
+        }),
+    ]
+
+admin.site.register(BritpickCategory, BritpickCategoryAdmin)
+
+class BritpickTypeAdmin(BaseAdmin):
+    search_fields = ['type', 'explanation',]
+
+admin.site.register(BritpickType, BritpickTypeAdmin)
 
 class ReferenceAdmin(BaseAdmin):
-    pass
+    search_fields = ['name', 'url', 'site_name', 'page_name',]
 
 admin.site.register(Reference, ReferenceAdmin)
 
 class QuoteAdmin(BaseAdmin):
-    pass
+    autocomplete_fields = ['words',]
+
+    fieldsets = [
+        BaseAdmin.DATE_EDITED_FIELDSET,
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': ('quote', 'reference', 'words',),
+        }),
+    ]
 
 admin.site.register(Quote, QuoteAdmin)
 
 class TopicAdmin(BaseAdmin):
-    fieldsets = [f for f in BaseAdmin.fieldsets]
+    search_fields = ['name',]
 
 admin.site.register(Topic, TopicAdmin)
 
@@ -88,9 +121,7 @@ class BritpickSearchStringInline(admin.TabularInline):
 class BritpickAdmin(BaseAdmin):
 
     inlines = [BritpickSearchStringInline,]
-    autocomplete_fields = ('categories','topics', 'words', 'word_groups', 'references',
-                           'search_groups', 'exclude_search_groups', 'require_search_groups',
-                           )
+    autocomplete_fields = ('types','topics', 'words', 'word_groups', 'references', 'search_groups', 'exclude_search_groups','require_search_groups',)
     # filter_horizontal = ('search_groups', 'exclude_search_groups', 'require_search_groups',)
 
     readonly_fields = [
@@ -101,11 +132,11 @@ class BritpickAdmin(BaseAdmin):
     # readonly_fields = [f for f in BaseAdmin.readonly_fields]
     # readonly_fields.extend(['words_changelinks','search_changelinks','exclude_search_groups_changelinks','require_search_groups_changelinks','word_groups_changelinks','topics_changelinks', 'references_changelinks',])
 
-    textinputoverrides = ['_description', ]
-
     fieldsets = [
+        BaseAdmin.DATE_EDITED_FIELDSET,
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
-            'fields': ('date_edited', ('_name','_description',), ('_active', '_verified', '_hidden',), 'type', 'categories',),
+            'fields': ('dialect', 'category', 'types',),
         }),
         (None, {
             'fields': ('search_changelinks',),
@@ -122,7 +153,7 @@ class BritpickAdmin(BaseAdmin):
             'fields': (('topics','topics_changelinks','always_show_topic_names',),),
         }),
         (None, {
-            'fields': (('references','references_changelinks'), '_display_description',),
+            'fields': (('references','references_changelinks'),),
         }),
     ]
 
@@ -162,26 +193,27 @@ admin.site.register(SearchString, SearchStringAdmin)
 
 
 class SearchGroupAdmin(BaseAdmin):
-    pass
+    search_fields = ['name',]
 
 admin.site.register(SearchGroup, SearchGroupAdmin)
 
 admin.site.register(SearchVariables)
 
 
-class WordQuoteInline(admin.TabularInline):
-    model = Quote
-    extra = 0
-    fields = ('text', 'reference',)
-    autocomplete_fields = ('reference',)
-    # insert_before = ''
+# class WordQuoteInline(admin.TabularInline):
+#     model = Quote
+#     extra = 0
+#     fields = ('text', 'reference',)
+#     autocomplete_fields = ('reference',)
+#     # insert_before = ''
 
 class WordAdmin(BaseAdmin):
-    inlines = [WordQuoteInline,]
-    autocomplete_fields = ('categories', 'topics', 'references',)
+    # inlines = [WordQuoteInline,]
+    search_fields = ['word',]
+    autocomplete_fields = ('topics', 'references',)
     readonly_fields = [
         *BaseAdmin.readonly_fields,
-        *['topics_changelinks', 'references_changelinks', ],
+        *['topics_changelinks', 'references_changelinks', 'quotes_changelinks',],
     ]
 
     fieldsets = [
@@ -195,9 +227,8 @@ class WordAdmin(BaseAdmin):
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
             'fields': (
-                '_description',
                 'dialect',
-                'britpick_type',
+                'category',
             ),
             'classes': ('optional-fieldset', 'indented-fieldset',)
         }),
@@ -209,6 +240,7 @@ class WordAdmin(BaseAdmin):
         (None, {
             'fields': (
                 ('references', 'references_changelinks'),
+                'quotes_changelinks',
             ),
             # 'classes': ('optional-fieldset',)
         }),
@@ -222,11 +254,16 @@ class WordAdmin(BaseAdmin):
         return getchangelinks(obj.references.all())
     references_changelinks.short_description = 'links'
 
+    def quotes_changelinks(self, obj):
+        # TODO: quotes_changelinks
+        return getchangelinks(Quote.objects.filter(words=obj))
+    quotes_changelinks.short_description = 'quotes'
+
 
 admin.site.register(Word, WordAdmin)
 
 class WordGroupAdmin(BaseAdmin):
-    pass
+    search_fields = ['name',]
 
 admin.site.register(WordGroup, WordGroupAdmin)
 

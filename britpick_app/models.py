@@ -3,109 +3,16 @@ from django.urls import reverse
 
 # britpick_app model
 class BaseModel(models.Model):
-    _name = models.CharField(max_length=100, blank=True, verbose_name='name')
-    _display_name = models.CharField(max_length=100, blank=True, help_text="overrides name for front-end display", verbose_name='display name')
-    _description = models.TextField(blank=True, verbose_name='description')
-    _display_description = models.TextField(blank=True, help_text="overrides description for front-end display", verbose_name='display description')
-    _active = models.BooleanField(default=True, verbose_name='active')
-    _hidden = models.BooleanField(default=False, verbose_name='hidden')
-    _verified = models.BooleanField(default=False, verbose_name='verified')
+    active = models.BooleanField(default=True, verbose_name='active')
+    hidden = models.BooleanField(default=False, verbose_name='hidden')
+    verified = models.BooleanField(default=False, verbose_name='verified')
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True, verbose_name='last edited')
+    notes = models.CharField(max_length=255, blank=True,)
 
     class Meta:
         abstract = True
 
-    def __str__(self):
-        return self.name
-
-    @property
-    def name(self):
-        if self._name:
-            return self._name
-        elif self._display_name:
-            return self._display_name
-        else:
-            return self.name_model_pk
-
-    @name.setter
-    def name(self, value):
-        self._name = value
-
-    @property
-    def name_model_pk(self):
-        return type(self).__name__ + ' [%s]' % str(self.pk)
-
-
-    @property
-    def name_verbose(self):
-        s = self.name_model_pk
-        if self._name:
-            s += ' ' + self._name
-        if self._display_name:
-            s += ' ' + '(%s)' % self._display_name
-        return s
-
-    @property
-    def display_name(self):
-        if self._display_name:
-            return self._display_name
-        else:
-            return self.name
-
-    @display_name.setter
-    def display_name(self, value):
-        self._display_name = value
-
-    @property
-    def display_name_verbose(self):
-        return self.display_name + ': ' + self.description
-
-    @property
-    def description(self):
-        if self._description:
-            return self._description
-        else:
-            return self._display_description
-
-    @description.setter
-    def description(self, value):
-        self._description = value
-
-    @property
-    def display_description(self):
-        if self._display_description:
-            return self._display_description
-        else:
-            return self._description
-
-    @display_description.setter
-    def display_description(self, value):
-        self._display_description = value
-
-    @property
-    def active(self):
-        return self._active
-
-    @active.setter
-    def active(self, value):
-        self._active = value
-
-    @property
-    def hidden(self):
-        return self._hidden
-
-    @hidden.setter
-    def hidden(self, value):
-        self._hidden = value
-
-    @property
-    def verified(self):
-        return self._verified
-
-    @verified.setter
-    def verified(self, value):
-        self._verified = value
 
 
 # class Suggestion(models.Model):
@@ -117,48 +24,66 @@ class BaseModel(models.Model):
 
 
 class Dialect(BaseModel):
+    name = models.CharField(max_length=100, blank=True,)
+    description = models.CharField(max_length=255, blank=True,)
+    limit_to_dialogue = models.BooleanField(default=False, help_text='search in dialogue only by default',)
     default = models.BooleanField(default=False)
-    spoken = models.BooleanField(default=False)
 
-class BritpickType(BaseModel):
-    """ mandatory, suggested, uncommon, informal, slang """
+
+    def __str__(self):
+        return self.name
 
 class BritpickCategory(BaseModel):
+    """ mandatory, suggested, common, uncommon, informal, slang """
+    name = models.CharField(max_length=100, blank=True)
+    description = models.CharField(max_length=255, blank=True)
+    allow_for_word = models.BooleanField(default=False)
+    default = models.BooleanField(default=False)
+
+    def __str__(self):
+        return self.name
+
+class BritpickType(BaseModel):
     # formerly 'explanation'
-    default_britpick_type = models.ForeignKey(
-        "BritpickType",
-        on_delete=models.CASCADE,
-        blank=True,
-        null=True,
-        related_name='categories',
-        help_text=
-            """
-            Categories may have specific types they lend themselves to
-            (ex same idea/different word -> mandatory)
-            This allows automatic assigning of types to Britpicks if they aren't manually specified
-            """,
-    )
+    name = models.CharField(max_length=100, blank=True, help_text='backend')
+    explanation = models.CharField(max_length=255, blank=True, help_text='frontend')
+    # default_britpick_category = models.ForeignKey(
+    #     "models.BritpickCategory",
+    #     on_delete=models.PROTECT,
+    #     blank=True,
+    #     null=True,
+    #     help_text=
+    #         """
+    #         May have specific categories it lends itself to
+    #         (ex same idea/different word -> mandatory)
+    #         This allows automatic assigning of types to Britpicks if they aren't manually specified
+    #         """,
+    # )
 
-
-
-
+    def __str__(self):
+        return self.name
 
 
 class Reference(BaseModel):
-    main_reference = models.BooleanField(default=False)
+    name = models.CharField(max_length=100, blank=True)
     url = models.URLField()
+    main_reference = models.BooleanField(default=False)
     site_name = models.CharField(max_length=100, blank=True)
-    page_name = models.CharField(max_length=300, blank=True)
+    page_name = models.CharField(max_length=100, blank=True)
 
+    def __str__(self):
+        return self.name
 
 class Quote(BaseModel):
-    text = models.TextField(
-        blank=True,
-        verbose_name='quote',
-    )
-    reference = models.ForeignKey("Reference", on_delete=models.CASCADE, related_name='quotes', null=True, blank=True,)
-    word = models.ForeignKey("Word", on_delete=models.CASCADE, related_name='quotes', null=True, blank=True,)
+    quote = models.TextField(blank=True,)
+    reference = models.ForeignKey("Reference", on_delete=models.PROTECT, related_name='quotes', null=True, blank=True,)
+    words = models.ManyToManyField("Word", related_name='quotes', blank=True,)
 
+    def __str__(self):
+        s = '"' + self.quote[:25] + '..."'
+        if self.words:
+            s += ' [%s]' % ','.join(w.word for w in self.words.all())
+        return s
 
 class Topic(BaseModel):
     """
@@ -174,11 +99,13 @@ class Topic(BaseModel):
         (WORD, 'word'),
     )
 
+    name = models.CharField(max_length=50, blank=True)
+    slug = models.SlugField(null=True, blank=True,)
     topic_type = models.CharField(max_length=20, choices=TOPIC_TYPES, default=TOPIC)
 
     dialect = models.ForeignKey(
         "Dialect",
-        models.CASCADE,
+        models.PROTECT,
         related_name='topics',
         blank=True,
         null=True,
@@ -213,24 +140,25 @@ class Britpick(BaseModel):
 
     for use in-text and in showing relationships in a topic
     """
+    dialect = models.ForeignKey(
+        "Dialect",
+        models.PROTECT,
+        related_name='britpicks',
+        null=True,
+        default=3, #british
+    )
 
-    # dialect = models.ForeignKey(
-    #     "Dialect",
-    #     models.CASCADE,
-    #     related_name='britpicks',
-    #     default=Dialect.objects.get(default=True).pk,
-    # )
-
-    # could prepopulate type with link from category?
-    type = models.ForeignKey(
-        "BritpickType",
-        models.CASCADE,
+    category = models.ForeignKey(
+        "BritpickCategory",
+        models.PROTECT,
         related_name='britpicks',
         blank=True,
         null=True,
+        default=2, #suggested
     )
-    categories = models.ManyToManyField(
-        "BritpickCategory",
+
+    types = models.ManyToManyField(
+        "BritpickType",
         blank=True,
         related_name='britpicks',
     )
@@ -279,7 +207,7 @@ class Britpick(BaseModel):
 class SearchString(BaseModel):
 
     # foreign key - so that any duplicates have to be made with groups
-    searched_by = models.ForeignKey("Britpick", on_delete=models.CASCADE, related_name='search_strings', blank=True, null=True)
+    searched_by = models.ForeignKey("Britpick", on_delete=models.PROTECT, related_name='search_strings', blank=True, null=True)
 
     string = models.CharField(max_length=300)
     # options created from separate searchwords functions/regex wrapper to create pattern; ie preserve all words, preserve case, beginning of sentence, end of phrase, question, noun
@@ -288,22 +216,22 @@ class SearchString(BaseModel):
 
     # search patterns (verbose)
     # search patterns (trie)
-    _pattern = models.TextField(blank=True)
-
-    @property
-    def name(self):
-        s = self.string
-        if self._name:
-            s += ' (%s)' % self._name
-        return s
-
-    @property
-    def pattern(self):
-        return self._pattern
-
-    @pattern.setter
-    def pattern(self, value):
-        self._pattern = value
+    # _pattern = models.TextField(blank=True)
+    #
+    # @property
+    # def name(self):
+    #     s = self.string
+    #     if self._name:
+    #         s += ' (%s)' % self._name
+    #     return s
+    #
+    # @property
+    # def pattern(self):
+    #     return self._pattern
+    #
+    # @pattern.setter
+    # def pattern(self, value):
+    #     self._pattern = value
 
 
 
@@ -314,7 +242,7 @@ class SearchGroup(BaseModel):
     can use with things like idiot that could have multiple results based on dialect
     also use with things contexts to include/exclude (driving context, swimming context)
     """
-
+    name = models.CharField(max_length=100, blank=True)
     search_strings = models.ManyToManyField("SearchString", blank=True, related_name='search_groups',)
 
 
@@ -326,7 +254,7 @@ class SearchVariables(BaseModel):
 class Word(BaseModel):
 
     word = models.CharField(
-        max_length=200,
+        max_length=255,
         help_text=
             """
                 not unique (ex 'grade')
@@ -335,16 +263,19 @@ class Word(BaseModel):
             """,
     )
 
+    description = models.CharField(max_length=255, blank=True)
+
+    # AND/OR GET DIALECT DYNAMICALLY THROUGH BRITPICK - make property???
     dialect = models.ForeignKey(
         "Dialect",
-        models.CASCADE,
+        models.PROTECT,
         related_name='words',
         blank=True,
         null=True,
     )
-    britpick_type = models.ForeignKey(
-        "BritpickType",
-        models.CASCADE,
+    category = models.ForeignKey(
+        "BritpickCategory",
+        models.PROTECT,
         related_name='words',
         blank=True,
         null=True,
@@ -355,8 +286,6 @@ class Word(BaseModel):
             """,
     )
 
-    # quotes = models.ManyToManyField("Quote", blank=True, related_name='words',)
-    # word_topic = models.ForeignKey("Topic", on_delete=models.CASCADE, related_name='words', blank=True, null=True,)
     topics = models.ManyToManyField(
         "Topic",
         related_name='words',
@@ -369,24 +298,12 @@ class Word(BaseModel):
     )
     references = models.ManyToManyField("Reference", blank=True, related_name='words')
 
-    @property
-    def name(self):
-        return self.word
-
-    @name.setter
-    def name(self, value):
-        self.word = value
 
 
 class WordGroup(BaseModel):
     words = models.ManyToManyField("Word", blank=True, related_name='groups',)
 
 
-
-
-# class Spelling(models.Model):
-#     find_string = models.CharField(max_length=100)
-#     replace_string = models.CharField(max_length=100)
 
 
 
