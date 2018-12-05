@@ -8,12 +8,19 @@ class BaseModel(models.Model):
     verified = models.BooleanField(default=False, verbose_name='verified')
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True, verbose_name='last edited')
-    notes = models.CharField(max_length=255, blank=True,)
+    notes = models.TextField(blank=True,)
 
     class Meta:
         abstract = True
 
 
+class OrderedModel(BaseModel):
+    ORDERING_CHOICES = [(x, str(x)) for x in range(100)]
+    ordering = models.IntegerField(default=99, choices=ORDERING_CHOICES)
+
+    class Meta:
+        ordering = ['ordering']
+        abstract = True
 
 # class Suggestion(models.Model):
 #     # can use for back-end notes and front-end suggestions
@@ -25,40 +32,51 @@ class BaseModel(models.Model):
 
 class Dialect(BaseModel):
     name = models.CharField(max_length=100, blank=True,)
-    description = models.CharField(max_length=255, blank=True,)
+    description = models.TextField(blank=True)
     limit_to_dialogue = models.BooleanField(default=False, help_text='search in dialogue only by default',)
     default = models.BooleanField(default=False)
 
+    class Meta:
+        ordering = ['-default', 'hidden', 'name',]
 
     def __str__(self):
-        return self.name
+        if self.default:
+            return '*' + self.name
+        elif self.hidden:
+            return '(%s)' % self.name
+        else:
+            return self.name
 
-class BritpickCategory(BaseModel):
+
+
+class BritpickCategory(OrderedModel):
     """ mandatory, suggested, common, uncommon, informal, slang """
+
     name = models.CharField(max_length=100, blank=True)
-    description = models.CharField(max_length=255, blank=True)
+    description = models.TextField(blank=True)
     allow_for_word = models.BooleanField(default=False)
     default = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
 
-class BritpickType(BaseModel):
+
+class BritpickType(OrderedModel):
     # formerly 'explanation'
-    name = models.CharField(max_length=100, blank=True, help_text='backend')
-    explanation = models.CharField(max_length=255, blank=True, help_text='frontend')
-    # default_britpick_category = models.ForeignKey(
-    #     "models.BritpickCategory",
-    #     on_delete=models.PROTECT,
-    #     blank=True,
-    #     null=True,
-    #     help_text=
-    #         """
-    #         May have specific categories it lends itself to
-    #         (ex same idea/different word -> mandatory)
-    #         This allows automatic assigning of types to Britpicks if they aren't manually specified
-    #         """,
-    # )
+    name = models.CharField(max_length=100, blank=True, help_text='for selecting on backend')
+    explanation = models.TextField(blank=True, help_text='frontend')
+    default_britpick_category = models.ForeignKey(
+        "BritpickCategory",
+        on_delete=models.PROTECT,
+        blank=True,
+        null=True,
+        help_text=
+            """
+            May have specific categories it lends itself to
+            (ex same idea/different word -> mandatory)
+            This allows automatic assigning of types to Britpicks if they aren't manually specified
+            """,
+    )
 
     def __str__(self):
         return self.name
@@ -77,13 +95,14 @@ class Reference(BaseModel):
 class Quote(BaseModel):
     quote = models.TextField(blank=True,)
     reference = models.ForeignKey("Reference", on_delete=models.PROTECT, related_name='quotes', null=True, blank=True,)
+    reference_url = models.URLField(blank=True, null=True, help_text='use to quickly add reference; it will either be assigned existing reference or create new one')
     words = models.ManyToManyField("Word", related_name='quotes', blank=True,)
 
     def __str__(self):
-        s = '"' + self.quote[:25] + '..."'
-        if self.words:
-            s += ' [%s]' % ','.join(w.word for w in self.words.all())
-        return s
+        if len(self.quote) < 25:
+            return '"%s"' % self.quote
+        else:
+            return '"%s"' % (self.quote[:23] + '...')
 
 class Topic(BaseModel):
     """
@@ -263,7 +282,7 @@ class Word(BaseModel):
             """,
     )
 
-    description = models.CharField(max_length=255, blank=True)
+    explanation = models.TextField(blank=True,)
 
     # AND/OR GET DIALECT DYNAMICALLY THROUGH BRITPICK - make property???
     dialect = models.ForeignKey(
@@ -301,7 +320,9 @@ class Word(BaseModel):
 
 
 class WordGroup(BaseModel):
+    name = models.CharField(max_length=100, blank=True)
     words = models.ManyToManyField("Word", blank=True, related_name='groups',)
+
 
 
 
