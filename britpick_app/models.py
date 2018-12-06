@@ -99,10 +99,10 @@ class Quote(BaseModel):
     words = models.ManyToManyField("Word", related_name='quotes', blank=True,)
 
     def __str__(self):
-        if len(self.quote) < 25:
+        if len(self.quote) < 50:
             return '"%s"' % self.quote
         else:
-            return '"%s"' % (self.quote[:23] + '...')
+            return '"%s"' % (self.quote[:48] + '...')
 
 class Topic(BaseModel):
     """
@@ -146,7 +146,8 @@ class Topic(BaseModel):
     # def get_absolute_url(self):
         # return reverse('people.views.details', args=[str(self.id)])
 
-
+    def __str__(self):
+        return self.name
 
 
 
@@ -317,6 +318,12 @@ class Word(BaseModel):
     )
     references = models.ManyToManyField("Reference", blank=True, related_name='words')
 
+    @property
+    def explanation_present(self):
+        return bool(self.explanation)
+
+    def __str__(self):
+        return self.word
 
 
 class WordGroup(BaseModel):

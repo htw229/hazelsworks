@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django import forms
 from django.utils.html import mark_safe
+from django.db.models import Count
 
 from britpick_app.models import *
 
@@ -15,7 +16,7 @@ class BaseAdmin(admin.ModelAdmin):
 
     ACTIVE_VERIFIED_FIELDSET = (None, {
         'fields': (('active', 'verified', 'hidden',),),
-        'classes': (),
+        'classes': ('checkbox-fieldset', 'optional-fieldset',),
     })
 
     READONLY_FIELDS = ['date_edited',]
@@ -44,6 +45,11 @@ class BaseAdmin(admin.ModelAdmin):
 
         return formfield
 
+    def britpickcount(self, obj):
+        return obj.britpicks.count()
+    britpickcount.short_description = 'Britpicks'
+
+
 class OrderedAdmin(BaseAdmin):
     list_display = ['ordering',*BaseAdmin.list_display,]
     list_editable = ['ordering',*BaseAdmin.list_editable,]
@@ -71,7 +77,13 @@ class DialectAdmin(BaseAdmin):
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
             'fields': (
-                'default', 'limit_to_dialogue', 'description',
+                ('default', 'limit_to_dialogue',),
+            ),
+            'classes': ('checkbox-fieldset',)
+        }),
+        (None, {
+            'fields': (
+                'description',
             ),
         }),
         BaseAdmin.FOOTER_FIELDSET,
@@ -83,6 +95,34 @@ class DialectAdmin(BaseAdmin):
 
 
 admin.site.register(Dialect, DialectAdmin)
+
+
+
+class BritpicksFilter(admin.SimpleListFilter):
+    title = 'britpicks'
+    parameter_name = 'num_britpicks'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('0', 'none'),
+            ('1', 'one'),
+            ('2', 'multiple'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == '0':
+            return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks=0)
+        if self.value() == '1':
+            return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks=1)
+        if self.value() == '2':
+            return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks__gt=1)
+
+
+
+
+
+
+
 
 
 class BritpickCategoryAdmin(OrderedAdmin):
@@ -99,7 +139,13 @@ class BritpickCategoryAdmin(OrderedAdmin):
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
             'fields': (
-                'description','allow_for_word', 'default',
+                ('allow_for_word', 'default'),
+            ),
+            'classes': ('checkbox-fieldset',)
+        }),
+        (None, {
+            'fields': (
+                'description',
             ),
         }),
         BaseAdmin.FOOTER_FIELDSET,
@@ -118,16 +164,16 @@ class BritpickTypeAdmin(OrderedAdmin):
     fieldsets = [
         (None, {
             'fields': (
-                'name',
+                'name', 'explanation',
             ),
             'classes': ('header-fieldset',)
         }),
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
-        (None, {
-            'fields': (
-                'explanation',
-            ),
-        }),
+        # (None, {
+        #     'fields': (
+        #         'explanation',
+        #     ),
+        # }),
         (None, {
             'fields': (
                 'default_britpick_category',
@@ -145,16 +191,20 @@ class ReferenceAdmin(BaseAdmin):
     readonly_fields = [*BaseAdmin.readonly_fields, 'site_name', 'page_name',]
 
     fieldsets = [
-        # (None, {
-        #     'fields': (
-        #         'name',
-        #     ),
-        #     'classes': ('header-fieldset',)
-        # }),
-        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
             'fields': (
-                'name', 'main_reference', 'url',
+                'name',
+            ),
+            'classes': ('header-fieldset',)
+        }),
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': (('main_reference',),),
+            'classes': ('checkbox-fieldset',),
+        }),
+        (None, {
+            'fields': (
+                'url',
             ),
         }),
         (None, {
@@ -183,10 +233,18 @@ class QuoteAdmin(BaseAdmin):
 
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
-            'fields': ('quote', 'words', 'reference_url', 'reference', ),
+            'fields': ('quote','words',),
+        }),
+        (None, {
+            'fields': (
+                'reference', 'reference_url',
+            ),
+            'classes': ('optional-fieldset',)
         }),
         BaseAdmin.FOOTER_FIELDSET,
     ]
+
+    mediumtextfields = [*BaseAdmin.mediumtextfields, 'quote',]
 
     def linkedwords(self, obj):
         return ', '.join(w.word for w in Word.objects.filter(quotes=obj.pk))
@@ -277,7 +335,7 @@ class BritpickAdmin(BaseAdmin):
 admin.site.register(Britpick, BritpickAdmin)
 
 class SearchStringAdmin(BaseAdmin):
-    pass
+    list_filter = [*BaseAdmin.list_filter]
 
 admin.site.register(SearchString, SearchStringAdmin)
 
@@ -297,17 +355,64 @@ admin.site.register(SearchVariables)
 #     autocomplete_fields = ('reference',)
 #     # insert_before = ''
 
+# class WordQuoteInline(admin.TabularInline):
+#     model = Quote.words.through
+#     extra = 0
+#     readonly_fields = ['quote',]
+
+class WordExplanationExistsFilter(admin.SimpleListFilter):
+    title = 'explanation exists'
+    parameter_name = 'explanation_exists'
+    #
+    def lookups(self, request, model_admin):
+        return (
+            ('true', 'explanation exists'),
+            ('false', 'no explanation')
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'false':
+            return queryset.filter(explanation='')
+        if self.value() == 'true':
+            return queryset.exclude(explanation='')
+
+class WordBritpickCountFilter(admin.SimpleListFilter):
+    title = 'britpicks'
+    parameter_name = 'britpick_count'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('none', '0'),
+            ('1', '1'),
+            ('multiple', '> 1'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == 'none':
+            return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks=0)
+        if self.value() == '1':
+            return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks=1)
+        if self.value() == 'multiple':
+            return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks__gt=1)
+
+
+
+
+
+
 class WordAdmin(BaseAdmin):
-    # inlines = [WordQuoteInline,]
-    search_fields = ['word',]
+    search_fields = ['word', 'explanation', 'topics__name',]
+    list_display = [*BaseAdmin.list_display, 'dialect', 'category', 'explanation_exists', 'quotes_count', 'topics_count', 'references_count','britpickcount']
+    list_filter = [*BaseAdmin.list_filter, 'dialect', 'category', WordExplanationExistsFilter,BritpicksFilter, 'topics',]
+
     autocomplete_fields = ('topics', 'references',)
     readonly_fields = [
         *BaseAdmin.readonly_fields,
-        *['topics_changelinks', 'references_changelinks', 'quotes_changelinks',],
+        *['topics_changelinks', 'references_changelinks', 'quotes_changelinks', 'britpicks_changelinks'],
     ]
+    # inlines = [WordQuoteInline,]
 
     fieldsets = [
-        BaseAdmin.FOOTER_FIELDSET,
         (None, {
             'fields': (
                 'word',
@@ -324,16 +429,17 @@ class WordAdmin(BaseAdmin):
         }),
         (None, {
             'fields': (
-                ('topics', 'topics_changelinks'),
+                'explanation',('topics', 'topics_changelinks'),
             ),
         }),
         (None, {
             'fields': (
                 ('references', 'references_changelinks'),
-                'quotes_changelinks',
+                'quotes_changelinks', 'britpicks_changelinks',
             ),
             # 'classes': ('optional-fieldset',)
         }),
+        BaseAdmin.FOOTER_FIELDSET,
     ]
 
     def topics_changelinks(self, obj):
@@ -345,10 +451,31 @@ class WordAdmin(BaseAdmin):
     references_changelinks.short_description = 'links'
 
     def quotes_changelinks(self, obj):
-        # TODO: quotes_changelinks
-        return getchangelinks(Quote.objects.filter(words=obj))
+        return getchangelinks(obj.quotes.all(), add_link=True, model_name='quote', attr='quote',)
     quotes_changelinks.short_description = 'quotes'
 
+    def britpicks_changelinks(self, obj):
+        return getchangelinks(obj.britpicks.all(), add_link=True, model_name='britpick')
+    britpicks_changelinks.short_description = 'britpicks'
+
+    def topics_count(self, obj):
+        return obj.topics.all().count()
+    topics_count.short_description = 'topics'
+
+    def references_count(self, obj):
+        return obj.references.all().count()
+    references_count.short_description = 'references'
+
+    def quotes_count(self, obj):
+        return obj.quotes.all().count()
+    quotes_count.short_description = 'quotes'
+
+    def explanation_exists(self, obj):
+        if obj.explanation:
+            return mark_safe('<img src="/static/admin/img/icon-yes.svg" alt="True">')
+        else:
+            return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
+    explanation_exists.short_description = 'explanation'
 
 admin.site.register(Word, WordAdmin)
 
@@ -357,11 +484,33 @@ class WordGroupAdmin(BaseAdmin):
 
 admin.site.register(WordGroup, WordGroupAdmin)
 
-def getchangelinks(objs, label = ''):
+def getchangelinks(objs, label = '', add_link=False, model_name = None, attr = None):
     links = []
     for o in objs:
-        links.append('<div>%s <a href="%s" class="related-widget-wrapper-link add-related">%s</a></div>' % (label,
-        reverse("admin:britpick_app_%s_change" % type(o).__name__.lower(), args=(o.id,)), o.name))
+        if attr:
+            s = getattr(o,attr)
+        else:
+            s = str(o)
+        links.append('<div>%s <a href="%s" class="related-widget-wrapper-link add-related change-icon">%s</a></div>' % (label,
+        reverse("admin:britpick_app_%s_change" % type(o).__name__.lower(), args=(o.id,)), s))
+
+    if add_link:
+        try:
+            links.append('<div>%s <a href="%s" class="related-widget-wrapper-link add-related">%s</a></div>' % (
+                label,
+                reverse("admin:britpick_app_%s_add" %
+                        type(objs[0]).__name__.lower(),
+                        args=()),
+                '<img src="/static/admin/img/icon-addlink.svg" alt="Add">'))
+        except IndexError:
+            links.append('<div>%s <a href="%s" class="related-widget-wrapper-link add-related">%s</a></div>' % (
+                label,
+                reverse("admin:britpick_app_%s_add" %
+                        model_name,
+                        args=()),
+                '<img src="/static/admin/img/icon-addlink.svg" alt="Add">'))
     html = ' '.join(links)
+
+
     return mark_safe(html)
 

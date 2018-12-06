@@ -8,6 +8,7 @@
 
 .module.aligned label {
     max-width: 90px;
+    text-align: right;
 }
 
 .module.aligned label.vCheckboxLabel.inline {
@@ -76,6 +77,33 @@ fieldset label {
 }
 
 
+@media (max-width: 1024px) {
+    fieldset .field-box {
+        float: left !important;
+        margin: initial !important;
+        margin-right: 20px !important;
+        padding: 10px !important;
+        border-top: 0 !important;
+    }
+
+    fieldset.checkbox-fieldset .field-box {
+        padding: 5px !important;
+    }
+
+    label {
+        font-size: 13px !important;
+    }
+
+    .aligned label {
+        padding-top: 0 !important;
+    }
+
+    .form-row select {
+        font-size: 13px !important;
+    }
+}
+
+
 fieldset {
     margin-left: 15px;
     /*padding-left: 15px;*/
@@ -85,6 +113,11 @@ fieldset {
 fieldset.header-fieldset {
     background-color: #79aec8;
     margin-left: 0;
+    padding-left: 15px;
+}
+
+fieldset.header-fieldset .form-row {
+    border-bottom: none;
 }
 
 fieldset.header-fieldset label {
@@ -103,12 +136,35 @@ fieldset.indented-fieldset {
 fieldset.internal-fieldset {
     background-color: #e6e6e6;
     margin-left: 0;
+    margin-top: 10px;
 }
 
 fieldset.internal-fieldset label {
     color: #969696 !important;
     font-weight: normal !important;
 }
+
+fieldset.internal-fieldset .form-row {
+    padding-top: 3px;
+    padding-bottom: 3px;
+}
+
+fieldset.checkbox-fieldset .form-row {
+    padding: 5px;
+    border-bottom: none;
+}
+
+fieldset.checkbox-fieldset {
+    background-color: #f8f8f8;
+    margin-left: 0;
+    padding-left: 125px !important;
+    border: 1px solid #eee;
+    /*border-left: 1px solid #eee;*/
+    /*border-bottom: 1px solid #eee;*/
+    /*border-right: 1px solid #eee;*/
+}
+
+
 
 
 fieldset.optional-fieldset {
@@ -157,8 +213,22 @@ fieldset.optional-fieldset label {
 
 form .aligned div.help,
 form .aligned input + div.help {
-    margin-left: 90px;
+    /*margin-left: 90px !important;*/
+    margin-left: 18px !important;
     max-width: 250px;
+}
+
+.aligned label {
+    padding-top: 0;
+}
+
+.aligned label + div.readonly {
+    padding: 3px 0;
+}
+
+.aligned label + p {
+    margin-left: 100px;
+    padding-top: 0;
 }
 
 .model-word div#quotes-group td {
@@ -186,23 +256,7 @@ form .aligned input + div.help {
     /*width: 100%;*/
 /*}*/
 
-@media (max-width: 1024px) {
-    fieldset .field-box {
-        float: left !important;
-        margin: initial !important;
-        margin-right: 20px !important;
-        padding: 10px !important;
-        border-top: 0 !important;
-    }
 
-    label {
-        font-size: 13px !important;
-    }
-
-    .form-row select {
-        font-size: 13px !important;
-    }
-}
 
 [class*="_category"] a.related-widget-wrapper-link, [class*="-category"] a.related-widget-wrapper-link, [class*="-types"] a.related-widget-wrapper-link, [class*="-dialect"] a.related-widget-wrapper-link {
     display: none;
@@ -230,12 +284,20 @@ form .aligned input + div.help {
 
 .field-box[class*="_changelinks"] .readonly {
     margin-left: 0;
+}
+
+[class*="_changelinks"] .readonly {
     font-size: 14px;
 }
 
-.field-box[class*="_changelinks"] .readonly a:after {
+[class*="_changelinks"] .readonly a.change-icon:after {
     content:url(/static/admin/img/icon-changelink.svg);
     margin-left: 5px
+}
+
+.field-quotes_changelinks .readonly div {
+    margin-bottom: 0.75em;
+    font-size: 13px;
 }
 
 /*.britpick-inline select {*/
