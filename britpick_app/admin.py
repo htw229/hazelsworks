@@ -56,10 +56,10 @@ class OrderedAdmin(BaseAdmin):
 
     max_choices = 1
 
-    def formfield_for_choice_field(self, db_field, request, **kwargs):
-        if db_field.name == "ordering":
-            kwargs['choices'] = [(x, str(x)) for x in range(1, self.max_choices + 1)]
-        return super(OrderedAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
+    # def formfield_for_choice_field(self, db_field, request, **kwargs):
+    #     if db_field.name == "ordering":
+    #         kwargs['choices'] = [(x, str(x)) for x in range(1, self.max_choices + 1)]
+    #     return super(OrderedAdmin, self).formfield_for_choice_field(db_field, request, **kwargs)
 
 class DialectAdmin(BaseAdmin):
     list_display = ('__str__', 'default', 'limit_to_dialogue', 'active', 'hidden', 'britpickcount')
@@ -274,28 +274,29 @@ class BritpickAdmin(BaseAdmin):
 
     readonly_fields = [
         *BaseAdmin.readonly_fields,
-        *['words_changelinks','search_changelinks','word_groups_changelinks','topics_changelinks', 'references_changelinks',],
+        *['words_changelinks','search_changelinks','word_groups_changelinks','topics_changelinks', 'references_changelinks', 'require_search_groups_changelinks', 'exclude_search_groups_changelinks', 'search_groups_changelinks','default_category', 'additional_types',],
     ]
 
     # readonly_fields = [f for f in BaseAdmin.readonly_fields]
     # readonly_fields.extend(['words_changelinks','search_changelinks','exclude_search_groups_changelinks','require_search_groups_changelinks','word_groups_changelinks','topics_changelinks', 'references_changelinks',])
 
     fieldsets = [
-        BaseAdmin.FOOTER_FIELDSET,
+
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
-            'fields': ('dialect', 'category', 'types',),
+            'fields': ('dialect', ('category', 'default_category',), ('types', 'additional_types'),),
+            'classes': ('lightgray-fieldset', )
         }),
-        (None, {
-            'fields': ('search_changelinks',),
-        }),
+        # (None, {
+        #     'fields': ('search_changelinks',),
+        # }),
         ('edit search', {
-            'classes': ('collapse',),
-            'fields': ('search_groups', 'exclude_search_groups', 'require_search_groups',),
+            'classes': ('inlineemphasis-fieldset',),
+            'fields': (('search_groups', 'search_groups_changelinks',), ('exclude_search_groups', 'exclude_search_groups_changelinks', 'require_search_groups', 'require_search_groups_changelinks',),),
         }),
 
         (None, {
-            'fields': (('words', 'words_changelinks', 'word_groups', 'word_groups_changelinks'),),
+            'fields': (('words', 'words_changelinks',), ('word_groups', 'word_groups_changelinks'), ('explanation',)),
         }),
         (None, {
             'fields': (('topics','topics_changelinks','always_show_topic_names',),),
@@ -303,6 +304,7 @@ class BritpickAdmin(BaseAdmin):
         (None, {
             'fields': (('references','references_changelinks'),),
         }),
+        BaseAdmin.FOOTER_FIELDSET,
     ]
 
     def words_changelinks(self, obj):
@@ -321,6 +323,29 @@ class BritpickAdmin(BaseAdmin):
         return getchangelinks(obj.references.all())
     references_changelinks.short_description = 'links'
 
+    def search_groups_changelinks(self, obj):
+        return getchangelinks(obj.search_groups.all())
+    search_groups_changelinks.short_description = 'links'
+
+    def exclude_search_groups_changelinks(self, obj):
+        return getchangelinks(obj.exclude_search_groups.all())
+    exclude_search_groups_changelinks.short_description = 'links'
+
+    def require_search_groups_changelinks(self, obj):
+        return getchangelinks(obj.require_search_groups.all())
+    require_search_groups_changelinks.short_description = 'links'
+
+    def default_category(self, obj):
+        # category = obj.getcategory()
+        return str(obj.getcategory()) + ' (from %s)' % obj.getcategorysource()
+    default_category.short_description = 'default'
+
+    def additional_types(self, obj):
+        types = []
+        for w in obj.words.all():
+            types.extend(t for t in w.types.all())
+        return ', '.join(str(t) for t in types)
+    additional_types.short_description = 'types from words'
 
     def search_changelinks(self, obj):
         s = getchangelinks(obj.search_strings.all())
@@ -329,13 +354,32 @@ class BritpickAdmin(BaseAdmin):
         s += getchangelinks(obj.require_search_groups.all(), label='require:')
 
         return mark_safe(s)
-
     search_changelinks.short_description = 'search'
 
 admin.site.register(Britpick, BritpickAdmin)
 
+
+
+class SearchStringBritpicksFilter(admin.SimpleListFilter):
+    title = 'britpicks'
+    parameter_name = 'num_britpicks'
+
+    def lookups(self, request, model_admin):
+        return (
+            ('1', 'Yes'),
+            ('0', 'No'),
+        )
+
+    def queryset(self, request, queryset):
+        if self.value() == '1':
+            return queryset.filter(searched_by__isnull=False)
+        if self.value() == '0':
+            return queryset.filter(searched_by__isnull=True)
+
+
+
 class SearchStringAdmin(BaseAdmin):
-    list_filter = [*BaseAdmin.list_filter]
+    list_filter = [*BaseAdmin.list_filter, SearchStringBritpicksFilter]
 
 admin.site.register(SearchString, SearchStringAdmin)
 
@@ -396,21 +440,40 @@ class WordBritpickCountFilter(admin.SimpleListFilter):
             return queryset.annotate(num_britpicks=Count('britpicks')).filter(num_britpicks__gt=1)
 
 
+class WordDefinitionInline(admin.TabularInline):
+    model = Definition
+    extra = 0
+    fields = ('dialect', 'definition',)
+    # insert_before = 'topics'
+    insert_after = 'types'
+    formfield_overrides = {
+        models.TextField: {'widget': forms.Textarea(attrs={'class':'vLargeTextField medium-text-field',})}
+    }
 
-
-
+    def formfield_for_foreignkey(self, db_field, request, **kwargs):
+        if db_field.name == "dialect":
+            # try:
+            #     parent_obj_id = request.resolver_match.args[0]
+            #     obj = Word.objects.get(id=parent_obj_id)
+            #     kwargs["queryset"] = Dialect.objects.filter(some_filtering_here=parent_obj_id)
+            # except IndexError:
+            #     pass
+            kwargs["queryset"] = Dialect.objects.order_by('-default','-hidden','name',)
+        return super(WordDefinitionInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 class WordAdmin(BaseAdmin):
     search_fields = ['word', 'explanation', 'topics__name',]
     list_display = [*BaseAdmin.list_display, 'dialect', 'category', 'explanation_exists', 'quotes_count', 'topics_count', 'references_count','britpickcount']
     list_filter = [*BaseAdmin.list_filter, 'dialect', 'category', WordExplanationExistsFilter,BritpicksFilter, 'topics',]
 
-    autocomplete_fields = ('topics', 'references',)
+    inlines = [WordDefinitionInline, ]
+
+    autocomplete_fields = ('topics', 'references','types',)
     readonly_fields = [
         *BaseAdmin.readonly_fields,
-        *['topics_changelinks', 'references_changelinks', 'quotes_changelinks', 'britpicks_changelinks'],
+        *['topics_changelinks', 'references_changelinks', 'quotes_changelinks', 'britpicks_changelinks', 'default_category'],
     ]
-    # inlines = [WordQuoteInline,]
+
 
     fieldsets = [
         (None, {
@@ -423,14 +486,20 @@ class WordAdmin(BaseAdmin):
         (None, {
             'fields': (
                 'dialect',
-                'category',
+                ('category', 'default_category',),
             ),
-            'classes': ('optional-fieldset', 'indented-fieldset',)
+            'classes': ('optional-fieldset', )
         }),
         (None, {
             'fields': (
                 'explanation',('topics', 'topics_changelinks'),
             ),
+        }),
+        ('definitions', {
+            'fields': (
+                'types',
+            ),
+            'classes': ('inlineemphasis-fieldset',)
         }),
         (None, {
             'fields': (
@@ -477,12 +546,23 @@ class WordAdmin(BaseAdmin):
             return mark_safe('<img src="/static/admin/img/icon-no.svg" alt="False">')
     explanation_exists.short_description = 'explanation'
 
+    def default_category(self, obj):
+        # category = obj.getcategory()
+        return str(obj.getcategory()) + ' (from %s)' % obj.getcategorysource()
+    default_category.short_description = 'default'
+
 admin.site.register(Word, WordAdmin)
 
 class WordGroupAdmin(BaseAdmin):
     search_fields = ['name',]
-
 admin.site.register(WordGroup, WordGroupAdmin)
+
+class DefinitionAdmin(BaseAdmin):
+    pass
+
+admin.site.register(Definition, DefinitionAdmin)
+
+
 
 def getchangelinks(objs, label = '', add_link=False, model_name = None, attr = None):
     links = []

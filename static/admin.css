@@ -51,7 +51,8 @@ fieldset label {
 
 .medium-text-field {
     max-height: 5em;
-    max-width: 25em;
+    max-width: 260px;
+    /*to match input boxes*/
 }
 
 .select2 .select2-container .select2-container--admin-autocomplete {
@@ -82,6 +83,7 @@ fieldset label {
         float: left !important;
         margin: initial !important;
         margin-right: 20px !important;
+        margin-left: -10px !important;
         padding: 10px !important;
         border-top: 0 !important;
     }
@@ -164,8 +166,38 @@ fieldset.checkbox-fieldset {
     /*border-right: 1px solid #eee;*/
 }
 
+fieldset.inlineemphasis-fieldset {
+    margin-left: 0;
+    background-color: #c5dbe6;
+    /*border: none;*/
+}
 
+fieldset.inlineemphasis-fieldset h2 {
+    /*margin: 0 0 0 -15px;*/
+}
 
+/*fieldset.inlinemphasis-fieldset div.form-row {*/
+    /*border: none;*/
+/*}*/
+
+fieldset.inlineemphasis-fieldset .form-row {
+    /*margin-right: 15px;*/
+    margin-left: 15px;
+    margin-right: 15px;
+    border-bottom-color: #d3ebf7;
+}
+
+fieldset.lightgray-fieldset {
+    background-color: #f8f8f8;
+    border: 1px solid #eee;
+    margin-left: 0;
+}
+
+fieldset.darkgray-fieldset {
+    background-color: #969696;
+    border: 1px solid #eee;
+    color: #969696 !important;
+}
 
 fieldset.optional-fieldset {
     /*background-color: #f8f8f8;*/

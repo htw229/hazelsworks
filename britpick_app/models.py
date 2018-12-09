@@ -15,7 +15,7 @@ class BaseModel(models.Model):
 
 
 class OrderedModel(BaseModel):
-    ORDERING_CHOICES = [(x, str(x)) for x in range(100)]
+    ORDERING_CHOICES = [(x, str(x)) for x in range(1,100)]
     ordering = models.IntegerField(default=99, choices=ORDERING_CHOICES)
 
     class Meta:
@@ -55,6 +55,7 @@ class BritpickCategory(OrderedModel):
     name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     allow_for_word = models.BooleanField(default=False)
+    # dialogue_default = models.BooleanField(default=False)
     default = models.BooleanField(default=False)
 
     def __str__(self):
@@ -90,7 +91,10 @@ class Reference(BaseModel):
     page_name = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-        return self.name
+        if self.name:
+            return self.name
+        else:
+            return str(self.url)[:25]
 
 class Quote(BaseModel):
     quote = models.TextField(blank=True,)
@@ -174,7 +178,8 @@ class Britpick(BaseModel):
         related_name='britpicks',
         blank=True,
         null=True,
-        default=2, #suggested
+        help_text='determined by set value > type > word category > word type; within each, the top ordering is used (mandatory -> slang)',
+        # default=2, #suggested
     )
 
     types = models.ManyToManyField(
@@ -194,12 +199,14 @@ class Britpick(BaseModel):
         "SearchGroup",
         blank=True,
         related_name='excluded_by',
+        verbose_name='exclude',
     )
 
     require_search_groups = models.ManyToManyField(
         "SearchGroup",
         blank=True,
         related_name='required_by',
+        verbose_name='require',
     )
 
     words = models.ManyToManyField("Word", blank=True, related_name='britpicks')
@@ -215,14 +222,58 @@ class Britpick(BaseModel):
             """,
     )
 
+    explanation = models.TextField(blank=True, )
+
 
     references = models.ManyToManyField("Reference", blank=True, related_name='britpicks')
 
+    def __str__(self):
+        return ', '.join(s.string for s in self.search_strings.all())
+
+    def gettypes(self):
+        types = [t for t in self.types.all()]
+        for w in self.words.all():
+            types.extend(t for t in w.types.all())
+        return types
+
+    def getcategory(self):
+        if self.category:
+            return self.category
+        if self.types:
+            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            if len(categories) > 0:
+                categories.sort(key=lambda x: x.ordering)
+                return categories[0]
+        if self.words:
+            categories = [c.getcategory() for c in self.words.all() if c.getcategory() is not None]
+            if len(categories) > 0:
+                categories.sort(key=lambda x: x.ordering)
+                return categories[0]
+
+        if self.dialect.limit_to_dialogue:
+            return BritpickCategory.objects.get(pk=5)
+        else:
+            return BritpickCategory.objects.get(default=True)
 
 
+    def getcategorysource(self):
+        if self.category:
+            return 'self'
+        if self.types:
+            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            if len(categories) > 0:
+                # categories.sort(key=lambda x: x.ordering)
+                return 'types'
+        if self.words:
+            categories = [c.getcategory() for c in self.words.all() if c.getcategory() is not None]
+            if len(categories) > 0:
+                # categories.sort(key=lambda x: x.ordering)
+                return 'words'
 
-
-
+        if self.dialect.limit_to_dialogue:
+            return 'dialect'
+        else:
+            return 'database default'
 
 class SearchString(BaseModel):
 
@@ -253,7 +304,8 @@ class SearchString(BaseModel):
     # def pattern(self, value):
     #     self._pattern = value
 
-
+    def __str__(self):
+        return self.string
 
 
 
@@ -265,6 +317,8 @@ class SearchGroup(BaseModel):
     name = models.CharField(max_length=100, blank=True)
     search_strings = models.ManyToManyField("SearchString", blank=True, related_name='search_groups',)
 
+    def __str__(self):
+        return self.name
 
 class SearchVariables(BaseModel):
     # database-side representation of markup
@@ -306,6 +360,16 @@ class Word(BaseModel):
             """,
     )
 
+    types = models.ManyToManyField(
+        "BritpickType",
+        blank=True,
+        related_name='words',
+        help_text='usually in britpick, not here',
+    )
+
+
+
+
     topics = models.ManyToManyField(
         "Topic",
         related_name='words',
@@ -324,6 +388,39 @@ class Word(BaseModel):
 
     def __str__(self):
         return self.word
+
+    def getcategory(self):
+        if self.category:
+            return self.category
+        if self.types:
+            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            if len(categories) > 0:
+                categories.sort(key=lambda x: x.ordering)
+                return categories[0]
+        return None
+
+    def getcategorysource(self):
+        if self.category:
+            return 'self'
+        if self.types:
+            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            if len(categories) > 0:
+                # categories.sort(key=lambda x: x.ordering)
+                return 'types'
+        return None
+
+class Definition(BaseModel):
+    dialect = models.ForeignKey(
+        "Dialect",
+        models.PROTECT,
+        related_name='definitions',
+        blank=False,
+        null=False,
+    )
+
+    definition = models.TextField(blank=False, )
+
+    word = models.ForeignKey("Word", on_delete=models.PROTECT, related_name='definitions', blank=False, null=False,)
 
 
 class WordGroup(BaseModel):
