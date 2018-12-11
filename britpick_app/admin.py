@@ -125,8 +125,8 @@ class BritpicksFilter(admin.SimpleListFilter):
 
 
 
-class BritpickCategoryAdmin(OrderedAdmin):
-    max_choices = BritpickCategory.objects.all().count()
+class CategoryAdmin(OrderedAdmin):
+    # max_choices = Category.objects.all().count()
 
     fieldsets = [
 
@@ -139,7 +139,7 @@ class BritpickCategoryAdmin(OrderedAdmin):
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
             'fields': (
-                ('allow_for_word', 'default'),
+                ('can_assign_to_word', 'default'),
             ),
             'classes': ('checkbox-fieldset',)
         }),
@@ -151,14 +151,14 @@ class BritpickCategoryAdmin(OrderedAdmin):
         BaseAdmin.FOOTER_FIELDSET,
     ]
 
-admin.site.register(BritpickCategory, BritpickCategoryAdmin)
+admin.site.register(Category, CategoryAdmin)
 
 class BritpickTypeAdmin(OrderedAdmin):
     max_choices = BritpickType.objects.all().count()
 
-    # list_display = ['ordering','__str__','default_britpick_category',*BaseAdmin.ACTIVE_VERIFIED_LIST, 'date_edited',]
+    # list_display = ['ordering','__str__','default_category',*BaseAdmin.ACTIVE_VERIFIED_LIST, 'date_edited',]
 
-    list_display = [*OrderedAdmin.list_display, 'default_britpick_category',]
+    list_display = [*OrderedAdmin.list_display, 'default_category', 'can_assign_to_word']
 
     search_fields = ['name', 'explanation',]
     fieldsets = [
@@ -176,7 +176,7 @@ class BritpickTypeAdmin(OrderedAdmin):
         # }),
         (None, {
             'fields': (
-                'default_britpick_category',
+                'default_category', 'can_assign_to_word',
             ),
             'classes': ('optional-fieldset',)
         }),
@@ -266,9 +266,17 @@ class BritpickSearchStringInline(admin.TabularInline):
     fields = ('string',)
     insert_before = 'search_groups'
 
+class BritpickReplacementsInline(admin.TabularInline):
+    model = BritpickReplacements
+    extra = 0
+
+    insert_before = 'word_groups'
+
+    autocomplete_fields = ['word',]
+
 class BritpickAdmin(BaseAdmin):
 
-    inlines = [BritpickSearchStringInline,]
+    inlines = [BritpickSearchStringInline, BritpickReplacementsInline]
     autocomplete_fields = ('types','topics', 'words', 'word_groups', 'references', 'search_groups', 'exclude_search_groups','require_search_groups',)
     # filter_horizontal = ('search_groups', 'exclude_search_groups', 'require_search_groups',)
 
@@ -452,13 +460,7 @@ class WordDefinitionInline(admin.TabularInline):
 
     def formfield_for_foreignkey(self, db_field, request, **kwargs):
         if db_field.name == "dialect":
-            # try:
-            #     parent_obj_id = request.resolver_match.args[0]
-            #     obj = Word.objects.get(id=parent_obj_id)
-            #     kwargs["queryset"] = Dialect.objects.filter(some_filtering_here=parent_obj_id)
-            # except IndexError:
-            #     pass
-            kwargs["queryset"] = Dialect.objects.order_by('-default','-hidden','name',)
+            kwargs["queryset"] = Dialect.objects.filter(limit_to_dialogue=False).order_by('-default','-hidden','name',)
         return super(WordDefinitionInline, self).formfield_for_foreignkey(db_field, request, **kwargs)
 
 class WordAdmin(BaseAdmin):
@@ -497,7 +499,7 @@ class WordAdmin(BaseAdmin):
         }),
         ('definitions', {
             'fields': (
-                'types',
+                'types', 'type',
             ),
             'classes': ('inlineemphasis-fieldset',)
         }),

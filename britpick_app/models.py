@@ -22,40 +22,34 @@ class OrderedModel(BaseModel):
         ordering = ['ordering']
         abstract = True
 
-# class Suggestion(models.Model):
-#     # can use for back-end notes and front-end suggestions
-#     text = models.TextField()
-#     britpick = models.ForeignKey("Britpick", on_delete=models.CASCADE, related_name='suggestions', blank=True)
-#     topic = models.ForeignKey("Topic", on_delete=models.CASCADE, related_name='suggestions', blank=True)
-
 
 
 class Dialect(BaseModel):
     name = models.CharField(max_length=100, blank=True,)
     description = models.TextField(blank=True)
-    limit_to_dialogue = models.BooleanField(default=False, help_text='search in dialogue only by default',)
+    limit_to_dialogue = models.BooleanField(default=False, help_text='search in dialogue only by default; only if true will be allowed to assign directly to word',)
     default = models.BooleanField(default=False)
 
     class Meta:
         ordering = ['-default', 'hidden', 'name',]
 
     def __str__(self):
-        if self.default:
-            return '*' + self.name
-        elif self.hidden:
-            return '(%s)' % self.name
-        else:
-            return self.name
+        return self.name
+        # if self.default:
+        #     return '*' + self.name
+        # elif self.hidden:
+        #     return '(%s)' % self.name
+        # else:
+        #     return self.name
 
 
 
-class BritpickCategory(OrderedModel):
+class Category(OrderedModel):
     """ mandatory, suggested, common, uncommon, informal, slang """
 
     name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
-    allow_for_word = models.BooleanField(default=False)
-    # dialogue_default = models.BooleanField(default=False)
+    can_assign_to_word = models.BooleanField(default=False)
     default = models.BooleanField(default=False)
 
     def __str__(self):
@@ -64,10 +58,10 @@ class BritpickCategory(OrderedModel):
 
 class BritpickType(OrderedModel):
     # formerly 'explanation'
-    name = models.CharField(max_length=100, blank=True, help_text='for selecting on backend')
+    name = models.CharField(max_length=100, blank=True, help_text='backend')
     explanation = models.TextField(blank=True, help_text='frontend')
-    default_britpick_category = models.ForeignKey(
-        "BritpickCategory",
+    default_category = models.ForeignKey(
+        "Category",
         on_delete=models.PROTECT,
         blank=True,
         null=True,
@@ -78,6 +72,7 @@ class BritpickType(OrderedModel):
             This allows automatic assigning of types to Britpicks if they aren't manually specified
             """,
     )
+    can_assign_to_word = models.BooleanField(default=False)
 
     def __str__(self):
         return self.name
@@ -173,7 +168,7 @@ class Britpick(BaseModel):
     )
 
     category = models.ForeignKey(
-        "BritpickCategory",
+        "Category",
         models.PROTECT,
         related_name='britpicks',
         blank=True,
@@ -212,6 +207,8 @@ class Britpick(BaseModel):
     words = models.ManyToManyField("Word", blank=True, related_name='britpicks')
     word_groups = models.ManyToManyField("WordGroup", blank=True, related_name='britpicks')
 
+    replacements = models.ManyToManyField("Word", through="BritpickReplacements", blank=True, related_name='breplacements')
+
     topics = models.ManyToManyField("Topic", blank=True, related_name='britpicks')
     always_show_topic_names = models.BooleanField(
         default=False,
@@ -240,7 +237,7 @@ class Britpick(BaseModel):
         if self.category:
             return self.category
         if self.types:
-            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            categories = [c.default_category for c in self.types.all() if c.default_category is not None]
             if len(categories) > 0:
                 categories.sort(key=lambda x: x.ordering)
                 return categories[0]
@@ -251,16 +248,16 @@ class Britpick(BaseModel):
                 return categories[0]
 
         if self.dialect.limit_to_dialogue:
-            return BritpickCategory.objects.get(pk=5)
+            return Category.objects.get(pk=5)
         else:
-            return BritpickCategory.objects.get(default=True)
+            return Category.objects.get(default=True)
 
 
     def getcategorysource(self):
         if self.category:
             return 'self'
         if self.types:
-            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            categories = [c.default_category for c in self.types.all() if c.default_category is not None]
             if len(categories) > 0:
                 # categories.sort(key=lambda x: x.ordering)
                 return 'types'
@@ -284,26 +281,6 @@ class SearchString(BaseModel):
     # options created from separate searchwords functions/regex wrapper to create pattern; ie preserve all words, preserve case, beginning of sentence, end of phrase, question, noun
     # inline - preserve word (#), markup, noun, dash
 
-
-    # search patterns (verbose)
-    # search patterns (trie)
-    # _pattern = models.TextField(blank=True)
-    #
-    # @property
-    # def name(self):
-    #     s = self.string
-    #     if self._name:
-    #         s += ' (%s)' % self._name
-    #     return s
-    #
-    # @property
-    # def pattern(self):
-    #     return self._pattern
-    #
-    # @pattern.setter
-    # def pattern(self, value):
-    #     self._pattern = value
-
     def __str__(self):
         return self.string
 
@@ -324,6 +301,30 @@ class SearchVariables(BaseModel):
     # database-side representation of markup
     # can contain regex
     pass
+
+
+
+class BritpickReplacements(models.Model):
+    ORDERING_CHOICES = [(x, str(x)) for x in range(0, 26)]
+    REPLACEMENT_CHOICES = [(True, 'replacement'), (False, 'disambiguation')]
+
+    britpick = models.ForeignKey("Britpick", on_delete=models.PROTECT, related_name='bwreplacements')
+    word = models.ForeignKey("Word", on_delete=models.PROTECT, related_name='wbreplacements')
+
+    replacement = models.BooleanField(default=True, choices=REPLACEMENT_CHOICES)
+
+    ordering = models.IntegerField(default=0, choices=ORDERING_CHOICES)
+
+    class Meta:
+        ordering = ['-replacement', 'ordering']
+
+    def __str__(self):
+        return str(self.britpick) + ':' + str(self.word)
+
+
+
+
+
 
 class Word(BaseModel):
 
@@ -348,7 +349,7 @@ class Word(BaseModel):
         null=True,
     )
     category = models.ForeignKey(
-        "BritpickCategory",
+        "Category",
         models.PROTECT,
         related_name='words',
         blank=True,
@@ -367,7 +368,7 @@ class Word(BaseModel):
         help_text='usually in britpick, not here',
     )
 
-
+    type = models.ForeignKey("BritpickType", on_delete=models.PROTECT, related_name='wtype', limit_choices_to={'can_assign_to_word': True}, blank=True, null=True,)
 
 
     topics = models.ManyToManyField(
@@ -393,7 +394,7 @@ class Word(BaseModel):
         if self.category:
             return self.category
         if self.types:
-            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            categories = [c.default_category for c in self.types.all() if c.default_category is not None]
             if len(categories) > 0:
                 categories.sort(key=lambda x: x.ordering)
                 return categories[0]
@@ -403,7 +404,7 @@ class Word(BaseModel):
         if self.category:
             return 'self'
         if self.types:
-            categories = [c.default_britpick_category for c in self.types.all() if c.default_britpick_category is not None]
+            categories = [c.default_category for c in self.types.all() if c.default_category is not None]
             if len(categories) > 0:
                 # categories.sort(key=lambda x: x.ordering)
                 return 'types'
