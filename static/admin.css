@@ -263,6 +263,31 @@ form .aligned input + div.help {
     padding-top: 0;
 }
 
+td.delete {
+    background-color: #e6e6e6;
+}
+
+
+
+/*BRITPICK*/
+
+td.field-modifiers ul {
+    margin-left: 0;
+}
+
+/*ul#id_search_strings-0-modifiers {*/
+    /*margin-left: 0;*/
+/*}*/
+
+td.field-modifiers li {
+    display: inline;
+}
+
+
+
+
+/*WORD*/
+
 .model-word div#quotes-group td {
     padding-top: 10px;
 }

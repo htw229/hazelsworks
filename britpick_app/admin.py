@@ -263,7 +263,7 @@ admin.site.register(Topic, TopicAdmin)
 class BritpickSearchStringInline(admin.TabularInline):
     model = SearchString
     extra = 0
-    fields = ('string',)
+    fields = ['string', 'processing', 'case_sensitive', 'begin_sentence', 'end_sentence',]
     insert_before = 'search_groups'
 
 class BritpickReplacementsInline(admin.TabularInline):
@@ -388,6 +388,17 @@ class SearchStringBritpicksFilter(admin.SimpleListFilter):
 
 class SearchStringAdmin(BaseAdmin):
     list_filter = [*BaseAdmin.list_filter, SearchStringBritpicksFilter]
+
+    fieldsets = [
+        (None, {
+            'fields': (
+                ('string',),
+                'modifiers',
+            ),
+            # 'classes': ('optional-fieldset',)
+        }),
+        BaseAdmin.FOOTER_FIELDSET,
+    ]
 
 admin.site.register(SearchString, SearchStringAdmin)
 

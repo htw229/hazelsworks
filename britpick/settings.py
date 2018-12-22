@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'app.apps.AppConfig',
     'britpick_app',
     'nested_admin',
+    'multiselectfield',
 ]
 
 MIDDLEWARE = [

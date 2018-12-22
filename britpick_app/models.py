@@ -1,5 +1,10 @@
 from django.db import models
 from django.urls import reverse
+from django import forms
+from multiselectfield import MultiSelectField
+
+
+
 
 # britpick_app model
 class BaseModel(models.Model):
@@ -272,19 +277,68 @@ class Britpick(BaseModel):
         else:
             return 'database default'
 
+
+
 class SearchString(BaseModel):
+    CONJUGATE_PHRASE = 0
+    PLURAL_PHRASE = 1
+    PRESERVE_PHRASE = 2
+
+    MODIFIER_CHOICES = [
+        (CONJUGATE_PHRASE, 'conjugate'),
+        (PLURAL_PHRASE, 'plural to end only'),
+        (PRESERVE_PHRASE, "don't conjugate"),
+    ]
 
     # foreign key - so that any duplicates have to be made with groups
-    searched_by = models.ForeignKey("Britpick", on_delete=models.PROTECT, related_name='search_strings', blank=True, null=True)
+    britpick = models.ForeignKey("Britpick", on_delete=models.PROTECT, related_name='search_strings', blank=True, null=True, )
+
+    # modifiers = MultiSelectField(choices=MODIFIER_CHOICES, blank=True, null=True,)
+
+    processing = models.SmallIntegerField(choices=MODIFIER_CHOICES, default=CONJUGATE_PHRASE)
+
+    # plural_only = models.BooleanField(default=False)
+    # preserve_string = models.BooleanField(default=False)
+    begin_sentence = models.BooleanField(default=False)
+    end_sentence = models.BooleanField(default=False)
+    case_sensitive = models.BooleanField(default=False)
 
     string = models.CharField(max_length=300)
+    pattern = models.TextField(blank=True,)
     # options created from separate searchwords functions/regex wrapper to create pattern; ie preserve all words, preserve case, beginning of sentence, end of phrase, question, noun
     # inline - preserve word (#), markup, noun, dash
+
+    @property
+    def ignorecase(self):
+        return not self.case_sensitive
 
     def __str__(self):
         return self.string
 
+    def createpattern(self):
+        self.pattern = self.string
+        if self.processing == self.PLURAL_PHRASE:
+            self.process_plural_only()
+        elif self.processing == self.CONJUGATE_PHRASE:
+            pass
 
+        if self.begin_sentence:
+            self.process_begin_sentence()
+        if self.end_sentence:
+            self.process_end_sentence()
+
+    def process_plural_only(self):
+        self.pattern += r'(|s|es)'
+        self.preserve_string = True
+
+    def process_begin_sentence(self):
+        self.case_sensitive = True
+        s = self.pattern[0].upper() + self.pattern[1:].lower()
+        s = r'(\n|\. |\? |\! |")' + s
+        self.pattern = s
+
+    def process_end_sentence(self):
+        self.pattern += r'(\.|\?|\,|\!)'
 
 class SearchGroup(BaseModel):
     """
