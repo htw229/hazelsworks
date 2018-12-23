@@ -20,6 +20,7 @@ class BaseModel(models.Model):
         abstract = True
 
 
+
 class OrderedModel(BaseModel):
     ORDERING_MIN = 0
     ORDERING_MAX = 25
@@ -220,6 +221,21 @@ class Quote(OrderedModel):
             return '"%s"' % self.text
         else:
             return '"%s"' % (self.text[:48] + '...')
+
+    def save(self, *args, **kwargs):
+        if self.reference_url:
+            try:
+                self.reference = Reference.objects.get(url=self.reference_url)
+            except Reference.DoesNotExist:
+                r = Reference(url=self.reference_url)
+                r.save()
+                self.reference = r
+            self.reference_url = None
+
+        super().save(*args, **kwargs)
+
+
+
 
 
 # class ParentChildTopics(OrderedModel):
