@@ -55,6 +55,10 @@ fieldset label {
     /*to match input boxes*/
 }
 
+.large-text-field {
+    max-width: 400px;
+}
+
 .select2 .select2-container .select2-container--admin-autocomplete {
     width: 100% !important;
 }
@@ -75,6 +79,10 @@ fieldset label {
 
 .module select {
     font-size: 13px;
+}
+
+.tabular input.vURLField {
+
 }
 
 
@@ -239,7 +247,7 @@ fieldset.optional-fieldset label {
 
 .inline-related tr.form-row,
 .inline-related tr.form-row td {
-    padding-top: 0.5em;
+    padding-top: 0.5em !important;
     padding-bottom: 0.5em;
 }
 
@@ -284,8 +292,6 @@ td.field-modifiers li {
 }
 
 
-
-
 /*WORD*/
 
 .model-word div#quotes-group td {
@@ -304,6 +310,16 @@ td.field-modifiers li {
     /*max-width: 100%;*/
     max-height: 100px;
 }
+
+
+/*TOPIC*/
+.model-topic textarea[id*="id_excerpts"] {
+    max-width: 400px;
+}
+
+
+
+
 
 /*don't display add/edit/change links for certain drop-downs'*/
 

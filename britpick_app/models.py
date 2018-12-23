@@ -20,12 +20,19 @@ class BaseModel(models.Model):
 
 
 class OrderedModel(BaseModel):
-    ORDERING_CHOICES = [(x, str(x)) for x in range(1,100)]
-    ordering = models.IntegerField(default=99, choices=ORDERING_CHOICES)
+    ORDERING_MIN = 0
+    ORDERING_MAX = 25
+    ORDERING_DEFAULT = 0
+
+    ORDERING_CHOICES = [(x, str(x)) for x in range(ORDERING_MIN, ORDERING_MAX)]
+    ordering = models.SmallIntegerField(default=ORDERING_DEFAULT, choices=ORDERING_CHOICES)
 
     class Meta:
         ordering = ['ordering']
         abstract = True
+
+
+
 
 
 
@@ -96,30 +103,78 @@ class Reference(BaseModel):
         else:
             return str(self.url)[:25]
 
-class Quote(BaseModel):
-    quote = models.TextField(blank=True,)
-    reference = models.ForeignKey("Reference", on_delete=models.PROTECT, related_name='quotes', null=True, blank=True,)
+# class Quote(BaseModel):
+#     DIRECT_QUOTE = 0
+#     EXCERPT = 1
+#
+#     QUOTE_TYPES = (
+#         (DIRECT_QUOTE, 'quote'),
+#         (EXCERPT, 'excerpt/explanation'),
+#     )
+#
+#     quote = models.TextField(blank=True,)
+#     quote_type = models.SmallIntegerField(choices='', default=DIRECT_QUOTE, )
+#
+#     reference = models.ForeignKey("Reference", on_delete=models.PROTECT, related_name='quotes', null=True, blank=True,)
+#     reference_url = models.URLField(blank=True, null=True, help_text='use to quickly add reference; it will either be assigned existing reference or create new one')
+#     words = models.ManyToManyField("Word", related_name='quotes', blank=True,)
+#
+#     def __str__(self):
+#         if len(self.quote) < 50:
+#             return '"%s"' % self.quote
+#         else:
+#             return '"%s"' % (self.quote[:48] + '...')
+
+
+
+class Quote(OrderedModel):
+    WORD_QUOTE = 0
+    EXPLANATION_QUOTE = 1
+    SUMMARY = 2
+
+    QUOTE_TYPES = (
+        (WORD_QUOTE, 'example'),
+        (EXPLANATION_QUOTE, 'explanation (quoted)'),
+        (SUMMARY, 'explanation (summarized)'),
+    )
+
+    text = models.TextField(blank=True, )
+
+    direct_quote = models.PositiveSmallIntegerField(choices=QUOTE_TYPES, default=WORD_QUOTE, verbose_name='type')
+
+    reference = models.ForeignKey("Reference", on_delete=models.PROTECT, null=True, blank=True,)
     reference_url = models.URLField(blank=True, null=True, help_text='use to quickly add reference; it will either be assigned existing reference or create new one')
-    words = models.ManyToManyField("Word", related_name='quotes', blank=True,)
+
+    words = models.ManyToManyField("Word", blank=True, related_name='quotes')
+    topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='texts', blank=True, null=True)
 
     def __str__(self):
-        if len(self.quote) < 50:
-            return '"%s"' % self.quote
+        if len(self.text) < 50:
+            return '"%s"' % self.text
         else:
-            return '"%s"' % (self.quote[:48] + '...')
+            return '"%s"' % (self.text[:48] + '...')
+
+
+# class ParentChildTopics(OrderedModel):
+#     parent_topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='child_topics')
+#     child_topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='parent_topics', unique=True)
+
 
 class Topic(BaseModel):
     """
     topic is a way to display a large amount of text, links, etc with large numbers of relationships
     """
 
-    WORD = 'W'
     MAIN_TOPIC = 'MT'
     TOPIC = 'T'
+    INLINE_TOPIC = 'ST'
+    # WORD_TOPIC = 'W'
+
     TOPIC_TYPES = (
-        (TOPIC, 'topic'),
         (MAIN_TOPIC, 'main topic'),
-        (WORD, 'word'),
+        (TOPIC, 'topic'),
+        (INLINE_TOPIC, 'inline topic'),
+        # (WORD_TOPIC, 'word'),
     )
 
     name = models.CharField(max_length=50, blank=True)
@@ -138,9 +193,12 @@ class Topic(BaseModel):
             """,
     )
 
-    text = models.TextField(blank=True)
+    # text = models.TextField(blank=True)
     references = models.ManyToManyField("Reference", blank=True, related_name='topics')
-    related_topics = models.ManyToManyField("self", symmetrical=True, blank=True)
+
+    parent_topic = models.ForeignKey("self", on_delete=models.PROTECT, related_name='child_topics', null=True, blank=True,)
+
+    related_topics = models.ManyToManyField("self", symmetrical=True, blank=True,)
     # slugfield w/prepopulated on admin page
 
     # # needed or not?
@@ -153,7 +211,21 @@ class Topic(BaseModel):
     def __str__(self):
         return self.name
 
+    # TODO: is the logic correct here?? need to create filter...
+    def canbeparentof(self, child_topic):
+        if self.topic_type == self.INLINE_TOPIC:
+            return False
+        if child_topic == self:
+            return False
 
+        t = self
+        while t.parent_topic:
+            if t.parent_topic == child_topic:
+                return False
+            else:
+                t = t.parent_topic
+
+        return True
 
 
 class Britpick(BaseModel):
@@ -386,8 +458,9 @@ class Word(BaseModel):
         max_length=255,
         help_text=
             """
-                not unique (ex 'grade')
-                use description for differentiation (ex 'Grade (noun)')
+                for multiple related words, separate by commas, most important word first (ie "underground, London Underground")\r\n
+                not unique (ex 'grade')\r\n
+                use description for differentiation (ex 'Grade (noun)')\r\n
                 (replaces .name)
             """,
     )

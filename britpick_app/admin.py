@@ -32,6 +32,7 @@ class BaseAdmin(admin.ModelAdmin):
 
     smalltextfields = []
     mediumtextfields = ['description', 'explanation', 'notes',]
+    largetextfields = []
     optionalinputs = []
     requiredinputs = []
 
@@ -42,6 +43,8 @@ class BaseAdmin(admin.ModelAdmin):
             formfield.widget = forms.TextInput(attrs={'class':'vTextField small-text-field',})
         if db_field.name in self.mediumtextfields:
             formfield.widget = forms.Textarea(attrs={'class':'vLargeTextField medium-text-field',})
+        if db_field.name in self.largetextfields:
+            formfield.widget = forms.Textarea(attrs={'class':'vLargeTextField large-text-field',})
 
         return formfield
 
@@ -221,7 +224,7 @@ admin.site.register(Reference, ReferenceAdmin)
 
 
 class QuoteAdmin(BaseAdmin):
-    search_fields = ['quote', 'words__word', 'reference__name', 'reference__url',]
+    search_fields = ['text', 'words__word', 'reference__name', 'reference__url',]
 
     list_display = [*BaseAdmin.list_display, 'linkedwords', 'reference',]
 
@@ -233,7 +236,7 @@ class QuoteAdmin(BaseAdmin):
 
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
-            'fields': ('quote','words',),
+            'fields': ('text','words',),
         }),
         (None, {
             'fields': (
@@ -244,7 +247,7 @@ class QuoteAdmin(BaseAdmin):
         BaseAdmin.FOOTER_FIELDSET,
     ]
 
-    mediumtextfields = [*BaseAdmin.mediumtextfields, 'quote',]
+    mediumtextfields = [*BaseAdmin.mediumtextfields, 'text',]
 
     def linkedwords(self, obj):
         return ', '.join(w.word for w in Word.objects.filter(quotes=obj.pk))
@@ -253,9 +256,104 @@ class QuoteAdmin(BaseAdmin):
 admin.site.register(Quote, QuoteAdmin)
 
 
+class TopicTextsInline(admin.TabularInline):
+    model = Quote
+    autocomplete_fields = ['reference',]
+    readonly_fields = []
+
+    fields = ['ordering', 'text', 'direct_quote', 'reference', 'reference_url',]
+    extra = 0
+    insert_after = 'dialect'
+
+
+    # def referenceorsummary(self, obj):
+    #     if obj.reference:
+    #         return obj.reference.name
+    #     else:
+    #         return 'summary'
+    # referenceorsummary.short_description = 'referenceorsummary'
+
+
+class TopicWordsInline(admin.TabularInline):
+    model = Topic.words.through
+    autocomplete_fields = ['word', ]
+    extra = 0
+    insert_after = 'dialect'
+
+class TopicBritpicksInline(admin.TabularInline):
+    model = Topic.britpicks.through
+    autocomplete_fields = ['britpick',]
+    # fields = ['']
+    extra = 0
+    insert_after = 'dialect'
+
+class TopicReferencesInline(admin.TabularInline):
+    model = Topic.references.through
+    extra = 0
+    autocomplete_fields = ['reference', ]
+    # fields = ['reference',]
+    insert_after = 'dialect'
+
+# class TopicChildTopicsInline(admin.TabularInline):
+#     model = Topic.child_topics.through
+#     extra = 0
+#     # autocomplete_fields = ['reference', ]
+#     # fields = ['reference',]
+#     insert_after = 'dialect'
+
+# class TopicRelatedTopicsInline(admin.TabularInline):
+#     model = Topic.related_topics
+#     # fk_name = 'related_topics'
+#     insert_after = 'text'
 
 class TopicAdmin(BaseAdmin):
     search_fields = ['name',]
+
+    inlines = [TopicTextsInline, TopicWordsInline, TopicBritpicksInline, TopicReferencesInline,]
+
+    filter_horizontal = ['related_topics',]
+    autocomplete_fields = ['parent_topic',]
+    readonly_fields = [*BaseAdmin.readonly_fields, 'child_topics', 'inline_topics',]
+
+    fieldsets = [
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': (
+                ('name','slug',),
+            ),
+            'classes': ('header-fieldset',)
+        }),
+        (None, {
+            'fields': ('topic_type', 'dialect', 'parent_topic', 'child_topics', 'inline_topics',),
+            'classes': ('lightgray-fieldset',)
+        }),
+        (None, {
+            'fields': ('related_topics',),
+        }),
+        BaseAdmin.FOOTER_FIELDSET,
+    ]
+
+    # def topic_relationships(self, obj):
+    #     strings = []
+    #     if obj.parent_topic:
+    #         strings.append('parent: ' + obj.parent_topic.name)
+    #     if obj.child_topics:
+    #
+    #         for t in obj.child_topics.exclude(topic_type = obj.SUB_TOPIC):
+    #             strings.append('child: ' + t.name)
+    #     if strings:
+    #         return '\r\n'.join(strings)
+    #     else:
+    #         return 'no topic relationships'
+    # topic_relationships.short_description = ''
+
+    def child_topics(self, obj):
+        return getchangelinks(obj.child_topics.exclude(topic_type=obj.INLINE_TOPIC), add_link=True, model_name='topic')
+    child_topics.short_description = 'child topics'
+
+    def inline_topics(self, obj):
+        return getchangelinks(obj.child_topics.filter(topic_type=obj.INLINE_TOPIC), add_link=True, model_name='topic')
+    inline_topics.short_description = 'inline topics'
 
 admin.site.register(Topic, TopicAdmin)
 
@@ -275,6 +373,7 @@ class BritpickReplacementsInline(admin.TabularInline):
     autocomplete_fields = ['word',]
 
 class BritpickAdmin(BaseAdmin):
+    search_fields = ['searchstrings', 'words']
 
     inlines = [BritpickSearchStringInline, BritpickReplacementsInline]
     autocomplete_fields = ('types','topics', 'words', 'word_groups', 'references', 'search_groups', 'exclude_search_groups','require_search_groups',)
