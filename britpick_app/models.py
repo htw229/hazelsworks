@@ -3,6 +3,7 @@ from django.urls import reverse
 from django import forms
 from multiselectfield import MultiSelectField
 
+import fetchreference
 
 
 
@@ -102,6 +103,72 @@ class Reference(BaseModel):
             return self.name
         else:
             return str(self.url)[:25]
+
+
+    def save(self, *args, **kwargs):
+        if not self.name and not self.page_name and not self.site_name:
+        # if True:
+            pagetitle = fetchreference.fetchreferencetitle(self.url)
+            print()
+            print(pagetitle)
+
+            if 'error' in pagetitle.lower():
+                self.page_name = pagetitle
+
+            else:
+                splittitle = []
+
+                # page is listed first
+                for divider in [' | ', ' · ', ' : ', ' - ', '—', '--',]:
+                    if len(splittitle) > 1:
+                        break
+
+                    splittitle = pagetitle.split(divider)
+                    if len(splittitle) > 2:
+                        self.page_name = splittitle.pop(0).strip()
+                        splittitle.reverse()
+                        self.site_name = ' - '.join(s.strip() for s in splittitle)
+                        break
+                    elif len(splittitle) > 1:
+                        self.page_name = splittitle[0].strip()
+                        self.site_name = splittitle[1].strip()
+                        break
+
+                # page is listed second
+                for divider in [': ']:
+                    if len(splittitle) > 1:
+                        break
+
+                    splittitle = pagetitle.split(divider, 1)
+                    if len(splittitle) > 1:
+                        self.page_name = splittitle[1].strip()
+                        self.site_name = splittitle[0].strip()
+                        break
+
+                    if len(splittitle) < 2:
+                        self.page_name = pagetitle
+
+                    if 'reddit' in self.url.lower():
+                        self.site_name = 'r/' + self.site_name
+
+        if not self.name:
+            if self.page_name == self.site_name:
+                self.name = self.page_name
+            elif self.page_name and self.site_name:
+                self.name = self.site_name + ' - ' + self.page_name
+            elif self.page_name:
+                self.name = self.page_name
+            elif self.site_name:
+                self.name = self.site_name
+
+
+        super().save(*args, **kwargs)
+
+
+
+
+
+
 
 # class Quote(BaseModel):
 #     DIRECT_QUOTE = 0
