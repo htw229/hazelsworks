@@ -292,14 +292,14 @@ class Replacement(models.Model):
 
 # TODO: exclude compound words (-); see 598, ill catches ill-mannered
 
-    @property
-    def searchwordstring(self) -> str:
-        wordlist = self.searchwordlist
-        for i, w in enumerate(wordlist):
-            w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
-            wordlist[i] = w
-        wordstring = ', '.join(wordlist)
-        return wordstring
+    # @property
+    # def searchwordstring(self) -> str:
+    #     wordlist = self.searchwordlist
+    #     for i, w in enumerate(wordlist):
+    #         w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
+    #         wordlist[i] = w
+    #     wordstring = ', '.join(wordlist)
+    #     return wordstring
 
     @property
     def excludedwordlist(self) -> list:
@@ -309,14 +309,14 @@ class Replacement(models.Model):
             wordlist = []
         return wordlist
 
-    @property
-    def excludedwordstring(self) -> str:
-        wordlist = self.excludedwordlist
-        for i, w in enumerate(wordlist):
-            w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
-            wordlist[i] = w
-        wordstring = ', '.join(wordlist)
-        return wordstring
+    # @property
+    # def excludedwordstring(self) -> str:
+    #     wordlist = self.excludedwordlist
+    #     for i, w in enumerate(wordlist):
+    #         w = htmlutils.searchwordformat(w, markup = htmlutils.Explain_Markup_Verbose)
+    #         wordlist[i] = w
+    #     wordstring = ', '.join(wordlist)
+    #     return wordstring
 
     @property
     def replacementslist(self) -> list:
@@ -326,11 +326,11 @@ class Replacement(models.Model):
         wordlist.extend([w for w in self.considerreplacements.split('\r\n') if w.strip() != ''])
         return wordlist
 
-    @property
-    def replacementsstring(self) -> str:
-        wordlist = self.replacementslist
-        wordstring = ', '.join(wordlist)
-        return wordstring
+    # @property
+    # def replacementsstring(self) -> str:
+    #     wordlist = self.replacementslist
+    #     wordstring = ', '.join(wordlist)
+    #     return wordstring
 
     @property
     def considerreplacementlist(self) -> list:

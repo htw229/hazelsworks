@@ -21,6 +21,7 @@ from app import views
 
 urlpatterns = [
     url(r'^admin/', admin.site.urls, name='admin'),
+    url(r'^nested_admin/', include('nested_admin.urls')),
     url(r'^britpick/findduplicates/', views.duplicates_view, name='britpick_findduplicates.html'),
     url(r'^database/', views.database_view, name='database'),
 

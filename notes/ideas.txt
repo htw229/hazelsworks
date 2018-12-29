@@ -195,6 +195,33 @@ Offensiveness
 
 
 
+britpick
+
+
+searchstring
+- searchgroup fk
+- britpick fk
+-
+
+
+search
+(linked by searchstrings)
+
+
+
+
+
+create string from search.py
+compile into pattern
+
+
+
+
+
+
+
+
+
 
 
 
