@@ -242,6 +242,10 @@ class Quote(OrderedModel):
 #     parent_topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='child_topics')
 #     child_topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='parent_topics', unique=True)
 
+class MainTopicsManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(parent_topic__isnull=True)
+
 
 class Topic(BaseModel):
     """
@@ -291,6 +295,9 @@ class Topic(BaseModel):
     # def get_absolute_url(self):
         # return reverse('people.views.details', args=[str(self.id)])
 
+    objects = models.Manager()
+    main_topics = MainTopicsManager()
+
     def __str__(self):
         return self.name
 
@@ -309,6 +316,9 @@ class Topic(BaseModel):
                 t = t.parent_topic
 
         return True
+
+    def childtopics(self):
+        return Topic.objects.filter(parent_topic=self)
 
 
 class Britpick(BaseModel):

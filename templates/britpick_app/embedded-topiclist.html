@@ -1,0 +1,14 @@
+{% if topics %}
+<ul class="topiclist listlevel-{{ listlevel|default:"top" }}">
+    {% for topic in topics %}
+        <li>
+            {{ topic.name }}
+            {% if listlevel %}
+                {% include "britpick_app/embedded-topiclist.html" with topics=topic.childtopics listlevel=listlevel|add:"1" %}
+            {% else %}
+                {% include "britpick_app/embedded-topiclist.html" with topics=topic.childtopics listlevel="1" %}
+            {% endif %}
+        </li>
+    {% endfor %}
+</ul>
+{% endif %}

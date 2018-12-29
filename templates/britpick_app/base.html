@@ -1,16 +1,16 @@
 <!DOCTYPE html>
+
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
     <title>
-        {% if pagetitle == "Britpick" %}
-            {{ pagetitle }}
-        {% else %}
-            {{ pagetitle }} - Britpick
-        {% endif %}
+        {% block pagetitle-override %}
+        {% block pagetitle %}{% endblock %} - Britpick
+        {% endblock %}
     </title>
-    <link rel="stylesheet" href="/static/britpick.css">
+    <link rel="stylesheet" href="/static/britpick_app/britpick.css">
+    <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Vollkorn:700" rel="stylesheet">
     <link rel="shortcut icon" href="/static/favicon/crown.ico">
@@ -38,7 +38,7 @@
 
 
 <div class="navbar header">
-    <a href="{% url 'britpick' %}"><img class="navbar image" src="/static/favicon/crown-32.png"></a>
+    <a href="{% url 'britpick' %}"><img class="navbar image" src="/static/navbar-crown-32.png"></a>
     <span class="navbar item"><a href="{% url 'britpick' %}">Britpick</a></span>
     ·
     <span class="navbar item"><a href="{% url 'topicslist' %}">Topics</a></span>
@@ -52,14 +52,15 @@
 
 
 <div class="content">
-    <h1>{{ pagetitle }}</h1>
+    <h1>{% block headertitle %}{% endblock %}</h1>
     {% if user.is_superuser %}
         {% if adminlink %}
             <p class="adminlink"><a href="{{ adminlink }}" target="_blank">edit</a></p>
         {% endif %}
     {% endif %}
     <div class="{{ csspage }}">
-        {% include template %}
+        {% block content %}
+        {% endblock %}
     </div>
 </div>
 

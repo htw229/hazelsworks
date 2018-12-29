@@ -43,7 +43,7 @@ class Reference(models.Model):
 
     @property
     def link(self) -> str:
-        s = '<a href="' + self.url + '"><img class="external-link" src="/static/flag.png">'
+        s = '<a href="' + self.url + '"><img class="external-link" src="/static/externallink-flag.png">'
         s += self.liststringorurl
         s += '</a>'
         return s
