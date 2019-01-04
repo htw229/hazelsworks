@@ -77,12 +77,21 @@ ul {
     margin: 0;
     padding: 0;
     line-height: 110%;
-    font-size: 100%;
+    font-size: 1em;
 }
 
-li {
-    font-size: 80%;
-    margin-bottom: 1em;
+/*li {*/
+    /*!*font-size: 80%;*!*/
+    /*font-size: 0.85em;*/
+    /*margin-bottom: 1em;*/
+/*}*/
+
+ul > li {
+    font-size: 0.85em;
+}
+
+ul > li ul {
+    font-size: 1em;
 }
 
 .l1 {
@@ -153,7 +162,7 @@ a:active {
     /*height: 32px;*/
     /*background-color: var(--blue);*/
     padding: 1%;
-    margin: 0;
+    margin: 0 0 1em 0;
 }
 
 .navbar.header {
@@ -192,6 +201,170 @@ a:active {
 
 
 
+.nav {
+
+}
+
+.hierarchy-nav {
+
+}
+
+.hierarchy-nav li {
+    display: inline-block;
+}
+
+.hierarchy-nav li + li:before {
+    content: " > ";
+    padding: 0 10px;
+}
+
+.choice-nav {
+    margin-bottom: 1em;
+    font-weight: bold;
+}
+
+.choice-nav ul:before {
+    content: "[ ";
+}
+
+.choice-nav ul:after {
+    content: " ]";
+}
+
+.choice-nav li {
+    display: inline-block;
+}
+
+.choice-nav li + li:before {
+    content: " | ";
+    padding: 0 10px;
+}
+
+
+ul.topiclist ul {
+    /*margin-bottom: 1em;*/
+    margin-left: 10px;
+}
+
+ul.topiclist li {
+    /*margin-bottom: 0.2em;*/
+    /*font-size: 1em;*/
+    line-height: 1.5em;
+    margin-bottom: 0;
+}
+
+
+
+ul.topiclist > li {
+    font-weight: bold;
+    /*line-height: 1.1em;*/
+}
+
+
+
+.maintopiclist ul {
+    /*font-size: 0.9em;*/
+}
+
+.maintopiclist ul.topiclist li {
+    /*margin-bottom: 0.2em;*/
+    /*font-size: 1em;*/
+    line-height: 2em;
+}
+
+.maintopiclist ul.topiclist li li {
+    font-size: 0.9em;
+}
+
+.maintopiclist ul.topiclist li li li {
+    font-size: 0.9em;
+}
+
+.maintopiclist li li ul {
+    /*margin-bottom: 0.2em;*/
+}
+
+/*.maintopiclist-minimized li li ul {*/
+    /*display: inline-block;*/
+/*}*/
+
+.maintopiclist-minimized li li li  {
+    display: inline-block;
+    /*margin-bottom: 0;*/
+}
+
+.maintopiclist-minimized li li li + li:before  {
+    content: " | ";
+}
+
+.maintopiclist-minimized li li li ul  {
+    display: none;
+}
+
+.maintopiclist-expanded ul.topiclist li li li li {
+    font-size: 1em;
+}
+
+/*.topiclinks ul, .topiclinks li {*/
+    /*display: inline-block;*/
+    /*margin-bottom: 0;*/
+    /*margin-left: 0;*/
+/*}*/
+
+/*.topiclinks li > ul:before{*/
+    /*content: " > ";*/
+    /*padding: 0 10px;*/
+/*}*/
+
+.topic-section {
+    margin-top: 1em;
+}
+
+.topicmap {
+    margin-top: 1em;
+    /*font-size: 0.8em;*/
+    background-color: #e6e6e6;
+}
+
+.topic-section .excerpt {
+    margin-left: 1em;
+    padding: 0.2em 1em;
+    background-color: #e6e6e6;
+}
+
+
+.topicmap ul.topiclist ul ul {
+    margin-left: 3px;
+    padding-left: 8px;
+    border-left: 1px black dotted;
+}
+
+
+
+.topicnavlist li {
+    display: inline-block;
+}
+
+.topicnavlist li + li:before {
+    content: " > ";
+    padding: 0 10px;
+}
+
+
+.topicnextprev {
+    margin-top: 1em;
+    width: 100%;
+    display: inline-block;
+    font-size: 0.85em;
+}
+
+.topicprev {
+    float: left;
+}
+
+.topicnext {
+    float: right;
+}
 
 
 

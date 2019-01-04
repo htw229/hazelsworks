@@ -1,7 +1,62 @@
 {% extends 'britpick_app/base.html' %}
+{% load md2 %}
 
-{% block title %}{{ topic.name }}{% endblock %}
+{% block hierarchy-nav %}
+<div class="topicnavlist">
+    <ul>
+        <li><a href="{% url 'britpick_app:topiclist' %}">Topics</a></li>
+    {% for parent_topic in topic.parent_topics %}
+        <li><a href="{% url 'britpick_app:topic' parent_topic.slug %}">{{ parent_topic.name }}</a></li>
+    {% endfor %}
+        <li>{{ topic.name }}</li>
+    </ul>
+</div>
+
+{% endblock %}
 
 {% block content %}
+
+{% for text in topic.texts.all %}
+
+    {{ text.direct_quote }} {{ text.WORD_QUOTE }}
+    <div class="topic-section">
+        {% if text.reference %}<p>Excerpt from <a href="{{ text.reference.url }}">{{ text.reference.name }}</a>:</p>{% endif %}
+        {% if text.direct_quote == text.EXPLANATION_QUOTE %}<div class="excerpt">{% endif %}
+        {{ text.text|markdown }}
+        {% if text.direct_quote == text.EXPLANATION_QUOTE %}</div>{% endif %}
+    </div>
+{% endfor %}
+
+<div class="topic-section topicmap">
+    {% include "britpick_app/topiclist-embedded.html" with topics=topic.top_parent_or_self_as_list current_topic=topic toplevel=True %}
+</div>
+
+
+
+
+{% if topic.related_topics.all %}
+<div class="topic-section">
+        <ul class="topiclist toplevel">
+            <li>See also</li>
+            {% for t in topic.related_topics.all %}
+            <li><a href="{% url 'britpick_app:topic' t.slug %}">{{ t.name }}</a></li>
+            {% endfor %}
+        </ul>
+</div>
+{% endif %}
+
+
+<div class="topicnextprev">
+    <div class="topicprev">
+        {% if topic.previous_topic %}
+            < <a href="{% url 'britpick_app:topic' topic.previous_topic.slug %}">{{ topic.previous_topic.name }}</a>
+        {% endif %}
+    </div>
+    <div class="topicnext">
+        {% if topic.next_topic %}
+            <a href="{% url 'britpick_app:topic' topic.next_topic.slug %}">{{ topic.next_topic.name }}</a> >
+        {% endif %}
+    </div>
+</div>
 
 {% endblock %}

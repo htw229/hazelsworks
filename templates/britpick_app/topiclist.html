@@ -1,9 +1,9 @@
 {% extends 'britpick_app/base.html' %}
 
-{% block pagetitle %}Topics{% endblock %}
-{% block headertitle %}Topics{% endblock %}
 {% block custom-css %}/static/britpick_app/topiclist.css{% endblock %}
 
 {% block content %}
-    {% include "britpick_app/embedded-topiclist.html" with topics=topic_list %}
+<div class="maintopiclist maintopiclist-minimized">
+    {% include "britpick_app/topiclist-embedded.html" with topics=topic_list %}
+</div>
 {% endblock %}

@@ -236,7 +236,7 @@ class QuoteAdmin(BaseAdmin):
 
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
-            'fields': ('text','words',),
+            'fields': ('text','direct_quote','words',),
         }),
         (None, {
             'fields': (

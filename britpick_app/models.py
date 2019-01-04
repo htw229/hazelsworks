@@ -3,9 +3,13 @@ from django.urls import reverse
 from django import forms
 from multiselectfield import MultiSelectField
 
+from django.utils.text import slugify
+
 import fetchreference
 
-
+class DisplayedManager(models.Manager):
+    def get_queryset(self):
+        return super().get_queryset().filter(active=True).filter(hidden=False)
 
 # britpick_app model
 class BaseModel(models.Model):
@@ -15,6 +19,9 @@ class BaseModel(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     date_edited = models.DateTimeField(auto_now=True, verbose_name='last edited')
     notes = models.TextField(blank=True,)
+
+    objects = models.Manager()
+    displayed = DisplayedManager()
 
     class Meta:
         abstract = True
@@ -98,6 +105,10 @@ class Reference(BaseModel):
     main_reference = models.BooleanField(default=False)
     site_name = models.CharField(max_length=100, blank=True)
     page_name = models.CharField(max_length=100, blank=True)
+
+
+    class Meta:
+        ordering = ['name',]
 
     def __str__(self):
         if self.name:
@@ -210,7 +221,7 @@ class Quote(OrderedModel):
 
     direct_quote = models.PositiveSmallIntegerField(choices=QUOTE_TYPES, default=WORD_QUOTE, verbose_name='type')
 
-    reference = models.ForeignKey("Reference", on_delete=models.PROTECT, null=True, blank=True,)
+    reference = models.ForeignKey("Reference", on_delete=models.PROTECT, null=True, blank=True, related_name='quotes')
     reference_url = models.URLField(blank=True, null=True, help_text='use to quickly add reference; it will either be assigned existing reference or create new one')
 
     words = models.ManyToManyField("Word", blank=True, related_name='quotes')
@@ -265,7 +276,7 @@ class Topic(BaseModel):
     )
 
     name = models.CharField(max_length=50, blank=True)
-    slug = models.SlugField(null=True, blank=True,)
+    slug = models.SlugField(blank=True, db_index=True)
     topic_type = models.CharField(max_length=20, choices=TOPIC_TYPES, default=TOPIC)
 
     dialect = models.ForeignKey(
@@ -298,11 +309,85 @@ class Topic(BaseModel):
     objects = models.Manager()
     main_topics = MainTopicsManager()
 
+    class Meta:
+        ordering = ['name']
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name) #TODO - create automatic redirect when changing slug
+
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return self.name
 
+    @property
+    def parent_topics(self) -> list:
+        """ returns parent topics in order from topic of hierarchy down """
+        topics = []
+        t = self
+        while t.parent_topic:
+            t = t.parent_topic
+            topics.append(t)
+
+        topics.reverse()
+
+        return topics
+
+    @property
+    def descendent_topics(self) -> list:
+        topics = []
+
+        for t in Topic.objects.all():
+            if self in t.parent_topics:
+                topics.append(t)
+        return topics
+
+    @property
+    def top_parent_or_self(self):
+        if self.parent_topic:
+            return self.parent_topics[0]
+        else:
+            return self
+
+    @property
+    def top_parent_or_self_as_list(self):
+        if self.parent_topic:
+            return [self.parent_topics[0]]
+        else:
+            return [self]
+    # def child_topics(self):
+    #     return Topic.objects.filter(parent_topic=self)
+
+    @property
+    def siblings(self) -> list:
+        if self.parent_topic:
+            topics = list(self.parent_topic.child_topics.all())
+        else:
+            topics = list(Topic.main_topics.all())
+
+        return topics
+
+    @property
+    def previous_topic(self):
+        topics = self.siblings
+        i = topics.index(self)
+        if i == 0:
+            return None
+        else:
+            return topics[topics.index(self)-1]
+
+    @property
+    def next_topic(self):
+        topics = self.siblings
+        i = topics.index(self)
+        if i == len(topics) - 1:
+            return None
+        else:
+            return topics[topics.index(self) + 1]
+
     # TODO: is the logic correct here?? need to create filter...
-    def canbeparentof(self, child_topic):
+    def canbeparentof(self, child_topic) -> bool:
         if self.topic_type == self.INLINE_TOPIC:
             return False
         if child_topic == self:
@@ -317,8 +402,7 @@ class Topic(BaseModel):
 
         return True
 
-    def childtopics(self):
-        return Topic.objects.filter(parent_topic=self)
+
 
 
 class Britpick(BaseModel):

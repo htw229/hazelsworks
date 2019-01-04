@@ -1,0 +1,32 @@
+{% extends 'britpick_app/base.html' %}
+
+{% block choice-nav %}
+        <ul>
+            <li>
+                {% if reference_filter != 'main' %}<a href="{% url 'britpick_app:references' 'main' %}">{% endif %}
+                Main References
+                {% if reference_filter != 'main' %}</a>{% endif %}
+            </li>
+            <li>
+                {% if reference_filter != 'topic' %}<a href="{% url 'britpick_app:references' 'topic' %}">{% endif %}
+                Topic References
+                {% if reference_filter != 'topic' %}</a>{% endif %}
+            </li>
+            <li>
+                {% if reference_filter != 'quote' %}<a href="{% url 'britpick_app:references' 'quote' %}">{% endif %}
+                Quote References
+                {% if reference_filter != 'quote' %}</a>{% endif %}
+            </li>
+            <li>
+                {% if reference_filter != 'all' %}<a href="{% url 'britpick_app:references' 'all' %}">{% endif %}
+                All References
+                {% if reference_filter != 'all' %}</a>{% endif %}
+            </li>
+        </ul>
+{% endblock %}
+
+{% block content %}
+<div class="mainreferences">
+    {% include "britpick_app/referencelist-embedded.html" with references=reference_list %}
+</div>
+{% endblock %}

@@ -1,13 +1,16 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
     <title>
-        {% block pagetitle-override %}
-        {% block pagetitle %}{% endblock %} - Britpick
-        {% endblock %}
+        {% if title == 'Britpick' %}
+            {{ title }}
+        {% elif not title %}
+            Britpick
+        {% else %}
+            {{ title }} - Britpick
+        {% endif %}
     </title>
     <link rel="stylesheet" href="/static/britpick_app/britpick.css">
     <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
@@ -39,25 +42,31 @@
 
 <div class="navbar header">
     <a href="{% url 'britpick' %}"><img class="navbar image" src="/static/navbar-crown-32.png"></a>
-    <span class="navbar item"><a href="{% url 'britpick' %}">Britpick</a></span>
+    <span class="navbar item"><a href="{% url 'britpick_app:britpick' %}">Britpick</a></span>
     ·
-    <span class="navbar item"><a href="{% url 'topicslist' %}">Topics</a></span>
+    <span class="navbar item"><a href="{% url 'britpick_app:topiclist' %}">Topics</a></span>
     ·
-    <span class="navbar item"><a href="{% url 'search' %}">Search</a></span>
+    <span class="navbar item"><a href="{% url 'britpick_app:search' %}">Search</a></span>
     ·
-    <span class="navbar item"><a href="{% url 'references' %}">References</a></span>
+    <span class="navbar item"><a href="{% url 'britpick_app:references' %}">References</a></span>
     ·
-    <span class="navbar item"><a href="{% url 'about' %}">About</a></span>
+    <span class="navbar item"><a href="{% url 'britpick_app:about' %}">About</a></span>
 </div>
 
 
 <div class="content">
-    <h1>{% block headertitle %}{% endblock %}</h1>
+    <div class="nav hierarchy-nav">
+        {% block hierarchy-nav %}{% endblock %}
+    </div>
+    <h1>{{ title }}</h1>
     {% if user.is_superuser %}
         {% if adminlink %}
             <p class="adminlink"><a href="{{ adminlink }}" target="_blank">edit</a></p>
         {% endif %}
     {% endif %}
+    <div class="nav choice-nav">
+        {% block choice-nav %}{% endblock %}
+    </div>
     <div class="{{ csspage }}">
         {% block content %}
         {% endblock %}
