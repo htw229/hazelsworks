@@ -3,7 +3,7 @@
 {% block choice-nav %}
         <ul>
             <li>
-                {% if reference_filter != 'main' %}<a href="{% url 'britpick_app:references' 'main' %}">{% endif %}
+                {% if reference_filter != 'main' %}<a href="{% url 'britpick_app:references' %}">{% endif %}
                 Main References
                 {% if reference_filter != 'main' %}</a>{% endif %}
             </li>

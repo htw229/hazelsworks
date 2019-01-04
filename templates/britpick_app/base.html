@@ -71,6 +71,11 @@
         {% block content %}
         {% endblock %}
     </div>
+    <div class="nav bottom-nav">
+        <div id="bottom-nav-left">{% block bottom-nav-left %}{% endblock %}</div>
+        <div id="bottom-nav-center">{% block bottom-nav-center %}<a href="#">top</a>{% endblock %}</div>
+        <div id="bottom-nav-right">{% block bottom-nav-right %}{% endblock %}</div>
+    </div>
 </div>
 
 <div class="navbar footer"></div>

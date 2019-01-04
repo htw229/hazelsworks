@@ -23,26 +23,12 @@ urlpatterns = [
         extra_context={'title': 'Search',},
     ), name='search',),
 
-    # path(r'references/<reference_filter>/', views.ReferencesView.as_view(
-    #     template_name='britpick_app/references.html',
-    #     extra_context={'title': 'References',},
-    # ), name='references',),
 
-    re_path(r'references/(?:(?P<reference_filter>[a-zA-Z]+)/)?$', views.ReferencesView.as_view(
+    re_path(r'^references/(?:(?P<reference_filter>[a-zA-Z]+)/)?$', views.ReferencesView.as_view(
         template_name='britpick_app/references.html',
         extra_context={'title': 'References',},
     ), name='references',),
 
-    # path(r'references/', views.ReferencesView.as_view(
-    #     template_name='britpick_app/references.html',
-    #     extra_context={'title': 'References', 'reference_filter': 'main',},
-    # ), name='references',),
-
-    # path(r'references/', views.ReferencesView.as_view(
-    #     template_name='britpick_app/references.html',
-    #     references_filter=views.ReferencesView.MAIN_REFERENCES,
-    #     extra_context={'title': 'References',},
-    # ), name='references',),
 
     path(r'about/', TemplateView.as_view(
         template_name='britpick_app/about.html',
