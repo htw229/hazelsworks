@@ -1,1 +1,2 @@
-"{{ quote.text }}" {% if quote.reference %}({% include "britpick_app/snippets/reference.html" with show_name=False reference=quote.reference %}){% endif %}
+{% load dict_access %}
+"{{ quote.quote_by_word|get_item:word.pk|safe }}" {% if quote.reference %}({% include "britpick_app/snippets/reference.html" with show_name=False reference=quote.reference %}){% endif %}

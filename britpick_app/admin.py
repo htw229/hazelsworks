@@ -142,7 +142,7 @@ class CategoryAdmin(OrderedAdmin):
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
             'fields': (
-                ('can_assign_to_word', 'default'),
+                ('can_assign_to_word', 'dialogue', 'default'),
             ),
             'classes': ('checkbox-fieldset',)
         }),
@@ -487,12 +487,16 @@ class SearchStringBritpicksFilter(admin.SimpleListFilter):
 
 class SearchStringAdmin(BaseAdmin):
     list_filter = [*BaseAdmin.list_filter, SearchStringBritpicksFilter]
+    readonly_fields = [*BaseAdmin.readonly_fields, 'pattern',]
 
     fieldsets = [
         (None, {
             'fields': (
+                'britpick',
                 ('string',),
-                'modifiers',
+                'processing',
+                ('begin_sentence', 'end_sentence', 'case_sensitive'),
+                'pattern',
             ),
             # 'classes': ('optional-fieldset',)
         }),

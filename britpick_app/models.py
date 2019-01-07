@@ -5,6 +5,8 @@ from multiselectfield import MultiSelectField
 
 from django.utils.text import slugify
 
+import re
+
 import fetchreference
 
 class DisplayedManager(models.Manager):
@@ -71,6 +73,7 @@ class Category(OrderedModel):
     name = models.CharField(max_length=100, blank=True)
     description = models.TextField(blank=True)
     can_assign_to_word = models.BooleanField(default=False)
+    dialogue = models.BooleanField(default=False)
     default = models.BooleanField(default=False)
 
     def __str__(self):
@@ -251,11 +254,13 @@ class Quote(OrderedModel):
 
         #TODO: run through suffixes/conjugations here
         for word in self.words.all():
-            try:
-                s = self.text.split(word.word)
-                html[word.pk] = s[0] + r'<em>' + word.word + r'</em>' + s[1]
-            except IndexError:
-                html[word.pk] = self.text
+            html[word.pk] = re.sub('(' + word.word + ')', r'<em>\1</em>', self.text, flags=re.IGNORECASE)
+            # try:
+            #
+            #     s = self.text.split(word.word)
+            #     html[word.pk] = s[0] + r'<em>' + word.word + r'</em>' + s[1]
+            # except IndexError:
+            #     html[word.pk] = self.text
 
         return html
 
@@ -486,7 +491,7 @@ class Britpick(BaseModel):
     references = models.ManyToManyField("Reference", blank=True, related_name='britpicks')
 
     def __str__(self):
-        return ', '.join(s.string for s in self.search_strings.all())
+        return ', '.join(str(s) for s in self.search_strings.all())
 
     def gettypes(self):
         types = [t for t in self.types.all()]
@@ -569,7 +574,21 @@ class SearchString(BaseModel):
         return not self.case_sensitive
 
     def __str__(self):
-        return self.string
+        strings = []
+        # pattern = re.compile(r'(?<=[\(\|])([^\(\|]*)(?=[\)\|])')
+        # matches = re.findall(pattern, self.string)
+
+        strings = self.string.split('(')
+
+        # for m in matches:
+        #     strings.append(m.group(1))
+
+        return ' | '.join(matches)
+
+    def save(self, *args, **kwargs):
+        self.createpattern()
+
+        super().save(*args, **kwargs)
 
     def createpattern(self):
         self.pattern = self.string
@@ -618,8 +637,8 @@ class BritpickReplacements(models.Model):
     ORDERING_CHOICES = [(x, str(x)) for x in range(0, 26)]
     REPLACEMENT_CHOICES = [(True, 'replacement'), (False, 'disambiguation')]
 
-    britpick = models.ForeignKey("Britpick", on_delete=models.PROTECT, related_name='bwreplacements')
-    word = models.ForeignKey("Word", on_delete=models.PROTECT, related_name='wbreplacements')
+    britpick = models.ForeignKey("Britpick", on_delete=models.SET_NULL, null=True, blank=True, related_name='bwreplacements')
+    word = models.ForeignKey("Word", on_delete=models.SET_NULL, related_name='wbreplacements', null=True, blank=True,)
 
     replacement = models.BooleanField(default=True, choices=REPLACEMENT_CHOICES)
 

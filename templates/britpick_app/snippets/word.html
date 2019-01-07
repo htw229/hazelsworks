@@ -1,4 +1,4 @@
-{% load dict_access %}
+
 <ul class="maintopiclist">
     <li>{{ word.word }}</li>
     <ul>
@@ -42,7 +42,7 @@
         {% if word.quotes.all %}
             {% for quote in word.quotes.all %}
                 <li>{% include "britpick_app/snippets/quote.html" %}</li>
-                <li>{{ quote.quote_by_word|get_item:word.pk|safe }}</li>
+                <li></li>
             {% endfor %}
         {% endif %}
     </ul>
