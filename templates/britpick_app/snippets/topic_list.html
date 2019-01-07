@@ -8,7 +8,7 @@
             <li>
                 {% if topic != current_topic %}<a href="{% url 'britpick_app:topic' topic.slug %}">{{ topic.name }}</a>{% else %}{{ topic.name }}{% endif %}
                 {% if topic == current_topic or current_topic == None or topic in current_topic.descendent_topics or topic in current_topic.parent_topics %}
-                    {% include "britpick_app/topiclist-embedded.html" with topics=topic.child_topics.all toplevel=False current_topic=current_topic %}
+                    {% include "britpick_app/snippets/topic_list.html" with topics=topic.child_topics.all toplevel=False current_topic=current_topic %}
                 {% endif %}
             </li>
         {% endif %}

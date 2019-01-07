@@ -71,14 +71,23 @@ p {
     /*font-size: 80%;*/
 }
 
+em {
+    font-style: normal;
+    font-weight: bold;
+}
+
 /* lists */
 
 ul {
     list-style-type: none;
-    margin: 0;
+    margin: 1em 0;
     padding: 0;
     line-height: 110%;
     font-size: 1em;
+}
+
+ul ul {
+    margin: 1em;
 }
 
 /*li {*/
@@ -149,6 +158,10 @@ a:hover {
 
 a:active {
     text-decoration: underline;
+}
+
+a.imagelink:hover, a.imagelink:active {
+    text-decoration: none;
 }
 
 .external-link {
@@ -448,7 +461,107 @@ ul.topiclist > li {
 /*  .britpick-page  */
 /*--------------------------------------------*/
 
-.britpick-page {}
+
+
+
+.britpick-results div.paragraph {
+    margin: 1em 0;
+}
+
+div.original-text {
+    /*display: block;*/
+}
+
+div.expansion-container {
+    margin-left: 10px;
+}
+
+div.britpick.expanded {
+    background-color: var(--lightgray);
+    min-width: 200px;
+    max-width: 200px;
+    margin: 1em 0 1em 10px;
+}
+
+.britpick.expanded div.toggle-bar {
+    background-color: var(--gray);
+}
+
+.britpick.expanded div.toggle-bar:hover {
+    background-color: var(--red);
+}
+
+.britpick.expanded div.content {
+    padding: 1em 5px;
+}
+
+span.britpick.inline {
+    background-color: var(--lightgray);
+}
+
+.britpick.inline span.toggle {
+    background-color: var(--lightyellow);
+}
+
+.britpick.inline span.toggle:after {
+    content:"more";
+}
+
+.britpick.inline span.toggle.expanded {
+    background-color: var(--yellow);
+}
+
+
+
+.britpick.inline span.toggle.expanded:after {
+    content:"less";
+}
+
+.britpick.inline span.toggle:hover {
+    background-color: var(--red);
+}
+
+img.toggle-similar {
+    margin: 0 5px;
+}
+
+/*span.toggle-similar:after {*/
+    /*content:"hide";*/
+/*}*/
+
+/*span.toggle-similar.hidden:after {*/
+    /*content:"show";*/
+/*}*/
+
+@media(min-width: 800px) {
+    .britpick-results div.paragraph {
+        display: inline-flex;
+    }
+}
+
+
+.expanded-britpick ul {
+
+}
+
+.expanded-britpick li {
+
+}
+
+.expanded-britpick div.toggle {
+    background-color: var(--gray);
+}
+
+.expanded-britpick div.toggle:hover {
+    background-color: var(--red);
+}
+
+
+
+
+
+
+
 
 textarea {
     width: 100%;

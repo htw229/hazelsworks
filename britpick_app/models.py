@@ -245,13 +245,20 @@ class Quote(OrderedModel):
 
         super().save(*args, **kwargs)
 
+    @property
+    def quote_by_word(self) -> dict:
+        html = {}
 
+        #TODO: run through suffixes/conjugations here
+        for word in self.words.all():
+            try:
+                s = self.text.split(word.word)
+                html[word.pk] = s[0] + r'<em>' + word.word + r'</em>' + s[1]
+            except IndexError:
+                html[word.pk] = self.text
 
+        return html
 
-
-# class ParentChildTopics(OrderedModel):
-#     parent_topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='child_topics')
-#     child_topic = models.ForeignKey("Topic", on_delete=models.PROTECT, related_name='parent_topics', unique=True)
 
 class MainTopicsManager(models.Manager):
     def get_queryset(self):

@@ -3,16 +3,23 @@ from django.views.generic import TemplateView, ListView, DetailView
 
 from . import views
 # from . import models
-from .models import Topic, Reference
+from .models import Topic, Reference, Word
 
 app_name = 'britpick_app'
 urlpatterns = [
     path(r'topics/', ListView.as_view(
-        template_name='britpick_app/topiclist.html',
+        template_name='britpick_app/snippets/../templates/britpick_app/topiclist.html',
         model=Topic,
         queryset = Topic.main_topics.all(),
         extra_context={'title': 'Topics',},
     ), name='topiclist'),
+
+    path(r'words/', ListView.as_view(
+        template_name='britpick_app/words.html',
+        model=Word,
+        queryset = Word.objects.all(),
+        # extra_content={'title': 'Words',},
+    ), name='words'),
 
     path(r'topics/<slug:topicslug>/', views.TopicView.as_view(
         template_name='britpick_app/topic.html',

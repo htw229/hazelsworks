@@ -1,0 +1,49 @@
+{% load dict_access %}
+<ul class="maintopiclist">
+    <li>{{ word.word }}</li>
+    <ul>
+        {% if word.definitions.all %}
+            {% for definition in word.definitions.all %}
+                <li>{{ definition.dialect }}: {{ definition.definition }}</li>
+            {% endfor %}
+        {% endif %}
+
+        {% if word.explanation %}
+            <li>explanation: {{ word.explanation }}</li>
+        {% endif %}
+
+        {% if word.dialect %}
+            <li>dialect: {{ word.dialect }}</li>
+        {% endif %}
+
+        {% if word.category %}
+            <li>category: {{ word.category }}</li>
+        {% endif %}
+
+        {% if word.type or word.references.all %}<li>{% endif %}
+        {% if word.type %}
+            type: {{ word.type }}
+        {% endif %}
+        {% if word.references.all %}
+            {% for reference in word.references.all %}
+                <ul style="display: inline;"><li style="display: inline;">{% include "britpick_app/snippets/reference.html" with show_name=False %}</li></ul>
+            {% endfor %}
+        {% endif %}
+        {% if word.type or word.references.all %}</li>{% endif %}
+
+        {% if word.topics.all %}
+            {% for topic in word.topics.all %}
+                <li>{% include "britpick_app/snippets/topic_link.html" %}</li>
+            {% endfor %}
+        {% endif %}
+
+
+
+        {% if word.quotes.all %}
+            {% for quote in word.quotes.all %}
+                <li>{% include "britpick_app/snippets/quote.html" %}</li>
+                <li>{{ quote.quote_by_word|get_item:word.pk|safe }}</li>
+            {% endfor %}
+        {% endif %}
+    </ul>
+</ul>

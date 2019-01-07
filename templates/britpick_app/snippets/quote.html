@@ -1,0 +1,1 @@
+"{{ quote.text }}" {% if quote.reference %}({% include "britpick_app/snippets/reference.html" with show_name=False reference=quote.reference %}){% endif %}

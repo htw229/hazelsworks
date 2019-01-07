@@ -1,0 +1,6 @@
+{% load static %}
+{#variables: url, name, show_name, image_url, admin_url, model_name#}
+{% static "topiclink-crown-16.png" as image_url %}
+{% url 'admin:britpick_app_topic_change' topic.id as admin_url %}
+{% url 'britpick_app:topic' topic.slug as url %}
+{% include "britpick_app/snippets/link.html" with name=topic.name model_name="topic" new_window=False %}

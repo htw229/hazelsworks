@@ -25,7 +25,7 @@
 {% block content %}
 
     <div class="topic-section topicmap" id="topic-map">
-        {% include "britpick_app/topiclist-embedded.html" with topics=topic.top_parent_or_self_as_list current_topic=topic toplevel=True %}
+        {% include "britpick_app/snippets/topic_list.html" with topics=topic.top_parent_or_self_as_list current_topic=topic toplevel=True %}
     </div>
 
 
@@ -42,7 +42,7 @@
     {% if topic.references.all %}
         <div class="topic-section" id="references">
         <div class="section-header">References</div>
-            {% include "britpick_app/referencelist-embedded.html" with references=topic.references.all %}
+            {% include "britpick_app/snippets/reference_list.html" with references=topic.references.all %}
         </div>
     {% endif %}
 
@@ -51,7 +51,7 @@
                 <div class="section-header">See also</div>
                 <ul class="topiclist toplevel">
                     {% for topic in topic.related_topics.all %}
-                    <li>{% include "britpick_app/topic-link.html" %}</li>
+                    <li>{% include "britpick_app/snippets/topic_link.html" %}</li>
                     {% endfor %}
                 </ul>
         </div>

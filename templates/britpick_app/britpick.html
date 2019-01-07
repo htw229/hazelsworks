@@ -1,4 +1,72 @@
 {% extends 'britpick_app/base.html' %}
+{% load static %}
+
+{% block includes %}
+    <script src="/static/britpick_app/britpicked_text.js"></script>
+{% endblock %}
 
 {% block content %}
+    <div>FORM</div>
+    <hr>
+    <div class="britpick-results">
+        <div class="left-margin"></div>
+        <div class="britpicked-text">
+            <div class="paragraph">
+                <div class="original-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc dictum dictum nibh sed bibendum. In maximus diam in mauris luctus vulputate ut a augue. Curabitur metus lacus, molestie a ligula vel, ultricies gravida mauris.
+
+                    <span class="britpick inline 233" id="inline-bp-1">[mauris (br) is not the same as mauris (am)
+                        <span class="toggle" id="toggle-bp-1" onclick="toggleBritpick('1')"></span>]
+
+                    </span>
+                    <img src="/static/hide-16.png" class="toggle-similar 233" onclick="toggleSimilar('233')">
+                    <img src="/static/show-16.png" class="toggle-similar 233" style="display: none;" onclick="toggleSimilar('233')">
+                     Praesent sed rhoncus ante. Aliquam erat volutpat. Vestibulum arcu urna, vestibulum et viverra a, convallis et velit. Aenean in iaculis massa. Aliquam <span class="britpick inline 356" id="inline-bp-2">[mauris (br) is not the same as mauris (am) <span class="toggle" id="toggle-bp-2" onclick="toggleBritpick('2')"></span>]</span> laoreet quam at enim cursus faucibus. Nam finibus lorem nunc, non eleifend nunc iaculis eu. Duis placerat pretium sapien, a condimentum nisl volutpat sed. Cras <span class="britpick inline 233" id="inline-bp-3">[mauris (br) is not the same as mauris (am) <span class="toggle" id="toggle-bp-3" onclick="toggleBritpick('3')"></span>]</span> quis sagittis tellus. Mauris quis sollicitudin est, at fermentum elit.</div>
+                <div class="expansion-container">
+                    <div class="britpick expanded" style="display:none;" id="expanded-bp-1">
+                        <div class="toggle-bar" onclick="toggleBritpick('1')">[x]</div>
+                        <div class="content">
+                            <ul>
+                                <li>ONE</li>
+                                <li>blocked mauris (br) is not the same as mauris (am)</li>
+                                <li>Nulla eu semper turpis, eu egestas ligula. Suspendisse potenti. Nam hendrerit eros in enim dignissim, id pellentesque tellus consectetur. Duis convallis enim sed nisi suscipit, quis malesuada magna interdum.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="britpick expanded" style="display:none;" id="expanded-bp-2">
+                        <div class="toggle-bar" onclick="toggleBritpick('2')">[x]</div>
+                        <div class="content">
+                            <ul>
+                                <li>TWO</li>
+                                <li>blocked mauris (br) is not the same as mauris (am)</li>
+                                <li>Nulla eu semper turpis, eu egestas ligula. Suspendisse potenti. Nam hendrerit eros in enim dignissim, id pellentesque tellus consectetur. Duis convallis enim sed nisi suscipit, quis malesuada magna interdum.</li>
+                            </ul>
+                        </div>
+                    </div>
+
+                    <div class="britpick expanded" style="display:none;" id="expanded-bp-3">
+                        <div class="toggle-bar" onclick="toggleBritpick('3')">[x]</div>
+                        <div class="content">
+                            <ul>
+                                <li>THREE</li>
+                                <li>blocked mauris (br) is not the same as mauris (am)</li>
+                                <li>Nulla eu semper turpis, eu egestas ligula. Suspendisse potenti. Nam hendrerit eros in enim dignissim, id pellentesque tellus consectetur. Duis convallis enim sed nisi suscipit, quis malesuada magna interdum.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div>Donec laoreet eros vitae odio tincidunt, ut posuere augue tincidunt. Aliquam a risus scelerisque, finibus sem id, ornare diam. Nulla eu semper turpis, eu egestas ligula. Suspendisse potenti. Nam hendrerit eros in enim dignissim, id pellentesque tellus consectetur. Duis convallis enim sed nisi suscipit, quis malesuada magna interdum. Nunc volutpat, urna at molestie tincidunt, dui dolor mollis felis, in consequat nibh libero non quam.</div>
+
+            <div>In ipsum quam, vulputate quis justo non, cursus cursus mi. Vestibulum in sapien a augue commodo vehicula. Mauris maximus neque maximus ipsum aliquam pulvinar. Phasellus eleifend libero a nisi consectetur efficitur. Aliquam accumsan quis lorem in porttitor. Cras ac mollis enim, eu consectetur dolor. Phasellus ultricies egestas posuere. Vestibulum lacinia nisl placerat nisl pulvinar, elementum dignissim diam pellentesque.</div>
+
+            <div>Suspendisse pulvinar id nisl sed ultrices. Sed ut erat sed nisi luctus ultrices vitae non dui. Maecenas rutrum lacus vel lorem sollicitudin, at rhoncus risus sagittis. Sed tincidunt dolor nec massa porttitor, id egestas metus consequat. Cras et enim neque. Aliquam eget lectus eleifend, eleifend mi eget, pharetra mauris. Ut posuere diam arcu, vel consectetur tortor iaculis a.</div>
+
+            <div>Phasellus rutrum venenatis lorem, eu viverra arcu feugiat vitae. Quisque sit amet tincidunt lacus, ac semper lectus. Morbi ac nibh eget augue rhoncus rhoncus. Sed molestie congue turpis vitae porta. Donec luctus pretium laoreet. Morbi pretium posuere odio ut gravida. Morbi nec eleifend elit, sed luctus lorem. Ut urna odio, tincidunt a rutrum eget, ultrices eu ante. Curabitur volutpat nibh sapien, non laoreet ante condimentum nec. Proin eleifend nisi lacus, congue gravida est bibendum non. Sed lobortis tortor ac velit consectetur tincidunt. Morbi fringilla metus eu luctus varius. Nullam suscipit dui velit, vel tincidunt ligula pulvinar et. Proin id fermentum mi.</div>
+
+        </div>
+        <div class="right-margin"></div>
+    </div>
+
 {% endblock %}

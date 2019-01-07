@@ -1,0 +1,17 @@
+{#variables: url, name, show_name, image_url, admin_url, model_name#}
+
+{% if image_url %}
+    <a href="{{ url }}" class="imagelink" target="_blank" title="{{ name }}">
+        <img src="{{ image_url }}">
+    </a>
+{% endif %}
+
+{% if name and show_name|default_if_none:True %}
+    <a href="{{ url }}" class="" {% if new_window|default:True %}target="_blank"{% endif %} title="{{ name }}">
+        {{ name }}
+    </a>
+{% endif %}
+
+{% if admin_url %}
+    {% include "britpick_app/snippets/admin_link.html" %}
+{% endif %}

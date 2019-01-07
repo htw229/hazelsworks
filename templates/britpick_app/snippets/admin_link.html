@@ -1,0 +1,6 @@
+{% load static %}
+{% if user.is_superuser and admin_url %}
+        <a class="imagelink" href="{{ admin_url }}" title="edit {{ model_name }}">
+            <img src="{% static "/admin/img/icon-changelink.svg" %}">
+        </a>
+{% endif %}

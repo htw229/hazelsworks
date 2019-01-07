@@ -1,0 +1,5 @@
+{% load static %}
+{#variables: url, name, show_name, image_url, admin_url, model_name#}
+{% static "externallink-flag-24.png" as image_url %}
+{% url 'admin:britpick_app_reference_change' reference.id as admin_url %}
+{% include "britpick_app/snippets/link.html" with url=reference.url name=reference.name model_name="reference" %}
