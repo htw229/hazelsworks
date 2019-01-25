@@ -189,6 +189,10 @@ a.imagelink:hover, a.imagelink:active {
     content:url(/static/admin/img/icon-changelink.svg);
 }
 
+.hidden {
+    display: none;
+}
+
 
 /*--------------------------------------------*/
 /*  NAVBAR  */

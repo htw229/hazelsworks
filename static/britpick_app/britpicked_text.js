@@ -1,21 +1,36 @@
-function toggleBritpick(id) {
 
-    let inlineBP = document.getElementById('inline-bp-' + id);
-    let toggleBP = document.getElementById('toggle-bp-' + id);
-    let expandedBP = document.getElementById('expanded-bp-' + id);
+function toggleExpandedBritpick(ele, britpickPk, show) {
 
-    if (expandedBP.style.display !== "none") {
-        expandedBP.style.display = "none";
-        toggleBP.style.display = "";
-        // toggleBP.classList.remove("expanded");
+    let paragraph = ele.closest('div.paragraph');
+    // paragraph.style.backgroundColor = "red";
+
+    let expandedBP = paragraph.getElementsByClassName('britpick expanded ' + britpickPk)[0];
+    let expandBPLinks = paragraph.getElementsByClassName('expand-britpick ' + britpickPk);
+
+    if (show) {
+        expandedBP.classList.remove("hidden");
+        for (i = 0; i < expandBPLinks.length; i++) {
+            expandBPLinks[i].classList.add("hidden");
+        }
     } else {
-        expandedBP.style.display = "inline-block";
-        toggleBP.style.display = "none";
-        // toggleBP.classList.add("expanded");
+        expandedBP.classList.add("hidden");
+        for (i = 0; i < expandBPLinks.length; i++) {
+            expandBPLinks[i].classList.remove("hidden");
+        }
     }
+
 }
 
-
+function toggleInlineBritpicks(britpickPk, show) {
+    let inlineBPs = document.getElementsByClassName("britpick inline " + britpickPk);
+    for (i = 0; i < inlineBPs.length; i++) {
+        if (show) {
+            inlineBPs[i].classList.remove("hidden");
+        } else {
+            inlineBPs[i].classList.add("hidden");
+        }
+    }
+}
 
 
 function toggleSimilar(id) {

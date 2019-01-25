@@ -28,7 +28,8 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-
+    # def string(self) -> str:
+    #     return str(self)
 
 class OrderedModel(BaseModel):
     ORDERING_MIN = 0
@@ -441,6 +442,15 @@ class Britpick(BaseModel):
         null=True,
         help_text='determined by set value > type > word category > word type; within each, the top ordering is used (mandatory -> slang)',
         # default=2, #suggested
+    )
+
+    type = models.ForeignKey(
+        "BritpickType",
+        models.PROTECT,
+        related_name='britpicks_onetype',
+        blank=True,
+        null=True,
+        help_text='',
     )
 
     types = models.ManyToManyField(

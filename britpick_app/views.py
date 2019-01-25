@@ -5,7 +5,7 @@ from django.views.generic import ListView, TemplateView, DetailView, FormView
 
 from django.db.models import Count, Q
 
-from .models import Topic, Reference
+from .models import Topic, Reference, Britpick
 from . import forms
 
 # CLASS
@@ -20,6 +20,7 @@ class BritpickView(TemplateView):
         form = context['form']
         if form.is_valid():
             context['britpicked'] = self.get_britpicked_text(form.cleaned_data)
+            context['formdata'] = form.cleaned_data
 
         return super().render_to_response(context)
 
@@ -30,9 +31,41 @@ class BritpickView(TemplateView):
         return context
 
     def get_britpicked_text(self, formdata):
-        britpicked = {}
-        britpicked['text'] = 'BRITPICKED!!! ' + formdata['text'] + ' BRITPICKED!!!'
-        britpicked['dialect'] = formdata['dialect']
+        example_britpick_01 = Britpick.objects.get(id=4)
+        example_britpick_02 = Britpick.objects.get(id=7)
+        example_britpick_03 = Britpick.objects.get(id=8)
+        example_britpick_04 = Britpick.objects.get(id=9)
+
+        paragraphs = [
+            {
+                'britpicks': [example_britpick_01,example_britpick_02,],
+                'inlines': [
+                    {
+                        'text': '"Hello, I am Andy',
+                        'britpick': example_britpick_01,
+                        'classes': ['dialogue',],
+                    },
+                    {
+                        'text': ' and I am Sam',
+                        'britpick': example_britpick_02,
+                        'classes': ['dialogue', ],
+                    },
+                    {
+                        'text': '," said Sam',
+                        'britpick': example_britpick_02,
+                        'classes': ['narrative', ],
+                    },
+                    {
+                        'text': '.',
+                        'britpick': None,
+                        'classes': [],
+                    },
+                ]
+            },
+        ]
+
+        britpicked = {'paragraphs': paragraphs,}
+
         return britpicked
 
 

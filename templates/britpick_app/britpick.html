@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block content %}
-    <div class="britpickform">
+    <div class="britpick-form">
         <form action="" method="post">
             {% csrf_token %}
             <ul>{{ form.as_ul }}</ul>
@@ -14,23 +14,45 @@
         </form>
     </div>
     <hr>
-    britpicked: text={{ britpicked.text }} dialect={{ britpicked.dialect }} dialectfromform={{ form.data.dialect.string }}
+    <div class="britpick-settings">
+        britpicked: text={{ britpicked.text }} dialect={{ britpicked.dialect }} dialectfromform={{ formdata.dialect }}
+    </div>
     <div class="britpick-results">
+        {% for paragraph in britpicked.paragraphs %}
+            <div class="paragraph">
+                <div class="original-text">
+                    {% for inline in paragraph.inlines %}
+                        {{ inline.text }}
+                        {% if inline.britpick %}
+                            {% include "britpick_app/snippets/britpick_inline.html" with inline=inline %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="expansion-container">
+                    {% for britpick in paragraph.britpicks %}
+                        {% include "britpick_app/snippets/britpick_expanded.html" with britpick=britpick %}
+                    {% endfor %}
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+
+    <div>
         <div class="left-margin"></div>
         <div class="britpicked-text">
             <div class="paragraph">
                 <div class="original-text">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nunc dictum dictum nibh sed bibendum. In maximus diam in mauris luctus vulputate ut a augue. Curabitur metus lacus, molestie a ligula vel, ultricies gravida mauris.
 
                     <span class="britpick inline 233" id="inline-bp-1">[mauris (br) is not the same as mauris (am)
-                        <span class="toggle" id="toggle-bp-1" onclick="toggleBritpick('1')"></span>]
+                        <span class="toggle" id="toggle-bp-1" onclick="toggleExpandedBritpick('1')"></span>]
 
                     </span>
                     <img src="/static/hide-16.png" class="toggle-similar 233" onclick="toggleSimilar('233')">
                     <img src="/static/show-16.png" class="toggle-similar 233" style="display: none;" onclick="toggleSimilar('233')">
-                     Praesent sed rhoncus ante. Aliquam erat volutpat. Vestibulum arcu urna, vestibulum et viverra a, convallis et velit. Aenean in iaculis massa. Aliquam <span class="britpick inline 356" id="inline-bp-2">[mauris (br) is not the same as mauris (am) <span class="toggle" id="toggle-bp-2" onclick="toggleBritpick('2')"></span>]</span> laoreet quam at enim cursus faucibus. Nam finibus lorem nunc, non eleifend nunc iaculis eu. Duis placerat pretium sapien, a condimentum nisl volutpat sed. Cras <span class="britpick inline 233" id="inline-bp-3">[mauris (br) is not the same as mauris (am) <span class="toggle" id="toggle-bp-3" onclick="toggleBritpick('3')"></span>]</span> quis sagittis tellus. Mauris quis sollicitudin est, at fermentum elit.</div>
+                     Praesent sed rhoncus ante. Aliquam erat volutpat. Vestibulum arcu urna, vestibulum et viverra a, convallis et velit. Aenean in iaculis massa. Aliquam <span class="britpick inline 356" id="inline-bp-2">[mauris (br) is not the same as mauris (am) <span class="toggle" id="toggle-bp-2" onclick="toggleExpandedBritpick('2')"></span>]</span> laoreet quam at enim cursus faucibus. Nam finibus lorem nunc, non eleifend nunc iaculis eu. Duis placerat pretium sapien, a condimentum nisl volutpat sed. Cras <span class="britpick inline 233" id="inline-bp-3">[mauris (br) is not the same as mauris (am) <span class="toggle" id="toggle-bp-3" onclick="toggleExpandedBritpick('3')"></span>]</span> quis sagittis tellus. Mauris quis sollicitudin est, at fermentum elit.</div>
                 <div class="expansion-container">
                     <div class="britpick expanded" style="display:none;" id="expanded-bp-1">
-                        <div class="toggle-bar" onclick="toggleBritpick('1')">[x]</div>
+                        <div class="toggle-bar" onclick="toggleExpandedBritpick('1')">[x]</div>
                         <div class="content">
                             <ul>
                                 <li>ONE</li>
@@ -41,7 +63,7 @@
                     </div>
 
                     <div class="britpick expanded" style="display:none;" id="expanded-bp-2">
-                        <div class="toggle-bar" onclick="toggleBritpick('2')">[x]</div>
+                        <div class="toggle-bar" onclick="toggleExpandedBritpick('2')">[x]</div>
                         <div class="content">
                             <ul>
                                 <li>TWO</li>
@@ -52,7 +74,7 @@
                     </div>
 
                     <div class="britpick expanded" style="display:none;" id="expanded-bp-3">
-                        <div class="toggle-bar" onclick="toggleBritpick('3')">[x]</div>
+                        <div class="toggle-bar" onclick="toggleExpandedBritpick('3')">[x]</div>
                         <div class="content">
                             <ul>
                                 <li>THREE</li>

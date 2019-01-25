@@ -391,7 +391,7 @@ class BritpickAdmin(BaseAdmin):
 
         BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
         (None, {
-            'fields': ('dialect', ('category', 'default_category',), ('types', 'additional_types'),),
+            'fields': ('dialect', ('category', 'default_category',), ('types', 'additional_types'), 'type',),
             'classes': ('lightgray-fieldset', )
         }),
         # (None, {

@@ -1,0 +1,3 @@
+<span class="britpick inline {{ inline.britpick.id }} {% for class in inline.classes %}{{ class }}{% endfor %} type-{{ inline.britpick.type|slugify }} category-{{ inline.britpick.category|slugify }}">
+    [ {{ inline.britpick }} <span class="expand-britpick {{ inline.britpick.pk }}" id="inline-" onclick="toggleExpandedBritpick(this, {{ inline.britpick.pk }}, show=true)">more</span>] <span class="hide-similar {{ inline.britpick.pk }}" onclick="toggleInlineBritpicks({{ inline.britpick.pk }}, show=false)">(hide similar)</span>
+</span>

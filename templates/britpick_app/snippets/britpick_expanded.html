@@ -1,0 +1,8 @@
+<div class="britpick expanded {{ britpick.id }} hidden type-{{ britpick.type|slugify }} category-{{ britpick.category|slugify }}">
+    <div class="toggle-bar" onclick="toggleExpandedBritpick(this, {{ britpick.id }}, show=false)">[x]</div>
+    <div class="content">
+        <ul>
+            <li>{{ britpick }}</li>
+        </ul>
+    </div>
+</div>
