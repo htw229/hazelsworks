@@ -4,11 +4,12 @@ from django.views.generic import TemplateView, ListView, DetailView
 from . import views
 # from . import models
 from .models import Topic, Reference, Word
+from . import forms
 
 app_name = 'britpick_app'
 urlpatterns = [
     path(r'topics/', ListView.as_view(
-        template_name='britpick_app/snippets/../templates/britpick_app/topiclist.html',
+        template_name='britpick_app/topiclist.html',
         model=Topic,
         queryset = Topic.main_topics.all(),
         extra_context={'title': 'Topics',},
@@ -42,7 +43,7 @@ urlpatterns = [
         extra_context={'title': 'About',},
     ), name='about',),
 
-    path(r'', TemplateView.as_view(
+    path(r'', views.BritpickView.as_view(
         template_name='britpick_app/britpick.html',
         extra_context={'title': 'Britpick',},
     ), name='britpick',),

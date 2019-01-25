@@ -491,7 +491,9 @@ class Britpick(BaseModel):
     references = models.ManyToManyField("Reference", blank=True, related_name='britpicks')
 
     def __str__(self):
-        return ', '.join(str(s) for s in self.search_strings.all())
+        s = ', '.join(str(s) for s in self.search_strings.all())
+        s += ' -> ' + ', '.join(str(w) for w in self.all_words())
+        return s
 
     def gettypes(self):
         types = [t for t in self.types.all()]
@@ -538,6 +540,11 @@ class Britpick(BaseModel):
         else:
             return 'database default'
 
+    def all_words(self):
+        words = [w for w in self.words.filter(active=True).filter(hidden=False)]
+        for group in self.word_groups.filter(active=True).filter(hidden=False):
+            words.extend([w for w in group.words.filter(active=True).filter(hidden=False)])
+        return words
 
 
 class SearchString(BaseModel):
@@ -574,16 +581,19 @@ class SearchString(BaseModel):
         return not self.case_sensitive
 
     def __str__(self):
-        strings = []
-        # pattern = re.compile(r'(?<=[\(\|])([^\(\|]*)(?=[\)\|])')
-        # matches = re.findall(pattern, self.string)
+        if not '(' in self.string:
+            return self.string
 
-        strings = self.string.split('(')
+        strings = [self.string]
 
-        # for m in matches:
-        #     strings.append(m.group(1))
+        for string in strings:
+            option_match = re.search(r"\(.*?\)", string)
+            if option_match:
+                options = [m for m in re.finditer(r'(?<=[\(\|])([^\(\|]*)(?=[\)\|])', option_match.group(0))]
+                for m in options:
+                    strings.append(string[:option_match.start()] + m.group(0) + string[option_match.end():])
 
-        return ' | '.join(matches)
+        return ', '.join(s for s in strings if '(' not in s)
 
     def save(self, *args, **kwargs):
         self.createpattern()
@@ -758,6 +768,8 @@ class WordGroup(BaseModel):
     name = models.CharField(max_length=100, blank=True)
     words = models.ManyToManyField("Word", blank=True, related_name='groups',)
 
+    def __str__(self):
+        return self.name
 
 
 

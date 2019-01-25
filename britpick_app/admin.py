@@ -670,7 +670,49 @@ class WordAdmin(BaseAdmin):
 admin.site.register(Word, WordAdmin)
 
 class WordGroupAdmin(BaseAdmin):
-    search_fields = ['name',]
+    search_fields = ['name', 'words__word',]
+
+    list_display = [*BaseAdmin.list_display, 'words_changelinks', 'britpicks_changelinks',]
+    list_filter = [*BaseAdmin.list_filter,]
+
+    inlines = []
+    filter_horizontal = ['words',]
+
+    autocomplete_fields = ()
+    readonly_fields = [
+        *BaseAdmin.readonly_fields,
+        'words_changelinks',
+        'britpicks_changelinks',
+    ]
+
+    fieldsets = [
+        (None, {
+            'fields': (
+                'name',
+            ),
+            'classes': ('header-fieldset',)
+        }),
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': (
+                'words',
+            ),
+        }),
+        BaseAdmin.FOOTER_FIELDSET,
+    ]
+
+    def words_changelinks(self, obj):
+        return getchangelinks(obj.words.all(), add_link=True, model_name='word')
+    words_changelinks.short_description = 'words'
+
+    def britpicks_changelinks(self, obj):
+        return getchangelinks(obj.britpicks.all(), add_link=True, model_name='britpick')
+    britpicks_changelinks.short_description = 'britpicks'
+
+
+
+
+
 admin.site.register(WordGroup, WordGroupAdmin)
 
 class DefinitionAdmin(BaseAdmin):

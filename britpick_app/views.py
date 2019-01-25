@@ -1,17 +1,43 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
-from django.views.generic import ListView, TemplateView, DetailView
+from django.views.generic import ListView, TemplateView, DetailView, FormView
 
 from django.db.models import Count, Q
 
 from .models import Topic, Reference
+from . import forms
 
 # CLASS
-class BaseView(TemplateView):
-    template_name = 'britpick_app/base.html'
+
 
 # INDEX (form)
+class BritpickView(TemplateView):
+    form_class = forms.BritpickForm
+
+    def post(self, request, *args, **kwargs):
+        context = self.get_context_data()
+        form = context['form']
+        if form.is_valid():
+            context['britpicked'] = self.get_britpicked_text(form.cleaned_data)
+
+        return super().render_to_response(context)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['britpicked'] = None
+        context['form'] = self.form_class(self.request.POST or None)
+        return context
+
+    def get_britpicked_text(self, formdata):
+        britpicked = {}
+        britpicked['text'] = 'BRITPICKED!!! ' + formdata['text'] + ' BRITPICKED!!!'
+        britpicked['dialect'] = formdata['dialect']
+        return britpicked
+
+
+
+
 
 class TopicView(DetailView):
     model = Topic
