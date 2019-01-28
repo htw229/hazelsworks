@@ -1,0 +1,71 @@
+/* HTML tags and attribute selectors */
+:root {
+    --red: #950d19;
+    --darkred: #7b0b15;
+    --lightyellow: #f6e98b;
+    --yellow: #eed82d;
+    --darkyellow: #c4b125;
+    --lightblue: #527bb2;
+    --blue: #21569c;
+    --darkblue: #1a4277;
+    --lightgray:#e6e6e6;
+    --gray:#555354;
+    --darkgray: #1f1d1e;
+}
+
+
+html, body {
+    font-family: 'Open Sans', sans-serif;
+    font-size: 14px;
+    margin: 0;
+    padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+        font-family: 'Vollkorn', serif;
+}
+
+    h1 { font-size: 1.35em; }
+
+    h2 { font-size: 1.15em; }
+
+    h3 { font-size: 1.1em; }
+
+    h4 { font-size: 1em; }
+
+    h5 { font-size: 1em; }
+
+    h6 { font-size: 1em; }
+
+p { }
+
+ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+li {
+
+}
+
+a {
+    text-decoration: none;
+    color: var(--blue);
+    font-weight: bold;
+}
+
+    a:visited {
+        color: var(--darkblue);
+    }
+
+    a:hover,
+    a:active {
+        text-decoration: underline;
+    }
+
+
+em {
+    font-style: normal;
+    font-weight: bold;
+}

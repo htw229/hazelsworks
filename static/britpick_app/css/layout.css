@@ -1,0 +1,84 @@
+ /*styles of global elements, the size of the cap, footer, sidebar*/
+ /*things that occur only one time on a page*/
+
+
+.navbar {
+    font-family: 'Vollkorn', serif;
+    font-weight: bold;
+    font-size: 1.2em;
+    color: white;
+    background-color: var(--red);
+    margin: 0 0 1em 0;
+    padding: 1%;
+}
+
+    .navbar ul { }
+
+    .navbar li {
+        display: inline-block;
+        padding: 0 1em 0 0;
+    }
+
+    .navbar li + li:after {
+        content: "·";
+        padding: 0 0 0 1em;
+    }
+
+    .navbar li:last-child:after {
+        content: "";
+    }
+
+    .navbar a {
+        color: white;
+    }
+
+    .navbar a:hover, .navbar a:active {
+        text-decoration: underline;
+    }
+
+    .navbar-crown {
+        vertical-align: middle;
+        padding: 0 0 11px 0;
+        margin: 0 0 0 2%;
+    }
+
+
+.hierarchy-nav { }
+
+    .hierarchy-nav li {
+        display: inline-block;
+    }
+
+    .hierarchy-nav li + li:before {
+        content: ">";
+        padding: 0 0.5em;
+    }
+
+/*h1 - page title*/
+
+.choice-nav {
+    margin-bottom: 1em;
+}
+
+    .choice-nav li {
+        display: inline-block;
+    }
+
+    .choice-nav li + li:before {
+        content: "|";
+        padding: 0 0.5em;
+    }
+
+
+.content {
+    max-width: 800px;
+    margin: 0 10% 0 5%;
+}
+
+
+
+.footer {
+    background-color: var(--blue);
+    height: 40px;
+    margin: 1em 0 0 0;
+}

@@ -12,7 +12,10 @@
             {{ title }} - Britpick
         {% endif %}
     </title>
-    <link rel="stylesheet" href="/static/britpick_app/britpick.css">
+{#    <link rel="stylesheet" href="/static/britpick_app/britpick.css">#}
+<link rel="stylesheet" href="/static/britpick_app/css/base.css">
+<link rel="stylesheet" href="/static/britpick_app/css/layout.css">
+<link rel="stylesheet" href="/static/britpick_app/css/britpick.css">
     <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Vollkorn:700" rel="stylesheet">
@@ -42,17 +45,15 @@
 <body>
 
 
-<div class="navbar header">
-    <a href="{% url 'britpick' %}"><img class="navbar image" src="/static/navbar-crown-32.png"></a>
-    <span class="navbar item"><a href="{% url 'britpick_app:britpick' %}">Britpick</a></span>
-    ·
-    <span class="navbar item"><a href="{% url 'britpick_app:topiclist' %}">Topics</a></span>
-    ·
-    <span class="navbar item"><a href="{% url 'britpick_app:search' %}">Search</a></span>
-    ·
-    <span class="navbar item"><a href="{% url 'britpick_app:references' %}">References</a></span>
-    ·
-    <span class="navbar item"><a href="{% url 'britpick_app:about' %}">About</a></span>
+<div class="navbar navbar-header">
+    <ul>
+        <li><a href="{% url 'britpick_app:britpick' %}"><img class="navbar-crown" src="/static/navbar-crown-32.png"></a></li>
+        <li><a href="{% url 'britpick_app:britpick' %}">Britpick</a></li>
+        <li><a href="{% url 'britpick_app:topiclist' %}">Topics</a></li>
+        <li><a href="{% url 'britpick_app:search' %}">Search</a></li>
+        <li><a href="{% url 'britpick_app:references' %}">References</a></li>
+        <li><a href="{% url 'britpick_app:about' %}">About</a></li>
+    </ul>
 </div>
 
 
@@ -78,18 +79,17 @@
         <div id="bottom-nav-center">{% block bottom-nav-center %}<a href="#">top</a>{% endblock %}</div>
         <div id="bottom-nav-right">{% block bottom-nav-right %}{% endblock %}</div>
     </div>
+
+    {% if user.is_superuser %}
+        <h2>Debug</h2>
+        {{ debug|safe }}
+    {% endif %}
+
 </div>
 
-<div class="navbar footer"></div>
+<div class="footer"></div>
 
-{% if user.is_superuser %}
-<div class="content">
-    <h3>Debug:</h3>
-    <p>
-    {{ debug|safe }}
-    </p>
-</div>
-{% endif %}
+
 
 </body>
 </html>
