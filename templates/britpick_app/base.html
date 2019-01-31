@@ -15,7 +15,9 @@
 {#    <link rel="stylesheet" href="/static/britpick_app/britpick.css">#}
 <link rel="stylesheet" href="/static/britpick_app/css/base.css">
 <link rel="stylesheet" href="/static/britpick_app/css/layout.css">
+<link rel="stylesheet" href="/static/britpick_app/css/modules.css">
 <link rel="stylesheet" href="/static/britpick_app/css/britpick.css">
+<link rel="stylesheet" href="/static/britpick_app/css/script.css">
     <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Vollkorn:700" rel="stylesheet">
@@ -45,38 +47,37 @@
 <body>
 
 
-<div class="navbar navbar-header">
-    <ul>
-        <li><a href="{% url 'britpick_app:britpick' %}"><img class="navbar-crown" src="/static/navbar-crown-32.png"></a></li>
-        <li><a href="{% url 'britpick_app:britpick' %}">Britpick</a></li>
-        <li><a href="{% url 'britpick_app:topiclist' %}">Topics</a></li>
-        <li><a href="{% url 'britpick_app:search' %}">Search</a></li>
-        <li><a href="{% url 'britpick_app:references' %}">References</a></li>
-        <li><a href="{% url 'britpick_app:about' %}">About</a></li>
-    </ul>
+<div class="navbar">
+    <div><a href="{% url 'britpick_app:britpick' %}"><img class="navbar-crown" src="/static/navbar-crown-128.png" width="32" height="32"></a></div>
+    <div>
+        <ul>
+            <li><a href="{% url 'britpick_app:britpick' %}">Britpick</a></li>
+            <li><a href="{% url 'britpick_app:topiclist' %}">Topics</a></li>
+            <li><a href="{% url 'britpick_app:search' %}">Search</a></li>
+            <li><a href="{% url 'britpick_app:references' %}">References</a></li>
+            <li><a href="{% url 'britpick_app:about' %}">About</a></li>
+        </ul>
+    </div>
 </div>
 
 
 <div class="content">
-    <div class="nav hierarchy-nav">
-        {% block hierarchy-nav %}{% endblock %}
-    </div>
+    <div class="page-parents-nav"><ul class="hierarchy-nav">{% block page-parents-nav %}{% endblock %}</ul></div>
+
     <h1>{{ title }}</h1>
     {% if user.is_superuser %}
         {% if adminlink %}
             <p class="adminlink"><a href="{{ adminlink }}" target="_blank">edit</a></p>
         {% endif %}
     {% endif %}
-    <div class="nav choice-nav">
-        {% block choice-nav %}{% endblock %}
-    </div>
+    <div class="page-sections-nav"><ul class="choice-nav">{% block page-section-nav %}{% endblock %}</ul></div>
     <div class="{{ csspage }}">
         {% block content %}
         {% endblock %}
     </div>
-    <div class="nav bottom-nav">
+    <div class="page-bottom-nav">
         <div id="bottom-nav-left">{% block bottom-nav-left %}{% endblock %}</div>
-        <div id="bottom-nav-center">{% block bottom-nav-center %}<a href="#">top</a>{% endblock %}</div>
+{#        <div id="bottom-nav-center">{% block bottom-nav-center %}<a href="#">top</a>{% endblock %}</div>#}
         <div id="bottom-nav-right">{% block bottom-nav-right %}{% endblock %}</div>
     </div>
 

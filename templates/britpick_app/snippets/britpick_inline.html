@@ -1,3 +1,17 @@
-<span class="britpick inline {{ inline.britpick.id }} {% for class in inline.classes %}{{ class }}{% endfor %} type-{{ inline.britpick.type|slugify }} category-{{ inline.britpick.category|slugify }}">
-    [ {{ inline.britpick }} <span class="expand-britpick {{ inline.britpick.pk }}" id="inline-" onclick="toggleExpandedBritpick(this, {{ inline.britpick.pk }}, show=true)">more</span>] <span class="hide-similar {{ inline.britpick.pk }}" onclick="toggleInlineBritpicks({{ inline.britpick.pk }}, show=false)">(hide similar)</span>
+<span class="inline-britpick {{ britpick.id }} {% for class in classes %}{{ class }}{% endfor %} type-{{ britpick.type|slugify }} category-{{ britpick.category|slugify }}" onclick="clickInlineBritpick(this, {{ britpick.pk }})">
+
+    <span class="inline-britpick-original-text">{{ originaltext }}</span>
+
+    <span class="inline-britpick-content">
+        [
+        {{ britpick }}
+        <span class="inline-britpick-open-expanded inline-britpick-button {{ britpick.pk }}" onclick="toggleExpandedBritpick(this, {{ britpick.pk }}, show=true)">
+            expand
+        </span>
+        ]
+    </span>
+
+    <span class="inline-britpick-button inline-britpick-hide-inlines {{ britpick.pk }}" onclick="toggleInlineBritpicks({{ britpick.pk }}, show=false)">
+        (hide similar)
+    </span>
 </span>

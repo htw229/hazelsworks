@@ -41,7 +41,12 @@ class BritpickView(TemplateView):
                 'britpicks': [example_britpick_01,example_britpick_02,],
                 'inlines': [
                     {
-                        'text': '"Hello, I am Andy',
+                        'text': '"Hello, I am ',
+                        'britpick': None,
+                        'classes': [],
+                    },
+                    {
+                        'text': 'Andy',
                         'britpick': example_britpick_01,
                         'classes': ['dialogue',],
                     },
@@ -56,7 +61,7 @@ class BritpickView(TemplateView):
                         'classes': ['narrative', ],
                     },
                     {
-                        'text': '.',
+                        'text': '. This is some original text. No britpicks to be found here.',
                         'britpick': None,
                         'classes': [],
                     },
@@ -64,7 +69,14 @@ class BritpickView(TemplateView):
             },
         ]
 
-        britpicked = {'paragraphs': paragraphs,}
+        # paragraphs.append(paragraphs[0])
+
+        # paragraphs[1] = paragraphs[0]
+        # paragraphs[2] = paragraphs[0]
+        # paragraphs[3] = paragraphs[0]
+
+
+        britpicked = {'paragraphs': [paragraphs[0] for i in range(10)],}
 
         return britpicked
 

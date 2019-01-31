@@ -1,28 +1,26 @@
 {% extends 'britpick_app/base.html' %}
 
-{% block choice-nav %}
-        <ul>
-            <li>
-                {% if reference_filter != 'main' %}<a href="{% url 'britpick_app:references' %}">{% endif %}
-                Main References
-                {% if reference_filter != 'main' %}</a>{% endif %}
-            </li>
-            <li>
-                {% if reference_filter != 'topic' %}<a href="{% url 'britpick_app:references' 'topic' %}">{% endif %}
-                Topic References
-                {% if reference_filter != 'topic' %}</a>{% endif %}
-            </li>
-            <li>
-                {% if reference_filter != 'quote' %}<a href="{% url 'britpick_app:references' 'quote' %}">{% endif %}
-                Quote References
-                {% if reference_filter != 'quote' %}</a>{% endif %}
-            </li>
-            <li>
-                {% if reference_filter != 'all' %}<a href="{% url 'britpick_app:references' 'all' %}">{% endif %}
-                All References
-                {% if reference_filter != 'all' %}</a>{% endif %}
-            </li>
-        </ul>
+{% block page-section-nav %}
+    <li>
+        {% if reference_filter != 'main' %}<a href="{% url 'britpick_app:references' %}">{% endif %}
+        Main References
+        {% if reference_filter != 'main' %}</a>{% endif %}
+    </li>
+    <li>
+        {% if reference_filter != 'topic' %}<a href="{% url 'britpick_app:references' 'topic' %}">{% endif %}
+        Topic References
+        {% if reference_filter != 'topic' %}</a>{% endif %}
+    </li>
+    <li>
+        {% if reference_filter != 'quote' %}<a href="{% url 'britpick_app:references' 'quote' %}">{% endif %}
+        Quote References
+        {% if reference_filter != 'quote' %}</a>{% endif %}
+    </li>
+    <li>
+        {% if reference_filter != 'all' %}<a href="{% url 'britpick_app:references' 'all' %}">{% endif %}
+        All References
+        {% if reference_filter != 'all' %}</a>{% endif %}
+    </li>
 {% endblock %}
 
 {% block content %}

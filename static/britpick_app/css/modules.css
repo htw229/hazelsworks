@@ -1,0 +1,22 @@
+.hierarchy-nav { }
+
+    .hierarchy-nav li {
+        display: inline-block;
+    }
+
+    .hierarchy-nav li + li:before {
+        content: ">";
+        padding: 0 0.5em;
+    }
+
+
+.choice-nav { }
+
+    .choice-nav li {
+        display: inline-block;
+    }
+
+    .choice-nav li + li:before {
+        content: "|";
+        padding: 0 0.5em;
+    }

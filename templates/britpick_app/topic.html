@@ -1,25 +1,18 @@
 {% extends 'britpick_app/base.html' %}
 {% load md2 %}
 
-{% block hierarchy-nav %}
-<div class="topicnavlist">
-    <ul>
-        <li><a href="{% url 'britpick_app:topiclist' %}">Topics</a></li>
+{% block page-parents-nav %}
+    <li><a href="{% url 'britpick_app:topiclist' %}">Topics</a></li>
     {% for parent_topic in topic.parent_topics %}
         <li><a href="{% url 'britpick_app:topic' parent_topic.slug %}">{{ parent_topic.name }}</a></li>
     {% endfor %}
-        <li>{{ topic.name }}</li>
-    </ul>
-</div>
-
+    <li>{{ topic.name }}</li>
 {% endblock %}
 
-{% block choice-nav %}
-    <ul>
-        {% if topic.references.all %}<li><a href="#references">references</a></li>{% endif %}
-        {% if topic.related_topics.all %}<li><a href="#related-topics">see also</a></li>{% endif %}
-        <li><a href="#topic-map">topic map</a></li>
-    </ul>
+{% block page-section-nav %}
+    {% if topic.references.all %}<li><a href="#references">references</a></li>{% endif %}
+    {% if topic.related_topics.all %}<li><a href="#related-topics">see also</a></li>{% endif %}
+    <li><a href="#topic-map">topic map</a></li>
 {% endblock %}
 
 {% block content %}
