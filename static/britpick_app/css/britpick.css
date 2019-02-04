@@ -35,7 +35,8 @@
     }
 
     .inline-britpick-button {
-        background-color: var(--lightblue);
+        background-color: white;
+        color: var(--lightblue);
     }
 
     .inline-britpick-open-expanded { }

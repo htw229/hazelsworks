@@ -33,6 +33,19 @@ function toggleExpandedBritpick(ele, britpickPK, show) {
 
 }
 
+function expandAllBritpicks() {
+    let expandedBritpicks = document.getElementsByClassName('expanded-britpick');
+    for (let i = 0; i < expandedBritpicks.length; i++) {
+        expandedBritpicks[i].classList.remove("js-hidden");
+    }
+}
+
+function collapseAllBritpicks() {
+    let expandedBritpicks = document.getElementsByClassName('expanded-britpick');
+    for (let i = 0; i < expandedBritpicks.length; i++) {
+        expandedBritpicks[i].classList.add("js-hidden");
+    }
+}
 
 function clickParagraph(elem, pk) {
 
