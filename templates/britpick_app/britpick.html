@@ -3,6 +3,8 @@
 
 {% block includes %}
     <script src="/static/britpick_app/britpicked_text.js"></script>
+    <script src="/static/britpick_app/britpick_form.js"></script>
+    <script src="/static/britpick_app/britpick.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -18,30 +20,54 @@
     <hr>
 
     <div class="britpick-settings">
-        britpicked: text={{ britpicked.text }} dialect={{ britpicked.dialect }} dialectfromform={{ formdata.dialect }}
+        britpicked: dialect={{ options.dialect.pk }}
         (<a onclick="expandAllBritpicks()">expand all</a>) | (<a onclick="collapseAllBritpicks()">collapse all</a>)
     </div>
 
     <div class="britpick-results">
-        {% for paragraph in britpicked.paragraphs %}
-            <div class="britpick-paragraph">
-                <div class="britpick-paragraph-text">
-                    {% for inline in paragraph.inlines %}
-
-                        {% if inline.britpick %}
-                            {% include "britpick_app/snippets/britpick_inline.html" with britpick=inline.britpick classes=inline.classes originaltext=inline.text %}
-                        {% else %}
-                            {{ inline.text }}
-                        {% endif %}
-                    {% endfor %}
+        {% for paragraph in britpicked_paragraphs %}
+            {% if paragraph.type == "SECTION_BREAK" %}
+                <div class="britpick-section-break"></div>
+            {% else %}
+                <div class="britpick-paragraph">
+                    <div class="britpick-paragraph-text">
+                        {% for span in paragraph.spans %}
+                            {% if span.britpick %}
+                                {% include "britpick_app/snippets/britpick_inline.html" with britpick=span.britpick classes=span.classes originaltext=span.text %}
+                            {% else %}
+                                {{ span.text }}
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                    <div class="britpick-paragraph-sidebar">
+                        {% for britpick in paragraph.britpicks %}
+                            {% include "britpick_app/snippets/britpick_expanded.html" with britpick=britpick %}
+                        {% endfor %}
+                    </div>
                 </div>
-                <div class="britpick-paragraph-sidebar">
-                    {% for britpick in paragraph.britpicks %}
-                        {% include "britpick_app/snippets/britpick_expanded.html" with britpick=britpick %}
-                    {% endfor %}
-                </div>
-            </div>
+            {% endif %}
         {% endfor %}
+
+{#        {% for paragraph in britpicked_paragraphs %}#}
+{#            <div class="britpick-paragraph">#}
+{#                <div class="britpick-paragraph-text">#}
+{#                    {% for inline in paragraph.inlines %}#}
+{##}
+{#                        {% if inline.britpick %}#}
+{#                            {% include "britpick_app/snippets/britpick_inline.html" with britpick=inline.britpick classes=inline.classes originaltext=inline.text %}#}
+{#                        {% else %}#}
+{#                            {{ inline.text }}#}
+{#                        {% endif %}#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#                <div class="britpick-paragraph-sidebar">#}
+{#                    {% for britpick in paragraph.britpicks %}#}
+{#                        {% include "britpick_app/snippets/britpick_expanded.html" with britpick=britpick %}#}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            </div>#}
+{#        {% endfor %}#}
     </div>
+
 
 {% endblock %}

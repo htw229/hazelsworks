@@ -785,8 +785,12 @@ class WordGroup(BaseModel):
 
 
 
+class SampleText(BaseModel):
+    name = models.CharField(max_length=100, blank=True)
+    text = models.TextField(blank=True)
 
-
+    def __str__(self):
+        return self.name
 
 
 

@@ -752,3 +752,28 @@ def getchangelinks(objs, label = '', add_link=False, model_name = None, attr = N
 
     return mark_safe(html)
 
+
+class SampleTextAdmin(BaseAdmin):
+    # search_fields = ['text', 'words__word', 'reference__name', 'reference__url',]
+
+    # list_display = [*BaseAdmin.list_display, 'linkedwords', 'reference',]
+
+    # list_display = ['active', '__str__', 'linkedwords', 'reference',]
+    # list_display_links = ['__str__']
+
+    # autocomplete_fields = ['words','reference',]
+    fieldsets = [
+        (None, {
+            'fields': (
+                'name',
+            ),
+            'classes': ('header-fieldset',)
+        }),
+        BaseAdmin.ACTIVE_VERIFIED_FIELDSET,
+        (None, {
+            'fields': ('text',),
+        }),
+        BaseAdmin.FOOTER_FIELDSET,
+    ]
+
+admin.site.register(SampleText, SampleTextAdmin)

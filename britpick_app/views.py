@@ -5,8 +5,9 @@ from django.views.generic import ListView, TemplateView, DetailView, FormView
 
 from django.db.models import Count, Q
 
-from .models import Topic, Reference, Britpick
+from .models import Topic, Reference, Britpick, SampleText
 from . import forms
+from . import britpick
 
 # CLASS
 
@@ -19,66 +20,16 @@ class BritpickView(TemplateView):
         context = self.get_context_data()
         form = context['form']
         if form.is_valid():
-            context['britpicked'] = self.get_britpicked_text(form.cleaned_data)
-            context['formdata'] = form.cleaned_data
+            context['options'] = form.cleaned_data
+            context['britpicked_paragraphs'] = britpick.britpick(form.cleaned_data)
 
         return super().render_to_response(context)
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['britpicked'] = None
         context['form'] = self.form_class(self.request.POST or None)
+        context['sample_texts'] = SampleText.displayed.all()
         return context
-
-    def get_britpicked_text(self, formdata):
-        example_britpick_01 = Britpick.objects.get(id=4)
-        example_britpick_02 = Britpick.objects.get(id=7)
-        example_britpick_03 = Britpick.objects.get(id=8)
-        example_britpick_04 = Britpick.objects.get(id=9)
-
-        paragraphs = [
-            {
-                'britpicks': [example_britpick_01,example_britpick_02,],
-                'inlines': [
-                    {
-                        'text': '"Hello, I am ',
-                        'britpick': None,
-                        'classes': [],
-                    },
-                    {
-                        'text': 'Andy',
-                        'britpick': example_britpick_01,
-                        'classes': ['dialogue',],
-                    },
-                    {
-                        'text': ' and I am Sam',
-                        'britpick': example_britpick_02,
-                        'classes': ['dialogue', ],
-                    },
-                    {
-                        'text': '," said Sam',
-                        'britpick': example_britpick_02,
-                        'classes': ['narrative', ],
-                    },
-                    {
-                        'text': '. This is some original text. No britpicks to be found here.',
-                        'britpick': None,
-                        'classes': [],
-                    },
-                ]
-            },
-        ]
-
-        # paragraphs.append(paragraphs[0])
-
-        # paragraphs[1] = paragraphs[0]
-        # paragraphs[2] = paragraphs[0]
-        # paragraphs[3] = paragraphs[0]
-
-
-        britpicked = {'paragraphs': [paragraphs[0] for i in range(10)],}
-
-        return britpicked
 
 
 
