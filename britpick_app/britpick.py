@@ -23,51 +23,6 @@ SECTION_BREAK = 'SECTION_BREAK'
 
 def britpick(formdata):
     text = standardizetext(formdata['text'])
-
-    paragraphs = []
-
-    example_britpick_01 = Britpick.objects.get(id=4)
-    example_britpick_02 = Britpick.objects.get(id=7)
-    example_britpick_03 = Britpick.objects.get(id=8)
-    example_britpick_04 = Britpick.objects.get(id=9)
-
-    paragraphs = [
-        {
-            'type': 'paragraph',
-            'britpicks': [example_britpick_01, example_britpick_02, ],
-            'inlines': [
-                {
-                    'text': '"Hello, I am ',
-                    'britpick': None,
-                    'classes': [],
-                },
-                {
-                    'text': 'Andy',
-                    'britpick': example_britpick_01,
-                    'classes': ['dialogue', ],
-                },
-                {
-                    'text': ' and I am Sam',
-                    'britpick': example_britpick_02,
-                    'classes': ['dialogue', ],
-                },
-                {
-                    'text': '," said Sam',
-                    'britpick': example_britpick_02,
-                    'classes': ['narrative', ],
-                },
-                {
-                    'text': '. This is some original text. No britpicks to be found here.',
-                    'britpick': None,
-                    'classes': [],
-                },
-            ]
-        },
-        {
-            'type': 'section_break',
-        }
-    ]
-
     text = getbritpicks(text)
     paragraphs = getparagraphs(text)
 

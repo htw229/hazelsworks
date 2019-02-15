@@ -29,8 +29,12 @@
         text-decoration: underline;
     }
 
+    .inline-britpick-content {
+        background-color: var(--lightgray);
+    }
+
     .inline-britpick.js-highlight .inline-britpick-content {
-        background-color: var(--yellow);
+        background-color: var(--lightyellow);
     }
 
     .inline-britpick.js-clicked .inline-britpick-content {
