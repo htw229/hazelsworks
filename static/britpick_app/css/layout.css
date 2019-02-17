@@ -51,9 +51,23 @@
         display: none;
     }
 
-.content {
+.content-container {
     max-width: 800px;
     margin: 0 10% 0 5%;
+}
+
+.content-columns {
+    display: flex;
+}
+
+.content {
+
+}
+
+.debug-container {
+    margin: 0 1em;
+    padding: 0 1em;
+    background-color: var(--lightgray);
 }
 
 .page-bottom-nav {

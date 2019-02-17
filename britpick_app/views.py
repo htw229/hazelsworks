@@ -1,3 +1,19 @@
+import logging
+import io
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
+log_capture_string = io.StringIO()
+logger_handler = logging.StreamHandler(log_capture_string)
+logger_handler.setLevel(logging.DEBUG)
+logger_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+logger.addHandler(logger_handler)
+
+# f_handler = logging.FileHandler('file.log', 'w+')
+#
+# f_format = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+# f_handler.setFormatter(f_format)
+# logger.addHandler(f_handler)
+
 from django.shortcuts import render
 from django.http import HttpResponse
 from django.views import View
@@ -9,6 +25,8 @@ from .models import Topic, Reference, Britpick, SampleText
 from . import forms
 from . import britpick
 
+
+
 # CLASS
 
 
@@ -17,11 +35,20 @@ class BritpickView(TemplateView):
     form_class = forms.BritpickForm
 
     def post(self, request, *args, **kwargs):
+        logger.info('britpickview post')
+
         context = self.get_context_data()
         form = context['form']
         if form.is_valid():
+            logger.error('FORM IS VALID')
             context['options'] = form.cleaned_data
             context['britpicked_paragraphs'] = britpick.britpick(form.cleaned_data)
+
+            log_contents = log_capture_string.getvalue()
+            log_capture_string.close()
+
+            context['logger'] = log_contents
+
 
         return super().render_to_response(context)
 

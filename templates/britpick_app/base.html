@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="/static/britpick_app/css/britpick.css">
 <link rel="stylesheet" href="/static/britpick_app/css/script.css">
     <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
+{% if user.is_superuser %}<script src="/static/britpick_app/debug.js"></script>{% endif %}
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Vollkorn:700" rel="stylesheet">
     <link rel="shortcut icon" href="/static/favicon/crown.ico">
@@ -61,7 +62,8 @@
 </div>
 
 
-<div class="content">
+
+<div class="content-container">
     <div class="page-parents-nav"><ul class="hierarchy-nav">{% block page-parents-nav %}{% endblock %}</ul></div>
 
     <h1>{{ title }}</h1>
@@ -69,22 +71,27 @@
         {% if adminlink %}
             <p class="adminlink"><a href="{{ adminlink }}" target="_blank">edit</a></p>
         {% endif %}
+        <a onclick="toggleDebug()">show/hide debug</a>
     {% endif %}
     <div class="page-sections-nav"><ul class="choice-nav">{% block page-section-nav %}{% endblock %}</ul></div>
-    <div class="{{ csspage }}">
-        {% block content %}
-        {% endblock %}
+    <div class="content-columns">
+        {% if user.is_superuser %}
+            <div class="debug-container js-hidden">
+                {{ logger }}
+                {{ debug|safe }}
+{#                {% debug %}#}
+            </div>
+        {% endif %}
+        <div class="content">
+            {% block content %}
+            {% endblock %}
+        </div>
     </div>
     <div class="page-bottom-nav">
         <div id="bottom-nav-left">{% block bottom-nav-left %}{% endblock %}</div>
 {#        <div id="bottom-nav-center">{% block bottom-nav-center %}<a href="#">top</a>{% endblock %}</div>#}
         <div id="bottom-nav-right">{% block bottom-nav-right %}{% endblock %}</div>
     </div>
-
-    {% if user.is_superuser %}
-        <h2>Debug</h2>
-        {{ debug|safe }}
-    {% endif %}
 
 </div>
 
