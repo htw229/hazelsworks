@@ -1,3 +1,16 @@
+import logging
+from . import debug
+import io
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+# # log_capture_string = io.StringIO()
+# logger_handler = logging.StreamHandler(debug.log_capture_string)
+# logger_handler.setLevel(logging.DEBUG)
+# logger_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+# logger.addHandler(logger_handler)
+
+logger = debug.Logger(__name__)
+
 import re
 
 from .models import Britpick
@@ -25,6 +38,9 @@ def britpick(formdata):
     text = standardizetext(formdata['text'])
     text = getbritpicks(text)
     paragraphs = getparagraphs(text)
+
+    logger.error('BRITPICK ERROR')
+    logger.debug('britpick debug')
 
     return paragraphs
 

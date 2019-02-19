@@ -739,6 +739,7 @@ class Word(BaseModel):
 
     def __str__(self):
         return self.word
+        return self.word
 
     def getcategory(self):
         if self.category:

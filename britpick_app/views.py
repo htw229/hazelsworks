@@ -1,12 +1,15 @@
 import logging
-import io
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-log_capture_string = io.StringIO()
-logger_handler = logging.StreamHandler(log_capture_string)
-logger_handler.setLevel(logging.DEBUG)
-logger_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
-logger.addHandler(logger_handler)
+from . import debug
+# import io
+# logger = logging.getLogger(__name__)
+# logger.setLevel(logging.DEBUG)
+# # log_capture_string = io.StringIO()
+# logger_handler = logging.StreamHandler(debug.log_capture_string)
+# logger_handler.setLevel(logging.DEBUG)
+# logger_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+# logger.addHandler(logger_handler)
+
+logger = debug.Logger(__name__)
 
 # f_handler = logging.FileHandler('file.log', 'w+')
 #
@@ -35,20 +38,21 @@ class BritpickView(TemplateView):
     form_class = forms.BritpickForm
 
     def post(self, request, *args, **kwargs):
-        logger.info('britpickview post')
+        # logger.info('britpickview post')
 
         context = self.get_context_data()
         form = context['form']
         if form.is_valid():
+            # logger = logging.getLogger('britpick_app.britpick')
             logger.error('FORM IS VALID')
             context['options'] = form.cleaned_data
             context['britpicked_paragraphs'] = britpick.britpick(form.cleaned_data)
 
-            log_contents = log_capture_string.getvalue()
-            log_capture_string.close()
+            # log_contents = debug.log_capture_string.getvalue()
+            # debug.log_capture_string.close()
 
-            context['logger'] = log_contents
-
+            context['logger'] = debug.loggeroutput()
+            # context['logger'] =
 
         return super().render_to_response(context)
 

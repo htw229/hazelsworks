@@ -19,6 +19,7 @@
 <link rel="stylesheet" href="/static/britpick_app/css/britpick.css">
 <link rel="stylesheet" href="/static/britpick_app/css/script.css">
     <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
+    <script src="/static/britpick_app/base.js"></script>
 {% if user.is_superuser %}<script src="/static/britpick_app/debug.js"></script>{% endif %}
     <link href="https://fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css?family=Vollkorn:700" rel="stylesheet">
@@ -71,15 +72,33 @@
         {% if adminlink %}
             <p class="adminlink"><a href="{{ adminlink }}" target="_blank">edit</a></p>
         {% endif %}
-        <a onclick="toggleDebug()">show/hide debug</a>
+        <a onclick="toggleClassVisibility('debug-container')">show/hide debug</a>
     {% endif %}
     <div class="page-sections-nav"><ul class="choice-nav">{% block page-section-nav %}{% endblock %}</ul></div>
     <div class="content-columns">
         {% if user.is_superuser %}
-            <div class="debug-container js-hidden">
-                {{ logger }}
-                {{ debug|safe }}
+            <div class="debug-container">
+                <ul>
+                    <li>modules:</li>
+                    {% for module, moduleclass in logger.modules.items %}
+                        <li><a class="button" onclick="toggleClassVisibility('{{ moduleclass }}')"><span class="{{ moduleclass }} js-hidden">show</span><span class="{{ moduleclass }}">hide</span> {{ module }}</a></li>
+                    {% endfor %}
+                </ul>
+                <ul>
+                    <li>message types:</li>
+                    {% for messagetype, messagetypeclass in logger.messagetypes.items %}
+                        <li><a class="button" onclick="toggleClassVisibility('{{ messagetypeclass }}')"><span class="{{ messagetypeclass }} js-hidden">show</span><span class="{{ messagetypeclass }}">hide</span> {{ messagetype }}</a></li>
+                    {% endfor %}
+                </ul>
+{#                {{ logger }}#}
+
+{#                {{ debug|safe }}#}
 {#                {% debug %}#}
+                <ul>
+                    {% for log in logger.logs %}
+                        <li class="{{ log.messagetypeclass }} {{ log.moduleclass }}">{{ log.elapsedtime }} : {{ log.module }} : {{ log.messagetype }} : {{ log.message }}</li>
+                    {% endfor %}
+                </ul>
             </div>
         {% endif %}
         <div class="content">

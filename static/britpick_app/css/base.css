@@ -69,3 +69,7 @@ em {
     font-style: normal;
     font-weight: bold;
 }
+
+.button {
+    cursor: pointer;
+}
