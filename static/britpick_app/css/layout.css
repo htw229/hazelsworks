@@ -61,10 +61,11 @@
 }
 
 .content {
-
+    flex: 5;
 }
 
 .debug-container {
+    flex: 3;
     margin: 0 1em;
     padding: 0 1em;
     background-color: var(--lightgray);

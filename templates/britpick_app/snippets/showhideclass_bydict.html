@@ -1,0 +1,6 @@
+<ul>
+    <li>{{ header }}:</li>
+    {% for label, class in dict.items %}
+        {% include "britpick_app/snippets/showhideclass_toggle.html" with class=class label=label %}
+    {% endfor %}
+</ul>

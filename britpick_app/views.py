@@ -44,7 +44,12 @@ class BritpickView(TemplateView):
         form = context['form']
         if form.is_valid():
             # logger = logging.getLogger('britpick_app.britpick')
-            logger.error('FORM IS VALID')
+            logger.critical('form valid critical')
+            logger.error('form valid error')
+            logger.warning('form valid warning', tags=['testtag'])
+            logger.info('form valid info', tags=['infotag', 'anothertag', 'testtag'])
+            logger.debug('form valid debug')
+
             context['options'] = form.cleaned_data
             context['britpicked_paragraphs'] = britpick.britpick(form.cleaned_data)
 

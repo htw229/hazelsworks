@@ -1,0 +1,28 @@
+.debug-level-critical {
+    color: red;
+    background-color: yellow;
+    font-weight: bold;
+}
+
+.debug-level-error {
+    background-color: yellow;
+    font-weight: bold;
+}
+
+.debug-level-warning {
+    font-weight: bold;
+}
+
+.debug-level-info {
+    font-style: italic;
+}
+
+.debug-level-debug {
+    background-color: white;
+}
+
+
+
+.logitem {
+
+}

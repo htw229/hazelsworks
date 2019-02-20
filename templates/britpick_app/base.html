@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+{% load dict_access %}
 <head>
     <meta charset="UTF-8">
     <meta name=viewport content="width=device-width, initial-scale=1">
@@ -16,6 +17,7 @@
 <link rel="stylesheet" href="/static/britpick_app/css/base.css">
 <link rel="stylesheet" href="/static/britpick_app/css/layout.css">
 <link rel="stylesheet" href="/static/britpick_app/css/modules.css">
+<link rel="stylesheet" href="/static/britpick_app/css/debug.css">
 <link rel="stylesheet" href="/static/britpick_app/css/britpick.css">
 <link rel="stylesheet" href="/static/britpick_app/css/script.css">
     <link rel="stylesheet" href="{% block custom-css %}{% endblock %}">
@@ -78,25 +80,17 @@
     <div class="content-columns">
         {% if user.is_superuser %}
             <div class="debug-container">
-                <ul>
-                    <li>modules:</li>
-                    {% for module, moduleclass in logger.modules.items %}
-                        <li><a class="button" onclick="toggleClassVisibility('{{ moduleclass }}')"><span class="{{ moduleclass }} js-hidden">show</span><span class="{{ moduleclass }}">hide</span> {{ module }}</a></li>
-                    {% endfor %}
-                </ul>
-                <ul>
-                    <li>message types:</li>
-                    {% for messagetype, messagetypeclass in logger.messagetypes.items %}
-                        <li><a class="button" onclick="toggleClassVisibility('{{ messagetypeclass }}')"><span class="{{ messagetypeclass }} js-hidden">show</span><span class="{{ messagetypeclass }}">hide</span> {{ messagetype }}</a></li>
-                    {% endfor %}
-                </ul>
-{#                {{ logger }}#}
-
-{#                {{ debug|safe }}#}
-{#                {% debug %}#}
+                {% include "britpick_app/snippets/showhideclass_bydict.html" with header='modules' dict=logger.modules %}
+                {% include "britpick_app/snippets/showhideclass_bydict.html" with header='message type' dict=logger.messagetypes %}
+                {% include "britpick_app/snippets/showhideclass_bydict.html" with header='log items' dict=logger.logitemclasses %}
+                {% include "britpick_app/snippets/showhideclass_bydict.html" with header='tags' dict=logger.tags %}
                 <ul>
                     {% for log in logger.logs %}
-                        <li class="{{ log.messagetypeclass }} {{ log.moduleclass }}">{{ log.elapsedtime }} : {{ log.module }} : {{ log.messagetype }} : {{ log.message }}</li>
+                        <li class="{% for c in log.classes %}{{ c }} {% endfor %}">
+                            {% for logitem in logger.logitemdisplay %}
+                                <span class="logitem {{ logger.logitemclasses|get_item:logitem.name }} {% if not logitem.visible %}js-hidden{% endif %}">{{ log|get_item:logitem.name }} :</span>
+                            {% endfor %}
+                        </li>
                     {% endfor %}
                 </ul>
             </div>
