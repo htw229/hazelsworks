@@ -35,12 +35,13 @@ SECTION_BREAK = 'SECTION_BREAK'
 # return list of paragraphs (with spans within them) to view
 
 def britpick(formdata):
-    text = standardizetext(formdata['text'])
-    text = getbritpicks(text)
-    paragraphs = getparagraphs(text)
+    logger.debug('britpick()')
 
-    logger.error('BRITPICK ERROR')
-    logger.debug('britpick debug')
+    searches = getsearches()
+
+    text = standardizetext(formdata['text'])
+    text = getbritpicks(text, searches)
+    paragraphs = getparagraphs(text)
 
     return paragraphs
 
@@ -74,13 +75,29 @@ def standardizetext(text):
     return text
 
 
-def getbritpicks(text):
-    searches = [('call', '5'), ('Derek', '2'), ('trouble', '8'),]
+def getbritpicks(text, searches):
+    # searches = [('call', '5'), ('Derek', '2'), ('trouble', '8'),]
+
     for search in searches:
-        text = re.sub(r'(%s)' % search[0], BRITPICK_MARKER.format(original_text=r'\1', britpick_pk=search[1]), text)
+        text = re.sub(r'(%s)' % search[1], BRITPICK_MARKER.format(original_text=r'\1', britpick_pk=search[0]), text)
 
     return text
 
+def getsearches():
+    debugtag = 'getsearches()'
+    britpicks = Britpick.displayed.all()
+    searches = []
+    for b in britpicks:
+        logger.debug(b, tags=[debugtag])
+        searchstrings = b.search_strings.all()
+        logger.debug(searchstrings, tags=[debugtag])
+
+        for s in searchstrings:
+            searches.append([b.pk, s.createpattern()])
+
+        # logger.debug([s.pattern for s in searchstrings])
+    logger.debug(searches)
+    return searches
 
 def getparagraphs(text):
     paragraphs = []

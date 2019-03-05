@@ -615,12 +615,14 @@ class SearchString(BaseModel):
         if self.processing == self.PLURAL_PHRASE:
             self.process_plural_only()
         elif self.processing == self.CONJUGATE_PHRASE:
-            pass
+            self.pattern = self.string
 
         if self.begin_sentence:
             self.process_begin_sentence()
         if self.end_sentence:
             self.process_end_sentence()
+
+        return self.pattern
 
     def process_plural_only(self):
         self.pattern += r'(|s|es)'

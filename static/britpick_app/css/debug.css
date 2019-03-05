@@ -14,7 +14,9 @@
 }
 
 .debug-level-info {
-    font-style: italic;
+    /*font-style: italic;*/
+    background-color: black;
+    color: white;
 }
 
 .debug-level-debug {

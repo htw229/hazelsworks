@@ -25,6 +25,7 @@ class Logger(logging.Logger):
     def _log(self, *args, tags = None, **kwargs):
         if tags is None:
             tags = []
+
         kwargs['extra'] = {'tags': tags}
         super()._log(*args, **kwargs)
 
